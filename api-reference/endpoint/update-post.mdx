@@ -1,7 +1,7 @@
 ---
 title: "Update post"
 api: "PUT /posts/{post}"
-description: "Update a post's content, schedule, status, or labels."
+description: "Update a post's content, schedule, enabled platforms, or labels — and trigger publishing."
 ---
 
 ## Request
@@ -10,24 +10,41 @@ description: "Update a post's content, schedule, status, or labels."
   The post ID.
 </ParamField>
 
+<ParamField body="status" type="string" required>
+  The post status. One of:
+
+  - `draft` — keep as draft
+  - `scheduled` — schedule for the time given in `scheduled_at` (must be in the future)
+  - `publishing` — **publish immediately**: dispatches the publish job to all enabled platforms
+
+  Cross-validated: `scheduled` requires a `scheduled_at` in the future.
+</ParamField>
+
+<ParamField body="content" type="string">
+  The post caption/text body.
+</ParamField>
+
+<ParamField body="media" type="array">
+  Media items to associate with the post (use [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media) to upload from URLs first).
+</ParamField>
+
 <ParamField body="platforms" type="array">
-  An array of platform entries to update.
+  An array of platform entries to enable. Any platform NOT listed here will be **disabled**. Pass an empty array to disable all.
   <Expandable>
     <ParamField body="id" type="string" required>
-      The post platform entry ID.
+      The post_platform entry ID (from `GET /posts/{id}` or `GET /posts`).
     </ParamField>
-    <ParamField body="content" type="string">
-      The updated content text.
+    <ParamField body="content_type" type="string">
+      Override the content_type for this platform (e.g. `linkedin_carousel` instead of the default `linkedin_post`). Use [`GET /content-types`](/api-reference/endpoint/list-content-types) to discover valid values. Cross-validated against the platform of the underlying social account.
+    </ParamField>
+    <ParamField body="meta" type="object">
+      Per-platform metadata override (e.g. `aspect_ratio`, Pinterest `board_id`).
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="scheduled_at" type="string">
-  The new scheduled date and time. Format: `Y-m-d H:i:s`.
-</ParamField>
-
-<ParamField body="status" type="string">
-  The new post status. One of: `draft`, `scheduled`, `publishing`.
+  ISO 8601 datetime. Required when `status=scheduled`.
 </ParamField>
 
 <ParamField body="label_ids" type="array">
@@ -36,21 +53,19 @@ description: "Update a post's content, schedule, status, or labels."
 
 ## Response
 
-Returns the updated post. Returns `422` if the post has already been published.
+Returns the updated post. Returns `422` with `{ "message": "Cannot edit a published post." }` if the post has already been published.
 
 <RequestExample>
 ```bash
 curl -X PUT https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c \
-  -H "Authorization: Bearer tp_your_api_key" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
+    "status": "publishing",
+    "content": "Launching now!",
     "platforms": [
-      {
-        "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-        "content": "Updated content for LinkedIn!"
-      }
+      { "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d", "content_type": "linkedin_post" }
     ],
-    "status": "scheduled",
     "label_ids": ["c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f"]
   }'
 ```
@@ -59,42 +74,52 @@ curl -X PUT https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5
 <ResponseExample>
 ```json
 {
-  "data": {
-    "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
-    "status": "scheduled",
-    "synced": false,
-    "scheduled_at": "2025-01-15 10:00:00",
-    "published_at": null,
-    "platforms": [
-      {
-        "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+  "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "content": "Launching now!",
+  "media": [],
+  "status": "publishing",
+  "scheduled_at": "2025-01-15 10:30:00",
+  "published_at": null,
+  "platforms": [
+    {
+      "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      "platform": "linkedin",
+      "content_type": "linkedin_post",
+      "status": "publishing",
+      "enabled": true,
+      "platform_url": null,
+      "published_at": null,
+      "error_message": null,
+      "display_name": "John Doe",
+      "display_username": "johndoe",
+      "display_avatar": "https://media.licdn.com/.../avatar.jpg",
+      "social_account": {
+        "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
         "platform": "linkedin",
-        "content": "Updated content for LinkedIn!",
-        "content_type": "linkedin_post",
-        "status": "pending",
-        "enabled": true,
-        "social_account": {
-          "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
-          "platform": "linkedin",
-          "display_name": "John Doe",
-          "username": "johndoe",
-          "is_active": true,
-          "status": "connected"
-        }
+        "display_name": "John Doe",
+        "username": "johndoe",
+        "is_active": true,
+        "status": "connected"
       }
-    ],
-    "labels": [
-      {
-        "id": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
-        "name": "Product Launch",
-        "color": "#4f46e5",
-        "created_at": "2025-01-10 08:00:00",
-        "updated_at": "2025-01-10 08:00:00"
-      }
-    ],
-    "created_at": "2025-01-14 09:00:00",
-    "updated_at": "2025-01-14 09:30:00"
-  }
+    }
+  ],
+  "labels": [
+    {
+      "id": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
+      "name": "Product Launch",
+      "color": "#4f46e5",
+      "created_at": "2025-01-10 08:00:00",
+      "updated_at": "2025-01-10 08:00:00"
+    }
+  ],
+  "created_at": "2025-01-14 09:00:00",
+  "updated_at": "2025-01-14 09:30:00"
 }
 ```
 </ResponseExample>
+
+## Tips
+
+- To publish an existing draft, send only `{ "status": "publishing" }` — content/platforms already saved are kept.
+- To schedule, send `{ "status": "scheduled", "scheduled_at": "2025-12-31T15:30:00Z" }`.
+- To toggle which platforms are active without changing content, send only the `platforms[]` array.

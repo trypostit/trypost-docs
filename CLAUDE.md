@@ -4,7 +4,7 @@ Docs for [TryPost](https://trypost.it) — open-source social media scheduling p
 
 ## Project Context
 
-TryPost is a Laravel + Inertia.js + React application that lets users schedule and publish posts across 11 social platforms. It has two deployment modes: **Cloud** (managed by us) and **Self-Hosted** (user deploys on their own server).
+TryPost is a Laravel + Inertia.js + React application that lets users schedule and publish posts across 10 social platforms (12 platform identifiers in code, since LinkedIn and Instagram each have two connection flavors). It has two deployment modes: **Cloud** (managed by us) and **Self-Hosted** (user deploys on their own server).
 
 The app source code lives at `~/Code/trypost`. This repo (`trypost-docs`) is the documentation site only.
 
@@ -39,7 +39,7 @@ Same paths, user configures `APP_URL` in `.env`:
 | **Documentation** | `book-open` | Product docs: quickstart, platforms, features, contributing |
 | **API Reference** | `code` | REST API endpoint docs with curl examples |
 | **Build with AI** | `microchip-ai` | MCP server intro, tools reference, 10 setup guides |
-| **Knowledge Base** | `book` | Conceptual guides: posts, media, hashtags, labels, accounts, team, notifications |
+| **Knowledge Base** | `book` | Conceptual guides: posts, media, signatures, labels, accounts, team, notifications |
 | **Self-Hosting** | `server` | Installation, configuration, production, Docker — isolated from the rest |
 
 ## Writing Rules
@@ -62,28 +62,38 @@ Same paths, user configures `APP_URL` in `.env`:
 ## API Reference
 
 ### Authentication
-- Bearer token in `Authorization` header
-- Key format: `tp_` + 48 random chars = 51 chars total
+- Bearer token in `Authorization` header (Personal Access Tokens, opaque format — do not assume any prefix or fixed length)
+- In examples use `YOUR_API_KEY` as the placeholder
 - Same key works for REST API and MCP server
 
-### Endpoints (19 total)
+### Endpoints
 | Group | Endpoints |
 |-------|-----------|
-| Posts | `GET /posts`, `POST /posts`, `GET /posts/{post}`, `PUT /posts/{post}`, `DELETE /posts/{post}` |
+| Posts | `GET /posts`, `POST /posts`, `GET /posts/{post}`, `PUT /posts/{post}`, `DELETE /posts/{post}`, `POST /posts/{post}/media`, `GET /posts/{post}/metrics`, `GET /posts/{post}/preview` |
+| Platforms | `GET /content-types` |
 | Workspace | `GET /workspace` |
-| Hashtags | `GET /hashtags`, `POST /hashtags`, `PUT /hashtags/{hashtag}`, `DELETE /hashtags/{hashtag}` |
-| Labels | `GET /labels`, `POST /labels`, `PUT /labels/{label}`, `DELETE /labels/{label}` |
+| Signatures | `GET /signatures`, `POST /signatures`, `PUT /signatures/{id}`, `DELETE /signatures/{id}` |
+| Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
 | Social Accounts | `GET /social-accounts`, `PUT /social-accounts/{account}/toggle` |
 | API Keys | `GET /api-keys`, `POST /api-keys`, `DELETE /api-keys/{apiToken}` |
 
+`PUT /posts/{post}` accepts a `status` of `publishing` to publish immediately (no separate publish endpoint at the REST level).
+
+### Response shape
+- Resources are returned **unwrapped** (`JsonResource::withoutWrapping()` is set globally). A single resource looks like `{ "id": ..., ... }` — no `data:` envelope.
+- Non-paginated collections return a plain JSON array (`[ {...}, {...} ]`).
+- Only `GET /posts` returns the Laravel pagination envelope (`{ data, links, meta }`).
+- `attach-media`, `metrics`, and `preview` are bespoke — not Resource-shaped (no `data:` wrapper, just the documented fields at top level).
+- `POST /api-keys` returns `{ "token": {...}, "plain_token": "..." }`. The plain token is shown ONCE.
+
 ### Pagination
-Only `GET /posts` paginates (15 per page). All other list endpoints return full results.
+Only `GET /posts` paginates (15 per page). All other list endpoints return full results as a plain array.
 
 ## MCP Server
 
-- 18 tools across 6 categories (Posts, Hashtags, Labels, Social Accounts, Workspace, API Keys)
-- MCP `CreatePost` only accepts `date` param — it creates a draft post with platform entries for all active accounts
-- API `POST /posts` accepts a `platforms` array with `social_account_id` and `content_type` — different behavior
+- Post tools include: `create-post`, `update-post`, `publish-post`, `get-post`, `list-posts`, `delete-post`, `attach-media-from-url`, `get-post-metrics`, `preview-post`. Plus tools for Signatures, Labels, Social Accounts, Workspace, API Keys, and Platforms (`list-content-types`).
+- `create-post` accepts `platforms[]` (each with `social_account_id` and `content_type`), `scheduled_at`, `label_ids`, etc. — same shape as REST `POST /posts`.
+- `publish-post` is a separate, destructive tool (annotated `IsDestructive`); REST clients use `PUT /posts/{id}` with `status=publishing` instead.
 
 ## Enum Values
 

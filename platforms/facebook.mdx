@@ -22,13 +22,19 @@ TryPost supports posting to Facebook pages.
 | **Reel** | 9:16 | Short-form vertical video |
 | **Story** | 9:16 | Temporary content (24 hours) |
 
+## OAuth scopes
+
+`public_profile`, `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `read_insights`
+
+The `read_insights` scope powers per-post and per-page metrics in **Analytics**.
+
 ## Self-hosting setup
 
 <Accordion title="Configure Facebook API credentials">
   1. Go to [Meta for Developers](https://developers.facebook.com/) and create an app
   2. Add the **Facebook Login** product
   3. Set the redirect URL to `{APP_URL}/accounts/facebook/callback`
-  4. Request permissions: `pages_manage_posts`, `pages_read_engagement`
+  4. Request permissions: `public_profile`, `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `read_insights`
   5. Add to your `.env`:
 
   ```env

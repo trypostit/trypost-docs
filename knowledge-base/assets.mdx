@@ -1,0 +1,59 @@
+---
+title: "Asset library"
+description: "Reusable images and videos stored in your workspace, plus on-demand search via Unsplash and Giphy."
+icon: "photo"
+---
+
+## What it is
+
+The **Assets** page (sidebar → Assets) is your workspace's media library — a place to upload, search, and reuse images and videos across multiple posts without re-uploading every time. It's also the picker that opens from the post editor when you click "Add media".
+
+## Sources
+
+The picker has three tabs:
+
+| Tab | Source | What it returns |
+|-----|--------|-----------------|
+| **Library** | Your workspace's uploaded assets | Everything you've uploaded or imported, scoped to this workspace |
+| **Unsplash** | [Unsplash](https://unsplash.com) | High-quality stock photography, royalty-free |
+| **Giphy** | [Giphy](https://giphy.com) | GIFs and animated short clips |
+
+Search and trending feeds are powered by each provider's official API — results are rendered server-side so your browser never sees raw API keys. When you pick a Giphy or Unsplash result, TryPost downloads the file and saves it as one of your workspace's assets so it survives even if the original goes away.
+
+## Uploading
+
+Click **Upload** to add files from your machine. Supported formats:
+
+| Type | MIME types accepted on upload |
+|------|-------------------------------|
+| Image | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
+| Video | `video/mp4` |
+
+Max file size: **1 GB**. Files larger than ~1 MB are sent in chunks via `Content-Range` for reliability on flaky connections.
+
+## Importing from URL
+
+The post composer also accepts public URLs — TryPost downloads the file server-side, validates the MIME type and size against the enabled platforms on the post, and stores the result. From the API, this is [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media).
+
+URL imports additionally accept `video/quicktime` (MOV) and `video/webm` on top of the standard formats above.
+
+## Searching
+
+The Library tab supports a substring search on the original filename. Unsplash and Giphy use their respective search APIs — pass any keyword phrase. Trending feeds (no query) are also available on both.
+
+## Reusing assets
+
+Pick an asset in the gallery and it's attached to the active post. The **same** asset can be attached to many posts — TryPost references the underlying file rather than copying it. Deleting an asset that's still in use is blocked from the UI to avoid breaking those posts.
+
+## Deleting
+
+From the Library tab, click any asset → trash icon. Deletion removes the file from storage and detaches it from the workspace. Posts that referenced the asset will lose the attachment; published posts on social platforms are unaffected.
+
+## API access
+
+There's no public API for the asset library yet. The closest equivalent is [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media), which downloads from a URL and attaches the result directly to a specific post in one shot.
+
+## Self-hosted
+
+- Stock-photo and GIF tabs require valid `UNSPLASH_ACCESS_KEY` and `GIPHY_API_KEY` in your `.env`. Without them, those tabs stay disabled — the Library tab works regardless.
+- Files are stored on the disk configured by `FILESYSTEM_DISK` (defaults to `r2` in shipped config). For production, point this at S3, R2, or any S3-compatible service. See the [Configuration guide](/self-hosting/configuration).

@@ -1,0 +1,88 @@
+---
+title: "Plans & billing"
+description: "Cloud subscription tiers, AI credits, and how billing works."
+icon: "credit-card"
+---
+
+<Note>
+  Everything on this page applies to **TryPost Cloud**. Self-hosted instances skip subscription and credit checks entirely (set `SELF_HOSTED=true` in `.env`).
+</Note>
+
+## Plans
+
+| | Starter | Plus | Pro | Max |
+|---|---|---|---|---|
+| Workspaces | 1 | 5 | 15 | 50 |
+| Social accounts | 5 | 10 | 30 | 100 |
+| Team members | 1 | 5 | 15 | 20 |
+| AI credits / month | 1,000 | 2,000 | 5,000 | 15,000 |
+| Monthly billing | Yes | Yes | Yes | Yes |
+| Yearly billing (discount) | Yes | Yes | Yes | Yes |
+
+Pick a plan that matches your busiest month — the dashboard returns `402 Payment Required` the moment you exceed any limit, with a message telling you which one is gating the action.
+
+## Trial
+
+New accounts start on an **8-day trial** of the plan you pick at signup. No card required to begin — Stripe collects the payment method once the trial converts to paid. Cancel any time during the trial to avoid charges.
+
+The trial countdown is visible at **Settings &gt; Account &gt; Billing**.
+
+## Subscribing
+
+1. Go to **Settings &gt; Account &gt; Billing**
+2. Pick **Monthly** or **Yearly** at the top of the plan picker
+3. Click the plan you want
+4. Confirm in Stripe Checkout — payment method is captured but you're not charged until the trial ends
+
+Yearly billing applies a per-plan discount versus monthly. The exact discount is shown next to each plan in Checkout.
+
+## Upgrading / downgrading
+
+Use the same **Settings &gt; Account &gt; Billing** page to change plans. Upgrades take effect immediately; Stripe prorates the difference for the remainder of the billing period. Downgrades take effect at the end of the current period — you keep the higher-tier limits until then.
+
+## Updating payment method &amp; invoices
+
+Click **Manage subscription** on the Billing page to open the Stripe Customer Portal in a new tab. From there you can:
+
+- Update card / payment method
+- Download invoices and receipts
+- Change billing email
+- Cancel the subscription
+
+## AI credits
+
+Every AI feature deducts credits from your workspace's monthly quota. The quota resets on each billing cycle.
+
+| Action | Cost |
+|--------|------|
+| Text generation (Generate, Review, Create caption) | 1 credit per ~150 tokens (input + output combined) |
+| Image generation | 50 credits per image (default model). HD variant: 100 credits. Flux Pro: 30 credits. |
+| Video generation | 500 credits per video |
+
+Track usage at **Settings &gt; Account &gt; Usage** — the page shows how many credits are used, the monthly limit, and live counts for workspaces / social accounts / members against your plan caps.
+
+When credits hit zero, AI calls return `402 Payment Required` until the next reset (or until you upgrade).
+
+## Limit-exceeded behavior
+
+When any plan limit is reached, the dashboard shows an upgrade dialog and the API/MCP layer returns `402 Payment Required` with a `message` explaining which limit was hit (e.g. `Workspace limit exceeded`, `Monthly AI credits exhausted`).
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Can I change plans mid-cycle?">
+    Yes. Upgrades are prorated and take effect immediately. Downgrades schedule at the end of the current billing period.
+  </Accordion>
+  <Accordion title="Do unused credits roll over?">
+    No — the credit balance resets at the start of each billing cycle.
+  </Accordion>
+  <Accordion title="What happens if my card fails?">
+    Stripe retries automatically. After the grace period set in your account, the subscription enters `past_due` and the dashboard shows a banner. New AI/credit-gated actions return `402` until billing recovers.
+  </Accordion>
+  <Accordion title="Can I cancel any time?">
+    Yes. Cancel from the Stripe Customer Portal. The subscription stays active until the end of the current billing period, then expires.
+  </Accordion>
+  <Accordion title="Does self-hosted have plans?">
+    No. Self-hosted instances bypass all subscription and credit checks. You manage your own infrastructure costs.
+  </Accordion>
+</AccordionGroup>

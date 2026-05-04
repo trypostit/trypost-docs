@@ -20,14 +20,21 @@ TryPost supports uploading YouTube Shorts.
 |------|-------------|-------------|
 | **Short** | 9:16 | Vertical video up to 60 seconds (required) |
 
+## OAuth scopes
+
+`https://www.googleapis.com/auth/youtube.upload`, `https://www.googleapis.com/auth/youtube.readonly`, `https://www.googleapis.com/auth/youtube.force-ssl`, `https://www.googleapis.com/auth/yt-analytics.readonly`
+
+`yt-analytics.readonly` powers the **Analytics** dashboard's YouTube view.
+
 ## Self-hosting setup
 
 <Accordion title="Configure Google/YouTube API credentials">
   1. Go to [Google Cloud Console](https://console.cloud.google.com/) and create a project
-  2. Enable the **YouTube Data API v3**
+  2. Enable the **YouTube Data API v3** and **YouTube Analytics API**
   3. Create OAuth 2.0 credentials
-  4. Set the redirect URL to `{APP_URL}/accounts/youtube/callback`
-  5. Add to your `.env`:
+  4. Add the scopes listed above to the OAuth consent screen
+  5. Set the redirect URL to `{APP_URL}/accounts/youtube/callback`
+  6. Add to your `.env`:
 
   ```env
   GOOGLE_CLIENT_ID=your_client_id

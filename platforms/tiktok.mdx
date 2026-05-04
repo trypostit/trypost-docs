@@ -19,13 +19,20 @@ TryPost supports posting videos to TikTok.
 |------|-------------|-------------|
 | **Video** | 9:16 | Short or long-form video (required) |
 
+## OAuth scopes
+
+`user.info.basic`, `user.info.profile`, `user.info.stats`, `video.publish`, `video.upload`, `video.list`
+
+`user.info.stats` and `video.list` are required for the **Analytics** dashboard's TikTok view.
+
 ## Self-hosting setup
 
 <Accordion title="Configure TikTok API credentials">
   1. Go to [TikTok Developers](https://developers.tiktok.com/) and create an app
-  2. Enable **Content Posting API**
-  3. Set the redirect URL to `{APP_URL}/accounts/tiktok/callback`
-  4. Add to your `.env`:
+  2. Enable both the **Content Posting API** (for `video.publish` / `video.upload`) and **Login Kit** (for the `user.info.*` scopes)
+  3. Add the scopes listed above to the app's authorized scopes
+  4. Set the redirect URL to `{APP_URL}/accounts/tiktok/callback`
+  5. Add to your `.env`:
 
   ```env
   TIKTOK_CLIENT_ID=your_client_key

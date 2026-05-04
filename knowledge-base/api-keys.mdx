@@ -25,14 +25,6 @@ After creation, the full key is shown **once**. Copy it immediately.
   TryPost stores a hash of your API key, not the key itself. If you lose it, you'll need to create a new one.
 </Warning>
 
-## Key format
-
-```
-tp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-Keys start with `tp_` followed by 48 random characters (51 characters total). The `tp_` prefix makes it easy to identify TryPost keys in your codebase and avoid committing them accidentally (add `tp_*` to your `.gitignore` patterns).
-
 ## Where to use your API key
 
 The same key works for both the REST API and MCP server:
@@ -43,7 +35,7 @@ Pass the key as a Bearer token in the `Authorization` header:
 
 ```bash
 curl -X GET https://app.trypost.it/api/posts \
-  -H "Authorization: Bearer tp_your_api_key"
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ### MCP Server
@@ -57,7 +49,7 @@ Use the key in your AI assistant's MCP configuration:
       "type": "http",
       "url": "https://app.trypost.it/mcp/trypost",
       "headers": {
-        "Authorization": "Bearer tp_your_api_key"
+        "Authorization": "Bearer YOUR_API_KEY"
       }
     }
   }

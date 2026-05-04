@@ -1,0 +1,51 @@
+---
+title: "Analytics"
+description: "See how your published posts and connected accounts are performing across each platform."
+icon: "chart-line"
+---
+
+## What it shows
+
+The **Analytics** dashboard pulls per-account engagement metrics straight from each platform's API and displays them in one place. Each connected account gets its own tab; the metrics shown depend on what the platform exposes.
+
+Supported platforms today:
+
+| Platform | Account-level metrics | Date-range filter |
+|----------|-----------------------|-------------------|
+| Instagram (Standalone & Facebook Business) | Yes | Yes |
+| Facebook | Yes | Yes |
+| LinkedIn Page | Yes | Yes |
+| Pinterest | Yes | Yes |
+| Threads | Yes | Yes |
+| X (Twitter) | Yes | Yes |
+| YouTube | Yes | Yes |
+| TikTok | Yes | No (TikTok API rolling window only) |
+
+Personal LinkedIn, Bluesky, and Mastodon don't expose account-level analytics — those accounts won't show up in the sidebar.
+
+## Date range
+
+Most platforms accept a date-range picker (default: last 7 days). Pick any custom window and the dashboard refetches metrics. TikTok ignores the picker — it returns its rolling window regardless.
+
+## Per-post metrics
+
+Account-level analytics live in the **Analytics** dashboard. **Per-post** metrics (likes, comments, shares per published post) are available from:
+
+- The post editor → Metrics tab on a `published` post
+- API: [`GET /posts/{post}/metrics`](/api-reference/endpoint/get-post-metrics)
+- MCP: `get-post-metrics-tool`
+
+Per-post metrics are cached for 5 minutes per platform entry to keep API calls within rate limits.
+
+## What to watch
+
+- **Audience growth** — followers gained over the period
+- **Reach / impressions** — unique users exposed to your content
+- **Engagement** — likes, comments, shares, saves (varies per platform)
+- **Top posts** — best-performing posts in the window (where the platform exposes them)
+
+## Limitations
+
+- Metrics depend on each platform's API stability. Outages or rate-limit hits may show stale or partial data.
+- Some platforms (notably TikTok) only expose a fixed rolling window — historical comparison isn't always possible.
+- Disconnected or token-expired accounts can't fetch metrics. Reconnect them from **Accounts**.

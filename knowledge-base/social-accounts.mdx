@@ -10,34 +10,49 @@ Social accounts are the connections between TryPost and your social media profil
 
 ## Supported platforms
 
-| Platform | Account types | Auth method |
-|----------|--------------|-------------|
-| **LinkedIn** | Personal profiles | OAuth |
-| **LinkedIn Page** | Company pages | OAuth |
-| **X (Twitter)** | Personal accounts | OAuth |
-| **Facebook** | Pages | OAuth |
-| **Instagram** | Business and creator accounts | OAuth (via Facebook) |
-| **TikTok** | Personal accounts | OAuth |
-| **YouTube** | Channels | OAuth (via Google) |
-| **Threads** | Personal accounts | OAuth |
-| **Pinterest** | Business accounts | OAuth |
-| **Bluesky** | Personal accounts | App Password |
-| **Mastodon** | Accounts on any instance | OAuth (per instance) |
+| Platform | Identifier | Account types | Auth method |
+|----------|-----------|---------------|-------------|
+| **LinkedIn** | `linkedin` | Personal profiles | OAuth |
+| **LinkedIn Page** | `linkedin-page` | Company pages | OAuth |
+| **X (Twitter)** | `x` | Personal accounts | OAuth |
+| **Facebook** | `facebook` | Pages | OAuth |
+| **Instagram (Standalone)** | `instagram` | Personal IG via Instagram's own OAuth | OAuth |
+| **Instagram (Facebook Business)** | `instagram-facebook` | Business / creator accounts linked to a Facebook page | OAuth (via Facebook) |
+| **TikTok** | `tiktok` | Personal and business accounts | OAuth |
+| **YouTube** | `youtube` | Channels | OAuth (via Google) |
+| **Threads** | `threads` | Personal accounts | OAuth |
+| **Pinterest** | `pinterest` | Personal and business accounts | OAuth |
+| **Bluesky** | `bluesky` | Personal accounts | App Password |
+| **Mastodon** | `mastodon` | Any instance | OAuth (per instance) |
 
 ## Connecting an account
 
-Go to **Accounts** in the dashboard and click the platform you want to connect. For most platforms, you'll be redirected to their authorization page. Some platforms have extra steps:
+Go to **Accounts** in the dashboard and click the platform you want to connect. For most platforms, you'll be redirected to their authorization page. A few have extra steps:
 
-- **LinkedIn Page** — After authorizing, you select which company page to connect
-- **Facebook** — After authorizing, you select which page to manage
-- **Instagram** — After authorizing through Facebook, you select which Instagram account to connect
-- **YouTube** — After authorizing with Google, you select which channel to connect
-- **Bluesky** — Enter your handle and an [App Password](https://bsky.app/settings/app-passwords) (not your main password)
-- **Mastodon** — Enter your instance URL first, then authorize on that instance
+- **LinkedIn Page** — after authorizing, pick which company page to connect
+- **Facebook** — after authorizing, pick which page to manage
+- **Instagram (Standalone)** — uses Instagram's own OAuth flow; suitable for personal IG accounts
+- **Instagram (Facebook Business)** — authorize through Facebook, then pick the Instagram account linked to a Facebook page (required for first-party publishing of feed/reels/stories/carousels)
+- **YouTube** — authorize with Google, then pick the channel
+- **Bluesky** — enter your handle and an [App Password](https://bsky.app/settings/app-passwords) (not your main password)
+- **Mastodon** — enter your instance URL first, then authorize on that instance
 
 <Note>
-  You can connect multiple accounts per platform. For example, connect both your personal LinkedIn and three company pages.
+  You can connect multiple accounts per platform — for example, both your personal LinkedIn and three company pages.
 </Note>
+
+## Connection limits (Cloud only)
+
+On TryPost Cloud, each plan caps the total number of connected accounts per workspace:
+
+| Plan | Connected accounts |
+|------|--------------------|
+| Starter | 5 |
+| Plus | 10 |
+| Pro | 30 |
+| Max | 100 |
+
+Self-hosted instances have no cap. When you exceed the limit on Cloud, connecting a new account returns `402 Payment Required` and the dashboard prompts you to upgrade.
 
 ## Active vs. inactive
 

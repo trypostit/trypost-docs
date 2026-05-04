@@ -1,78 +1,66 @@
 ---
 title: "List posts"
 api: "GET /posts"
-description: "List all posts for the current workspace with pagination."
+description: "List all posts for the current workspace, paginated 15 per page."
 ---
 
 ## Request
 
-<ParamField query="page" type="integer" optional>
-  The page number for pagination. Defaults to `1`.
+<ParamField query="page" type="integer">
+  Page number for pagination. Defaults to `1`.
 </ParamField>
 
 ## Response
 
-Returns a paginated list of posts with their platforms, labels, and scheduling information.
+Returns posts ordered by `scheduled_at` descending (latest first), 15 per page.
 
 <ResponseField name="data" type="array">
   <Expandable>
-    <ResponseField name="id" type="string">
-      The post ID.
+    <ResponseField name="id" type="string">UUID of the post.</ResponseField>
+    <ResponseField name="content" type="string">The post text body. May be `null` for drafts.</ResponseField>
+    <ResponseField name="media" type="array">
+      Media items attached to the post. Each item has `id`, `path`, `url`, `type` (`image` | `video` | `document`), `mime_type`, `original_filename`. Empty array if none.
     </ResponseField>
     <ResponseField name="status" type="string">
-      The post status: `draft`, `scheduled`, `publishing`, `published`, `partially_published`, or `failed`.
-    </ResponseField>
-    <ResponseField name="synced" type="boolean">
-      Whether the post content is synced across platforms.
+      One of: `draft`, `scheduled`, `publishing`, `published`, `partially_published`, `failed`.
     </ResponseField>
     <ResponseField name="scheduled_at" type="string">
-      The scheduled date and time in `Y-m-d H:i:s` format.
+      Scheduled publish time in `Y-m-d H:i:s` format. May be `null` for unscheduled drafts.
     </ResponseField>
     <ResponseField name="published_at" type="string">
-      The published date and time. Null if not yet published.
+      Publish completion time in `Y-m-d H:i:s` format. `null` until fully published.
     </ResponseField>
     <ResponseField name="platforms" type="array">
-      The post content for each connected social account.
+      One entry per `post_platform` (one social account targeted by this post).
       <Expandable>
-        <ResponseField name="id" type="string">
-          The post platform entry ID.
-        </ResponseField>
-        <ResponseField name="platform" type="string">
-          The social platform name.
-        </ResponseField>
-        <ResponseField name="content" type="string">
-          The post content for this platform.
-        </ResponseField>
-        <ResponseField name="content_type" type="string">
-          The content type.
-        </ResponseField>
-        <ResponseField name="status" type="string">
-          The publishing status for this platform.
-        </ResponseField>
-        <ResponseField name="enabled" type="boolean">
-          Whether this platform entry is enabled.
-        </ResponseField>
+        <ResponseField name="id" type="string">UUID of the post_platform row. Use this in `PUT /posts/{post}` to enable/disable platforms.</ResponseField>
+        <ResponseField name="platform" type="string">Platform identifier — e.g. `linkedin`, `linkedin-page`, `x`, `facebook`, `instagram`, `instagram-facebook`, `tiktok`, `youtube`, `threads`, `pinterest`, `bluesky`, `mastodon`.</ResponseField>
+        <ResponseField name="content_type" type="string">Format used for this platform — e.g. `linkedin_post`, `instagram_reel`. See [`GET /content-types`](/api-reference/endpoint/list-content-types).</ResponseField>
+        <ResponseField name="status" type="string">Per-platform publish status: `pending`, `publishing`, `published`, or `failed`.</ResponseField>
+        <ResponseField name="enabled" type="boolean">Whether this platform will be published to.</ResponseField>
+        <ResponseField name="platform_url" type="string">Public URL of the published post. `null` until published successfully.</ResponseField>
+        <ResponseField name="published_at" type="string">Per-platform publish time in `Y-m-d H:i:s` format. `null` until published.</ResponseField>
+        <ResponseField name="error_message" type="string">Error reason from the last failed publish attempt. `null` on success.</ResponseField>
+        <ResponseField name="display_name" type="string">Snapshot of the social account's display name (preserved if the account is later disconnected).</ResponseField>
+        <ResponseField name="display_username" type="string">Snapshot of the username/handle.</ResponseField>
+        <ResponseField name="display_avatar" type="string">Snapshot URL of the avatar.</ResponseField>
         <ResponseField name="social_account" type="object">
-          The connected social account details.
+          The connected social account. Fields: `id`, `platform`, `display_name`, `username`, `is_active`, `status` (`connected` | `disconnected` | `token_expired`).
         </ResponseField>
       </Expandable>
     </ResponseField>
     <ResponseField name="labels" type="array">
-      The labels assigned to the post.
+      Workspace labels attached to the post. Each item has `id`, `name`, `color`, `created_at`, `updated_at`.
     </ResponseField>
-    <ResponseField name="created_at" type="string">
-      The creation timestamp.
-    </ResponseField>
-    <ResponseField name="updated_at" type="string">
-      The last update timestamp.
-    </ResponseField>
+    <ResponseField name="created_at" type="string">Creation timestamp in `Y-m-d H:i:s` format.</ResponseField>
+    <ResponseField name="updated_at" type="string">Last update timestamp in `Y-m-d H:i:s` format.</ResponseField>
   </Expandable>
 </ResponseField>
 
 <RequestExample>
 ```bash
 curl -X GET https://app.trypost.it/api/posts \
-  -H "Authorization: Bearer tp_your_api_key"
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 </RequestExample>
 
@@ -82,18 +70,24 @@ curl -X GET https://app.trypost.it/api/posts \
   "data": [
     {
       "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+      "content": "Excited to announce our new feature!",
+      "media": [],
       "status": "scheduled",
-      "synced": true,
       "scheduled_at": "2025-01-15 10:00:00",
       "published_at": null,
       "platforms": [
         {
           "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
           "platform": "linkedin",
-          "content": "Excited to announce our new feature!",
           "content_type": "linkedin_post",
           "status": "pending",
           "enabled": true,
+          "platform_url": null,
+          "published_at": null,
+          "error_message": null,
+          "display_name": "John Doe",
+          "display_username": "johndoe",
+          "display_avatar": "https://media.licdn.com/.../avatar.jpg",
           "social_account": {
             "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
             "platform": "linkedin",
@@ -109,8 +103,26 @@ curl -X GET https://app.trypost.it/api/posts \
       "updated_at": "2025-01-14 09:00:00"
     }
   ],
-  "links": { "first": "...", "last": "...", "prev": null, "next": null },
-  "meta": { "current_page": 1, "last_page": 1, "per_page": 15, "total": 1 }
+  "links": {
+    "first": "https://app.trypost.it/api/posts?page=1",
+    "last":  "https://app.trypost.it/api/posts?page=1",
+    "prev":  null,
+    "next":  null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "to": 1,
+    "last_page": 1,
+    "per_page": 15,
+    "total": 1,
+    "path": "https://app.trypost.it/api/posts",
+    "links": [
+      { "url": null, "label": "&laquo; Previous", "page": null, "active": false },
+      { "url": "https://app.trypost.it/api/posts?page=1", "label": "1", "page": 1, "active": true },
+      { "url": null, "label": "Next &raquo;", "page": null, "active": false }
+    ]
+  }
 }
 ```
 </ResponseExample>

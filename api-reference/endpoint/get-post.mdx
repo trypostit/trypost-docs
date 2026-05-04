@@ -1,65 +1,78 @@
 ---
 title: "Get post"
 api: "GET /posts/{post}"
-description: "Get a specific post by ID with all its platform content, labels, and media."
+description: "Get a specific post by ID with all its platform entries, media, and labels."
 ---
 
 ## Request
 
 <ParamField path="post" type="string" required>
-  The post ID.
+  The post UUID.
 </ParamField>
 
 ## Response
 
-Returns the full post details including platform-specific content, social accounts, and labels.
+Returns the full post. Response shape is identical to one entry in [`GET /posts`](/api-reference/endpoint/list-posts) — see that endpoint for full field documentation.
 
 <RequestExample>
 ```bash
 curl -X GET https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c \
-  -H "Authorization: Bearer tp_your_api_key"
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 </RequestExample>
 
 <ResponseExample>
 ```json
 {
-  "data": {
-    "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
-    "status": "draft",
-    "synced": true,
-    "scheduled_at": "2025-01-15 10:00:00",
-    "published_at": null,
-    "platforms": [
-      {
-        "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+  "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "content": "Excited to announce our new feature!",
+  "media": [
+    {
+      "id": "01HX1A2B3C4D5E6F7G8H9I0J1K",
+      "path": "media/01HX1A2B-photo.jpg",
+      "url": "https://app.trypost.it/storage/media/01HX1A2B-photo.jpg",
+      "type": "image",
+      "mime_type": "image/jpeg",
+      "original_filename": "photo.jpg"
+    }
+  ],
+  "status": "draft",
+  "scheduled_at": "2025-01-15 10:00:00",
+  "published_at": null,
+  "platforms": [
+    {
+      "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      "platform": "linkedin",
+      "content_type": "linkedin_post",
+      "status": "pending",
+      "enabled": true,
+      "platform_url": null,
+      "published_at": null,
+      "error_message": null,
+      "display_name": "John Doe",
+      "display_username": "johndoe",
+      "display_avatar": "https://media.licdn.com/.../avatar.jpg",
+      "social_account": {
+        "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
         "platform": "linkedin",
-        "content": "Excited to announce our new feature!",
-        "content_type": "linkedin_post",
-        "status": "pending",
-        "enabled": true,
-        "social_account": {
-          "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
-          "platform": "linkedin",
-          "display_name": "John Doe",
-          "username": "johndoe",
-          "is_active": true,
-          "status": "connected"
-        }
+        "display_name": "John Doe",
+        "username": "johndoe",
+        "is_active": true,
+        "status": "connected"
       }
-    ],
-    "labels": [
-      {
-        "id": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
-        "name": "Product Launch",
-        "color": "#4f46e5",
-        "created_at": "2025-01-10 08:00:00",
-        "updated_at": "2025-01-10 08:00:00"
-      }
-    ],
-    "created_at": "2025-01-14 09:00:00",
-    "updated_at": "2025-01-14 09:00:00"
-  }
+    }
+  ],
+  "labels": [
+    {
+      "id": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
+      "name": "Product Launch",
+      "color": "#4f46e5",
+      "created_at": "2025-01-10 08:00:00",
+      "updated_at": "2025-01-10 08:00:00"
+    }
+  ],
+  "created_at": "2025-01-14 09:00:00",
+  "updated_at": "2025-01-14 09:00:00"
 }
 ```
 </ResponseExample>

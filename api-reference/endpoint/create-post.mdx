@@ -1,42 +1,50 @@
 ---
 title: "Create post"
 api: "POST /posts"
-description: "Create a new post with content for one or more social platforms."
+description: "Create a new post targeting one or more social accounts. Returns the created post with status 201."
 ---
 
 ## Request
 
 <ParamField body="platforms" type="array" required>
-  An array of platform entries. Each entry specifies a social account and the content to publish.
+  At least one platform entry. Each entry pins this post to a connected social account and a `content_type`.
   <Expandable>
     <ParamField body="social_account_id" type="string" required>
-      The UUID of the social account to post to.
+      UUID of an active social account in the current workspace. Inactive or external accounts are rejected.
     </ParamField>
     <ParamField body="content_type" type="string" required>
-      The content type for this platform. Must match the social account's platform. Values: `linkedin_post`, `linkedin_carousel`, `linkedin_page_post`, `linkedin_page_carousel`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_reel`, `instagram_story`, `tiktok_video`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`.
+      Format for this platform — must match the social account's platform. Discover the catalog with [`GET /content-types`](/api-reference/endpoint/list-content-types).
+
+      Allowed values: `linkedin_post`, `linkedin_carousel`, `linkedin_page_post`, `linkedin_page_carousel`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_carousel`, `instagram_reel`, `instagram_story`, `tiktok_video`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`.
     </ParamField>
     <ParamField body="content" type="string">
-      The post content text.
+      Per-platform text override. Omit to share the same text across platforms (set later via [`PUT /posts/{post}`](/api-reference/endpoint/update-post)). Maximum 63206 characters.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="scheduled_at" type="string">
-  Schedule the post for a future date and time. Format: `Y-m-d H:i:s`. Must be in the future.
+  ISO 8601 datetime in the future (e.g. `2026-05-10T15:30:00Z`). Required when `status=scheduled`.
 </ParamField>
 
 <ParamField body="status" type="string">
-  The post status. One of: `draft`, `scheduled`, `publishing`. Defaults to `draft`.
+  Initial post status. One of:
+
+  - `draft` *(default)* — keep editing
+  - `scheduled` — schedule for `scheduled_at`
+  - `publishing` — dispatch publish jobs immediately
+
+  To set content, media, and labels in one go after creation, use [`PUT /posts/{post}`](/api-reference/endpoint/update-post). To attach media from URLs, use [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media).
 </ParamField>
 
 ## Response
 
-Returns the created post with its platform entries.
+Returns `201` with the created post. Response shape is identical to [`GET /posts/{post}`](/api-reference/endpoint/get-post) — see that endpoint for full field documentation.
 
 <RequestExample>
 ```bash
 curl -X POST https://app.trypost.it/api/posts \
-  -H "Authorization: Bearer tp_your_api_key" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "platforms": [
@@ -46,7 +54,7 @@ curl -X POST https://app.trypost.it/api/posts \
         "content": "Hello from the TryPost API!"
       }
     ],
-    "scheduled_at": "2025-01-15 10:00:00",
+    "scheduled_at": "2026-05-10T15:30:00Z",
     "status": "scheduled"
   }'
 ```
@@ -55,34 +63,38 @@ curl -X POST https://app.trypost.it/api/posts \
 <ResponseExample>
 ```json
 {
-  "data": {
-    "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
-    "status": "scheduled",
-    "synced": false,
-    "scheduled_at": "2025-01-15 10:00:00",
-    "published_at": null,
-    "platforms": [
-      {
-        "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+  "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "content": null,
+  "media": [],
+  "status": "scheduled",
+  "scheduled_at": "2026-05-10 15:30:00",
+  "published_at": null,
+  "platforms": [
+    {
+      "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      "platform": "linkedin",
+      "content_type": "linkedin_post",
+      "status": "pending",
+      "enabled": true,
+      "platform_url": null,
+      "published_at": null,
+      "error_message": null,
+      "display_name": "John Doe",
+      "display_username": "johndoe",
+      "display_avatar": "https://media.licdn.com/.../avatar.jpg",
+      "social_account": {
+        "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
         "platform": "linkedin",
-        "content": "Hello from the TryPost API!",
-        "content_type": "linkedin_post",
-        "status": "pending",
-        "enabled": true,
-        "social_account": {
-          "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
-          "platform": "linkedin",
-          "display_name": "John Doe",
-          "username": "johndoe",
-          "is_active": true,
-          "status": "connected"
-        }
+        "display_name": "John Doe",
+        "username": "johndoe",
+        "is_active": true,
+        "status": "connected"
       }
-    ],
-    "labels": [],
-    "created_at": "2025-01-14 09:00:00",
-    "updated_at": "2025-01-14 09:00:00"
-  }
+    }
+  ],
+  "labels": [],
+  "created_at": "2025-01-14 09:00:00",
+  "updated_at": "2025-01-14 09:00:00"
 }
 ```
 </ResponseExample>

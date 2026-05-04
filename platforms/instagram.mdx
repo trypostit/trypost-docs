@@ -1,38 +1,62 @@
 ---
 title: Instagram
-description: Connect your Instagram Business or Creator account to TryPost
+description: Connect a personal Instagram or a Business / Creator account to TryPost
 ---
 
 # Instagram
 
-TryPost supports posting to Instagram Business and Creator accounts.
+TryPost supports two Instagram connection flavors, each backed by a different OAuth flow:
 
-<Note>
-  Personal Instagram accounts are not supported. You need a **Business** or **Creator** account connected to a Facebook page.
-</Note>
+| Connection | Identifier | Best for |
+|------------|------------|----------|
+| **Instagram (Standalone)** | `instagram` | Personal Instagram accounts that aren't linked to a Facebook page. Uses Instagram's own OAuth. |
+| **Instagram (Facebook Business)** | `instagram-facebook` | Business or Creator accounts linked to a Facebook page. Required for first-party publishing of feed, reels, stories, and carousels at full quality. |
+
+Connect either (or both) from **Accounts** in the dashboard.
 
 ## Connect your account
 
+### Standalone (personal)
+
 1. Go to **Accounts** in the TryPost dashboard
 2. Click **Connect Instagram**
+3. Authorize TryPost on instagram.com
+4. The account shows up immediately
+
+### Business (via Facebook)
+
+1. Go to **Accounts** in the TryPost dashboard
+2. Click **Connect Instagram (Facebook Business)**
 3. Authorize TryPost through Facebook
-4. Select the Instagram account to connect
+4. Select the Facebook page whose Instagram account you want to connect
 
 ## Supported content types
 
-| Type | Aspect ratio | Media | Description |
-|------|-------------|-------|-------------|
-| **Feed** | 1:1 | Up to 10 images or 1 video | Main feed post |
-| **Reel** | 9:16 | 1 video (required) | Short-form vertical video |
-| **Story** | 9:16 | 1 image or video (required) | Temporary content (24 hours) |
+| Type | `content_type` | Aspect | Media | Description |
+|------|----------------|--------|-------|-------------|
+| **Feed** | `instagram_feed` | 4:5 | 1 image or 1 video (optional) | Single-asset feed post |
+| **Carousel** | `instagram_carousel` | 4:5 | Up to 10 images (required) | Swipeable feed carousel — images only |
+| **Reel** | `instagram_reel` | 9:16 | 1 video (required) | Short-form vertical video |
+| **Story** | `instagram_story` | 9:16 | 1 image or video (required) | Temporary content (24 hours) |
+
+All four content types are available on both connection flavors.
+
+## OAuth scopes
+
+| Connection | Scopes requested |
+|------------|------------------|
+| Instagram (Standalone, `instagram`) | `instagram_business_basic`, `instagram_business_content_publish`, `instagram_business_manage_insights` |
+| Instagram (Facebook Business, `instagram-facebook`) | `public_profile`, `pages_show_list`, `pages_read_engagement`, `business_management`, `instagram_basic`, `instagram_content_publish`, `instagram_manage_insights` |
+
+The `*_manage_insights` scopes power the **Analytics** dashboard's Instagram view.
 
 ## Self-hosting setup
 
-<Accordion title="Configure Instagram API credentials">
+<Accordion title="Configure Instagram (Standalone) API credentials">
   1. Go to [Meta for Developers](https://developers.facebook.com/) and create an app
-  2. Add the **Instagram** product
+  2. Add the **Instagram** product (the standalone Instagram API, not Instagram Graph via Facebook)
   3. Set the redirect URL to `{APP_URL}/accounts/instagram/callback`
-  4. Request permissions: `instagram_basic`, `instagram_content_publish`
+  4. Request permissions: `instagram_business_basic`, `instagram_business_content_publish`, `instagram_business_manage_insights`
   5. Add to your `.env`:
 
   ```env
@@ -40,4 +64,11 @@ TryPost supports posting to Instagram Business and Creator accounts.
   INSTAGRAM_CLIENT_SECRET=your_app_secret
   INSTAGRAM_CLIENT_REDIRECT="${APP_URL}/accounts/instagram/callback"
   ```
+</Accordion>
+
+<Accordion title="Configure Instagram (Facebook Business) API credentials">
+  1. In the same Meta for Developers app, also add the **Facebook Login for Business** product
+  2. Set the redirect URL to `{APP_URL}/accounts/instagram-facebook/callback`
+  3. Request permissions: `public_profile`, `pages_show_list`, `pages_read_engagement`, `business_management`, `instagram_basic`, `instagram_content_publish`, `instagram_manage_insights`
+  4. Use the same `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET` you've configured for Facebook (it's the same app)
 </Accordion>

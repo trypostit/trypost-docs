@@ -1,0 +1,58 @@
+---
+title: "Account & security"
+description: "Manage your personal account: profile, language, password, sessions, connected logins."
+icon: "user-shield"
+---
+
+Your TryPost account is separate from your workspaces — one user can belong to many workspaces, and personal account settings live under **Settings &gt; Profile** and **Settings &gt; Authentication**.
+
+## Profile
+
+**Settings &gt; Profile** lets you update:
+
+| Field | Notes |
+|-------|-------|
+| **Name** | Display name shown to teammates and on comments |
+| **Email** | Used for login and notifications. Changing it triggers a re-verification email. |
+| **Profile photo** | Upload from your machine. Stored on the configured filesystem (same as post media). |
+| **Language** | `en`, `pt-BR`, or `es`. Sets the dashboard UI language; persisted as a cookie + on your user record. |
+
+You can also delete your account from this page — see [Deleting your account](#deleting-your-account) below.
+
+## Authentication
+
+**Settings &gt; Authentication** is the single page for everything sign-in related.
+
+### Password
+
+- If you signed up with email/password, you can change it here.
+- If you signed up with Google and never set a password, the page shows a "Set password" form instead. Setting one lets you log in either way.
+
+### Active sessions
+
+Every device or browser you've signed in from shows up as a session, with IP address, last-active timestamp, browser/OS, and a marker on the current session. Click **Sign out other devices** to invalidate every session except this one — useful if you suspect a leaked credential.
+
+This calls `DELETE /settings/authentication/sessions` and forces re-login on every other device.
+
+### Connected accounts
+
+If Google login is configured (Cloud has it on; self-hosted needs `GOOGLE_CLIENT_ID` etc.), you can link or unlink your Google account here. Unlinking is blocked if it would leave you with no way to sign in (e.g. you have no password set).
+
+### Email verification
+
+New accounts must verify their email before scheduling posts. The signup flow sends a verification link automatically. To resend, hit **Resend verification email** on the banner shown on every page until you verify.
+
+## Deleting your account
+
+From **Settings &gt; Profile**, scroll to the danger zone. Account deletion is **immediate and irreversible**:
+
+- Removes your user record
+- Cancels any subscription on your account (Cloud)
+- Deletes workspaces you own (along with their posts, accounts, signatures, labels) — workspaces you only belong to as admin/member are unaffected; you're just removed from them
+- Disconnects your social accounts on TryPost's side. Posts already published to social platforms are unaffected — TryPost has no way to retract them.
+
+You'll be asked to type your password (or "DELETE", if you're a Google-only user) to confirm.
+
+## Notifications
+
+See [Notifications](/knowledge-base/notifications) for the dedicated page on how alerts work and what you can toggle.

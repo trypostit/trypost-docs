@@ -17,15 +17,22 @@ TryPost supports posting to Threads.
 
 | Type | Description |
 |------|-------------|
-| **Post** | Text with up to 10 optional images |
+| **Post** | Text with up to 10 optional images **or** 1 video |
+
+## OAuth scopes
+
+`threads_basic`, `threads_content_publish`, `threads_manage_insights`
+
+`threads_manage_insights` powers per-post and account-level metrics in **Analytics**.
 
 ## Self-hosting setup
 
 <Accordion title="Configure Threads API credentials">
   1. Go to [Meta for Developers](https://developers.facebook.com/) and create an app
   2. Add the **Threads** product
-  3. Set the redirect URL to `{APP_URL}/accounts/threads/callback`
-  4. Add to your `.env`:
+  3. Request the scopes above in the app's permissions section
+  4. Set the redirect URL to `{APP_URL}/accounts/threads/callback`
+  5. Add to your `.env`:
 
   ```env
   THREADS_CLIENT_ID=your_app_id

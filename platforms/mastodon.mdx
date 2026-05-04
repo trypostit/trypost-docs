@@ -18,8 +18,12 @@ TryPost supports posting to any Mastodon instance.
 
 | Type | Description |
 |------|-------------|
-| **Post** | Text with up to 4 optional images or video |
+| **Post** | Text with up to 4 optional images or 1 video |
+
+## OAuth scopes
+
+`read:accounts`, `write:statuses`, `write:media`
 
 ## Self-hosting setup
 
-No API credentials or environment variables are required for Mastodon. TryPost dynamically registers an OAuth app on each Mastodon instance when a user connects.
+No API credentials or environment variables are required for Mastodon. TryPost dynamically registers an OAuth app on each Mastodon instance the first time a user connects from there.

@@ -1,0 +1,41 @@
+---
+title: "Brand profile"
+description: "The voice, look, and language settings that shape every AI-generated post."
+icon: "palette"
+---
+
+## What it is
+
+Each workspace has a **Brand profile** that the AI features (Generate, Review, Create) use to keep generated content on-brand without you having to spell it out every time. Set it up once per workspace; every AI call from then on is wrapped with these guardrails.
+
+Find it under **Settings &gt; Workspace &gt; Brand**.
+
+## Fields
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| **Website** | No | A URL up to 255 characters. Used as context for AI generation. |
+| **Description** | No | Up to 2 000 characters. What you do, who you serve. The AI's strongest signal for relevance. |
+| **Tone** | No | One of: `professional`, `casual`, `friendly`, `bold`, `inspirational`, `humorous`, `educational` |
+| **Voice notes** | No | Up to 2 000 characters. Free-form notes — phrases to use, things to avoid, signature jokes. |
+| **Brand color** | No | Hex `#RRGGBB`. Used in image generation and any layouts that pull theme colors. |
+| **Background color** | No | Hex `#RRGGBB`. Default canvas color when AI renders branded slides. |
+| **Text color** | No | Hex `#RRGGBB`. Default text color on rendered slides. |
+| **Brand font** | Required | One of the supported font families. Used for AI-rendered slides. |
+| **Content language** | Required | `en`, `pt-BR`, or `es`. The language the AI generates posts in. |
+
+## How the AI uses it
+
+When you click **Generate**, **Review**, or run **Create with AI**, TryPost concatenates a short brand brief (description, tone, voice notes, language) with your prompt before sending it to the model. The model never sees your raw prompt in isolation — it always sees brand context.
+
+That's why two workspaces with the same prompt can produce very different copy: one is wrapped with "Marketing agency for B2B SaaS, professional tone" and the other with "Indie creator, humorous tone, mention coffee".
+
+## Recommendations
+
+- **Keep the description specific.** "We sell software" → bad. "B2B inventory management for fast-fashion brands" → good.
+- **Use voice notes for taste, not facts.** Things like "we never use exclamation marks", "we always close with a question", "avoid corporate buzzwords".
+- **Lock in the content language.** It controls the whole AI surface — generated posts, review feedback, even the example button labels.
+
+## Autofill (Cloud)
+
+When you fill in **Website**, the dashboard offers to autofill the rest from your homepage's metadata. The AI scrapes the URL, extracts a brand description, suggests a tone, and proposes voice notes — you review and save. Saves a few minutes vs. typing it from scratch.

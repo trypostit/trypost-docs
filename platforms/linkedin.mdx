@@ -19,9 +19,16 @@ TryPost supports posting to LinkedIn personal profiles and company pages.
 | Type | Description |
 |------|-------------|
 | **Post** | Text with optional images or video |
-| **Carousel** | Multi-image document (PDF) swipeable posts |
+| **Carousel** | Swipeable post — up to 20 images or a single PDF document |
 
 Both content types are available for personal profiles and company pages.
+
+## OAuth scopes
+
+| Connection | Scopes requested |
+|------------|------------------|
+| Personal profile (`linkedin`) | `openid`, `profile`, `email`, `r_basicprofile`, `w_member_social` |
+| Company page (`linkedin-page`) | `openid`, `profile`, `email`, `w_organization_social`, `r_organization_social`, `rw_organization_admin`, `w_member_social` |
 
 ## Self-hosting setup
 
@@ -34,6 +41,7 @@ Both content types are available for personal profiles and company pages.
   4. Go to the **Products** tab and request access to:
      - **Share on LinkedIn**
      - **Sign In with LinkedIn using OpenID Connect**
+     - **Marketing Developer Platform** (required for company-page scopes like `w_organization_social` and `rw_organization_admin`)
   5. Add to your `.env`:
 
   ```env

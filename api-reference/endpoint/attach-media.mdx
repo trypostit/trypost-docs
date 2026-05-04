@@ -1,0 +1,90 @@
+---
+title: "Attach media from URLs"
+api: "POST /posts/{post}/media"
+description: "Download images or videos from public URLs and attach them to a post."
+---
+
+## Path parameters
+
+<ParamField path="post" type="string" required>
+  The UUID of the post to attach media to.
+</ParamField>
+
+## Request
+
+<ParamField body="urls" type="array" required>
+  Public HTTP/HTTPS URLs of images or videos. **Max 10 URLs per call**, **50 MB per file**.
+
+  Allowed MIME types:
+
+  - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp`
+  - **Videos**: `video/mp4`, `video/quicktime`, `video/webm`
+
+  URLs are downloaded server-side and stored as Media records on the workspace.
+</ParamField>
+
+## Behaviour
+
+- The post must belong to the caller's current workspace; otherwise the response is `404`.
+- Allowed media types are **intersected with the platforms enabled on the post**. If an enabled platform doesn't support the file type (e.g. video on a platform that's image-only), that file is rejected and listed in `failed_urls`.
+- Successful attachments are appended to the post's `media[]` array.
+
+## Response
+
+Returns an object with three fields:
+
+<ResponseField name="post" type="object">
+  The updated post — same shape as [`GET /posts/{post}`](/api-reference/endpoint/get-post), with newly-attached items now in the `media[]` array.
+</ResponseField>
+<ResponseField name="attached_count" type="integer">
+  Number of URLs that were successfully downloaded and attached.
+</ResponseField>
+<ResponseField name="failed_urls" type="array">
+  URLs that were rejected (unreachable, wrong MIME type, too large, or not allowed by any enabled platform). Each entry is the original URL string.
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c/media \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": [
+      "https://cdn.example.com/photo.jpg",
+      "https://cdn.example.com/video.mp4"
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "post": {
+    "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+    "content": "Launch day!",
+    "media": [
+      {
+        "id": "01HX1A2B3C4D5E6F7G8H9I0J1K",
+        "path": "media/01HX1A2B-photo.jpg",
+        "url": "https://app.trypost.it/storage/media/01HX1A2B-photo.jpg",
+        "type": "image",
+        "mime_type": "image/jpeg",
+        "original_filename": "photo.jpg"
+      }
+    ],
+    "status": "draft",
+    "scheduled_at": null,
+    "published_at": null,
+    "platforms": [],
+    "labels": [],
+    "created_at": "2025-01-14 09:00:00",
+    "updated_at": "2025-01-14 09:30:00"
+  },
+  "attached_count": 1,
+  "failed_urls": [
+    "https://cdn.example.com/video.mp4"
+  ]
+}
+```
+</ResponseExample>

@@ -1,64 +1,58 @@
 ---
 title: "List social accounts"
 api: "GET /social-accounts"
-description: "List all connected social accounts for the current workspace."
+description: "List all connected social accounts for the current workspace, ordered by platform. Returns a plain array (no pagination)."
 ---
 
 ## Response
 
-Returns all connected social accounts sorted by platform.
+Plain array of social account objects. Each item has these fields:
 
-<ResponseField name="data" type="array">
-  <Expandable>
-    <ResponseField name="id" type="string">
-      The social account ID.
-    </ResponseField>
-    <ResponseField name="platform" type="string">
-      The platform name: `linkedin`, `linkedin-page`, `x`, `facebook`, `instagram`, `tiktok`, `youtube`, `threads`, `pinterest`, `bluesky`, or `mastodon`.
-    </ResponseField>
-    <ResponseField name="display_name" type="string">
-      The account's display name.
-    </ResponseField>
-    <ResponseField name="username" type="string">
-      The account's username or handle.
-    </ResponseField>
-    <ResponseField name="is_active" type="boolean">
-      Whether the account is active for posting.
-    </ResponseField>
-    <ResponseField name="status" type="string">
-      The account connection status: `connected`, `disconnected`, or `token_expired`.
-    </ResponseField>
-  </Expandable>
+<ResponseField name="id" type="string">
+  Social account UUID.
+</ResponseField>
+<ResponseField name="platform" type="string">
+  Platform identifier. One of: `linkedin`, `linkedin-page`, `x`, `facebook`, `instagram`, `instagram-facebook`, `tiktok`, `youtube`, `threads`, `pinterest`, `bluesky`, `mastodon`.
+</ResponseField>
+<ResponseField name="display_name" type="string">
+  The account's display name.
+</ResponseField>
+<ResponseField name="username" type="string">
+  The account's username or handle.
+</ResponseField>
+<ResponseField name="is_active" type="boolean">
+  Whether the account is active for publishing. Toggle with [`PUT /social-accounts/{id}/toggle`](/api-reference/endpoint/toggle-social-account).
+</ResponseField>
+<ResponseField name="status" type="string">
+  Connection status: `connected`, `disconnected`, or `token_expired`. Disconnected/expired accounts are skipped at publish time.
 </ResponseField>
 
 <RequestExample>
 ```bash
 curl -X GET https://app.trypost.it/api/social-accounts \
-  -H "Authorization: Bearer tp_your_api_key"
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 </RequestExample>
 
 <ResponseExample>
 ```json
-{
-  "data": [
-    {
-      "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
-      "platform": "linkedin",
-      "display_name": "John Doe",
-      "username": "johndoe",
-      "is_active": true,
-      "status": "connected"
-    },
-    {
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "platform": "x",
-      "display_name": "John",
-      "username": "@johndoe",
-      "is_active": true,
-      "status": "connected"
-    }
-  ]
-}
+[
+  {
+    "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
+    "platform": "linkedin",
+    "display_name": "John Doe",
+    "username": "johndoe",
+    "is_active": true,
+    "status": "connected"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "platform": "x",
+    "display_name": "John",
+    "username": "@johndoe",
+    "is_active": true,
+    "status": "connected"
+  }
+]
 ```
 </ResponseExample>

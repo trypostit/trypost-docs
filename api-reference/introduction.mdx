@@ -1,6 +1,6 @@
 ---
 title: "Introduction"
-description: "The TryPost API lets you manage social media posts, hashtags, labels, and more with a simple REST API."
+description: "The TryPost API lets you manage social media posts, signatures, labels, and more with a simple REST API."
 ---
 
 ## Base URL
@@ -15,25 +15,21 @@ For self-hosted instances, the base URL is your `APP_URL` followed by `/api` (e.
 
 ## Authentication
 
-All API requests require a Bearer token in the `Authorization` header. You can create API keys from the [TryPost dashboard](https://app.trypost.it).
+All API requests require a Bearer token in the `Authorization` header. You can create API keys (Personal Access Tokens) from the [TryPost dashboard](https://app.trypost.it/settings/authentication) or via the [`POST /api-keys`](/api-reference/endpoint/create-api-key) endpoint.
 
 ```bash
-Authorization: Bearer tp_your_api_key
+Authorization: Bearer YOUR_API_KEY
 ```
 
 <Warning>
-  Keep your API key secret. Do not expose it in client-side code or public repositories.
+  Keep your API key secret. Do not expose it in client-side code or public repositories. The plain token value is only shown once at creation — store it immediately.
 </Warning>
 
-## Key format
+## Workspace scoping
 
-All TryPost API keys follow the format:
+Every API key is bound to a specific workspace at creation time. All requests act on that workspace — you cannot list or modify resources from other workspaces with the same key. To work with multiple workspaces, create one API key per workspace.
 
-```
-tp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-Keys start with `tp_` followed by 48 random characters (51 characters total).
+The same key works for the REST API and the [MCP server](/ai/introduction).
 
 ## Rate limiting
 
@@ -49,8 +45,8 @@ The API uses conventional HTTP status codes. All error responses include a `mess
 | `201` | Created |
 | `204` | No content (successful deletion) |
 | `401` | Missing or invalid API key |
-| `402` | Active subscription required |
-| `404` | Resource not found |
+| `402` | Active subscription required (Cloud only — self-hosted instances skip this check) |
+| `404` | Resource not found, or resource not in the key's workspace |
 | `422` | Validation error |
 | `429` | Rate limit exceeded |
 
@@ -60,28 +56,69 @@ The API uses conventional HTTP status codes. All error responses include a `mess
 }
 ```
 
+## Response shape
+
+Resources are returned **unwrapped** — no `data:` envelope. A single resource looks like:
+
+```json
+{
+  "id": "9f1a2b3c-...",
+  "name": "...",
+  "...": "..."
+}
+```
+
+A non-paginated collection looks like a plain array:
+
+```json
+[
+  { "id": "9f1a2b3c-...", "name": "..." },
+  { "id": "a1b2c3d4-...", "name": "..." }
+]
+```
+
+The only endpoint that wraps in `data:` is `GET /posts`, because it's paginated.
+
 ## Pagination
 
-The **List posts** endpoint returns paginated results (15 per page). The response includes pagination metadata:
+The [`GET /posts`](/api-reference/endpoint/list-posts) endpoint returns 15 posts per page. The response uses Laravel's standard pagination envelope:
 
 ```json
 {
   "data": [...],
   "links": {
     "first": "https://app.trypost.it/api/posts?page=1",
-    "last": "https://app.trypost.it/api/posts?page=5",
-    "prev": null,
-    "next": "https://app.trypost.it/api/posts?page=2"
+    "last":  "https://app.trypost.it/api/posts?page=5",
+    "prev":  null,
+    "next":  "https://app.trypost.it/api/posts?page=2"
   },
   "meta": {
     "current_page": 1,
+    "from": 1,
+    "to": 15,
     "last_page": 5,
     "per_page": 15,
-    "total": 72
+    "total": 72,
+    "path": "https://app.trypost.it/api/posts",
+    "links": [
+      { "url": null, "label": "&laquo; Previous", "page": null, "active": false },
+      { "url": "https://app.trypost.it/api/posts?page=1", "label": "1", "page": 1, "active": true },
+      { "url": null, "label": "Next &raquo;", "page": null, "active": false }
+    ]
   }
 }
 ```
 
-Use the `page` query parameter to navigate between pages.
+Use the `page` query parameter to navigate. Other list endpoints (signatures, labels, social accounts, API keys) return all items without pagination, as a plain array.
 
-Other list endpoints (hashtags, labels, social accounts, API keys) return all items without pagination.
+## Quick reference
+
+| Resource | Endpoints |
+|---|---|
+| Posts | `GET /posts`, `POST /posts`, `GET /posts/{id}`, `PUT /posts/{id}`, `DELETE /posts/{id}`, `POST /posts/{id}/media`, `GET /posts/{id}/metrics`, `GET /posts/{id}/preview` |
+| Platforms | `GET /content-types` |
+| Workspace | `GET /workspace` |
+| Signatures | `GET /signatures`, `POST /signatures`, `PUT /signatures/{id}`, `DELETE /signatures/{id}` |
+| Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
+| Social accounts | `GET /social-accounts`, `PUT /social-accounts/{id}/toggle` |
+| API keys | `GET /api-keys`, `POST /api-keys`, `DELETE /api-keys/{id}` |

@@ -10,7 +10,7 @@ Workspaces are the top-level organizational unit in TryPost. Each workspace is a
 
 - Social media accounts
 - Posts and calendar
-- Hashtag groups and labels
+- Signatures and labels
 - Team members and roles
 - API keys
 
@@ -20,7 +20,7 @@ Nothing is shared between workspaces — they're completely independent.
 
 1. Click on your workspace name in the sidebar
 2. Click **Create Workspace**
-3. Enter a name and set your timezone
+3. Enter a name
 4. Click **Create**
 
 You'll be switched to the new workspace immediately. Connect social accounts and invite team members to get started.
@@ -35,21 +35,24 @@ Go to **Settings > Workspace** to manage:
 
 | Setting | Description |
 |---------|-------------|
-| **Name** | The display name (e.g., "My Brand", "Client A") |
-| **Timezone** | Used for scheduling posts. All times in the dashboard are shown in this timezone |
-| **Logo** | Optional workspace logo displayed in the sidebar |
+| **Name** | The display name (e.g. "My Brand", "Client A") |
+| **Logo** | Optional workspace logo, shown in the sidebar and avatar slots |
+| **Brand profile** *(separate "Brand" tab)* | Website, description, tone, voice notes, primary/background/text colors, font, and content language. The AI generation features pull this profile so generated posts match your voice. |
 
-## Timezone
+All scheduling times are stored and displayed in UTC.
 
-The workspace timezone is critical for scheduling:
+## Plan limits (Cloud only)
 
-- A post scheduled for "10:00 AM" uses the workspace timezone
-- The calendar displays times in the workspace timezone
-- Changing the timezone does not reschedule existing posts — they keep their original UTC time
+On TryPost Cloud, each plan caps how many workspaces, social accounts, members, and AI credits an account can use. Self-hosted instances skip these checks.
 
-<Tip>
-  Set your workspace timezone to match your target audience's location. If you're posting for a Brazilian brand, use `America/Sao_Paulo`. For a US audience, use `America/New_York`.
-</Tip>
+| Limit | Starter | Plus | Pro | Max |
+|-------|---------|------|-----|-----|
+| Workspaces | 1 | 5 | 15 | 50 |
+| Social accounts | 5 | 10 | 30 | 100 |
+| Members | 1 | 5 | 15 | 20 |
+| AI credits / month | 1,000 | 2,000 | 5,000 | 15,000 |
+
+When you hit a limit, the API and dashboard return `402 Payment Required` with a message telling you what's gating the action. Upgrade from **Settings > Account > Billing**.
 
 ## Use cases
 
@@ -74,7 +77,7 @@ Separate your personal and professional presence:
 API keys belong to a specific workspace. When you authenticate with an API key:
 
 - All API operations are scoped to that workspace
-- You can only access that workspace's posts, accounts, hashtags, etc.
+- You can only access that workspace's posts, accounts, signatures, etc.
 - The same applies to MCP connections — the AI assistant only sees one workspace
 
 To manage multiple workspaces via API, create a separate API key for each.
@@ -91,7 +94,7 @@ Go to **Settings > Workspace** and scroll to the danger zone.
 
 <AccordionGroup>
   <Accordion title="How many workspaces can I create?">
-    There's no limit on TryPost Cloud or self-hosted instances.
+    On TryPost Cloud, the cap depends on your plan (Starter 1 → Max 50 — see the table above). Self-hosted instances have no limit.
   </Accordion>
   <Accordion title="Can I transfer a workspace to another user?">
     Not directly. The workspace owner cannot be changed. You would need to create a new workspace under the other user and reconnect the accounts.

@@ -62,7 +62,16 @@
               "api-reference/endpoint/get-post",
               "api-reference/endpoint/create-post",
               "api-reference/endpoint/update-post",
-              "api-reference/endpoint/delete-post"
+              "api-reference/endpoint/delete-post",
+              "api-reference/endpoint/attach-media",
+              "api-reference/endpoint/get-post-metrics",
+              "api-reference/endpoint/get-post-preview"
+            ]
+          },
+          {
+            "group": "Platforms",
+            "pages": [
+              "api-reference/endpoint/list-content-types"
             ]
           },
           {
@@ -72,12 +81,12 @@
             ]
           },
           {
-            "group": "Hashtags",
+            "group": "Signatures",
             "pages": [
-              "api-reference/endpoint/list-hashtags",
-              "api-reference/endpoint/create-hashtag",
-              "api-reference/endpoint/update-hashtag",
-              "api-reference/endpoint/delete-hashtag"
+              "api-reference/endpoint/list-signatures",
+              "api-reference/endpoint/create-signature",
+              "api-reference/endpoint/update-signature",
+              "api-reference/endpoint/delete-signature"
             ]
           },
           {
@@ -149,8 +158,18 @@
             "pages": [
               "knowledge-base/posts",
               "knowledge-base/media",
-              "knowledge-base/hashtags",
-              "knowledge-base/labels"
+              "knowledge-base/assets",
+              "knowledge-base/signatures",
+              "knowledge-base/labels",
+              "knowledge-base/templates"
+            ]
+          },
+          {
+            "group": "AI",
+            "pages": [
+              "knowledge-base/ai-features",
+              "knowledge-base/brand-profile",
+              "knowledge-base/analytics"
             ]
           },
           {
@@ -162,8 +181,10 @@
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Account & billing",
             "pages": [
+              "knowledge-base/account-and-security",
+              "knowledge-base/plans-and-billing",
               "knowledge-base/api-keys",
               "knowledge-base/notifications"
             ]

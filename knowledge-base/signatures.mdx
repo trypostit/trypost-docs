@@ -1,0 +1,57 @@
+---
+title: "Signatures"
+description: "Reusable text blocks — hashtags, links, calls-to-action — that you can append to any post."
+icon: "hashtag"
+---
+
+## What are signatures?
+
+Signatures are reusable text blocks you can append to a post with one click — hashtag sets, a link to your newsletter, a call-to-action, anything you'd otherwise retype every time. Create a signature once and reuse it across posts.
+
+## Creating a signature
+
+Go to **Signatures** in the sidebar or use the API:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Name** | Yes | A descriptive name (e.g., "SaaS hashtags", "Newsletter CTA", "Product launch") |
+| **Content** | Yes | The text appended to the post (e.g., `#saas #marketing #growth` or `🔗 Subscribe: trypost.it/news`) |
+
+<Tip>
+  Keep one signature per intent — one for hashtags, one for the newsletter CTA, one for the conference plug. You can apply more than one to the same post.
+</Tip>
+
+## Using signatures
+
+When composing a post, click the signatures icon to see your list. Click any signature to append its content to the post.
+
+You can apply multiple signatures to a single post — they're appended in the order you click them.
+
+## Managing signatures
+
+- **Edit** — Update the name or content at any time. Existing posts that already inserted the signature aren't affected — the text was copied at insertion time.
+- **Delete** — Remove a signature you no longer need. Existing posts are not affected.
+
+## Best practices
+
+- **One intent per signature** — A hashtag pack and a newsletter CTA belong in separate signatures so you can mix and match.
+- **Platform awareness** — LinkedIn performs well with 3–5 hashtags, X with 1–2, Instagram with up to 30. Consider creating platform-specific signatures.
+- **Refresh regularly** — Trending tags and CTAs change. Review your signatures periodically.
+
+## Via the API
+
+Manage signatures programmatically:
+
+```bash
+# Create a signature
+curl -X POST https://app.trypost.it/api/signatures \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "SaaS hashtags", "content": "#saas #marketing #growth #startup #b2b"}'
+
+# List all signatures
+curl -X GET https://app.trypost.it/api/signatures \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+See the full [Signatures API reference](/api-reference/endpoint/list-signatures).

@@ -1,0 +1,22 @@
+---
+title: "Delete signature"
+api: "DELETE /signatures/{signature}"
+description: "Delete a signature by ID."
+---
+
+## Request
+
+<ParamField path="signature" type="string" required>
+  The signature ID to delete.
+</ParamField>
+
+## Response
+
+Returns `204 No Content` on success.
+
+<RequestExample>
+```bash
+curl -X DELETE https://app.trypost.it/api/signatures/e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>

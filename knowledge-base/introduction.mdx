@@ -6,13 +6,13 @@ icon: "book"
 
 ## What is TryPost?
 
-TryPost is a social media scheduling platform that lets you create, schedule, and publish posts across 10+ social networks from a single dashboard. It's open-source and available as a managed cloud service or self-hosted on your own infrastructure.
+TryPost is a social media scheduling platform that lets you create, schedule, and publish posts across 10 social networks from a single dashboard. It's open-source and available as a managed cloud service or self-hosted on your own infrastructure.
 
 ## Core concepts
 
 <Columns cols={2}>
   <Card title="Posts" icon="pen-to-square" href="/knowledge-base/posts">
-    The content you create and publish. Each post can target multiple platforms with synced or custom content per platform.
+    The content you create and publish. Each post fans out to one platform entry per connected account, with its own status, media, and per-platform metadata.
   </Card>
   <Card title="Social Accounts" icon="share-nodes" href="/knowledge-base/social-accounts">
     Your connected social media profiles and pages. Connect once, post everywhere.
@@ -31,14 +31,48 @@ TryPost is a social media scheduling platform that lets you create, schedule, an
   <Card title="Labels" icon="tag" href="/knowledge-base/labels">
     Color-coded tags to categorize and filter posts by campaign, topic, or priority.
   </Card>
-  <Card title="Hashtag Groups" icon="hashtag" href="/knowledge-base/hashtags">
-    Reusable hashtag collections that you can insert into any post with one click.
+  <Card title="Signatures" icon="hashtag" href="/knowledge-base/signatures">
+    Reusable text blocks — hashtag sets, newsletter CTAs, link callouts — appended to posts with one click.
   </Card>
   <Card title="Media" icon="image" href="/knowledge-base/media">
-    Images, videos, and documents. Each platform has specific format requirements and limits.
+    Images and videos. Each platform has specific format requirements and limits.
+  </Card>
+  <Card title="Asset library" icon="photo" href="/knowledge-base/assets">
+    Reusable workspace media plus on-demand search across Unsplash and Giphy.
   </Card>
   <Card title="Notifications" icon="bell" href="/knowledge-base/notifications">
     Stay informed about publishing results, account issues, and team activity via in-app and email alerts.
+  </Card>
+</Columns>
+
+## Working with AI
+
+<Columns cols={2}>
+  <Card title="AI features" icon="sparkles" href="/knowledge-base/ai-features">
+    Generate captions, review drafts, and create end-to-end posts (text + images) from a single prompt.
+  </Card>
+  <Card title="Brand profile" icon="palette" href="/knowledge-base/brand-profile">
+    The voice, tone, and visual settings the AI uses to keep every generated post on-brand.
+  </Card>
+  <Card title="Post templates" icon="bookmarks" href="/knowledge-base/templates">
+    Pre-built post structures you can apply to a draft in one click.
+  </Card>
+  <Card title="Analytics" icon="chart-line" href="/knowledge-base/analytics">
+    Per-account metrics from each platform, with date-range filtering.
+  </Card>
+</Columns>
+
+## Account &amp; billing
+
+<Columns cols={2}>
+  <Card title="Account &amp; security" icon="user-shield" href="/knowledge-base/account-and-security">
+    Profile, language, password, active sessions, and connected logins.
+  </Card>
+  <Card title="Plans &amp; billing" icon="credit-card" href="/knowledge-base/plans-and-billing">
+    Cloud plan limits, AI credits, trials, and how to upgrade.
+  </Card>
+  <Card title="API keys" icon="key" href="/knowledge-base/api-keys">
+    Authenticate REST API and MCP server requests with workspace-scoped Personal Access Tokens.
   </Card>
 </Columns>
 
@@ -60,7 +94,7 @@ TryPost is a social media scheduling platform that lets you create, schedule, an
 
 <Columns cols={2}>
   <Card title="REST API" icon="code" href="/api-reference/introduction">
-    19 endpoints to manage posts, hashtags, labels, accounts, and API keys programmatically.
+    Manage posts, signatures, labels, accounts, and API keys programmatically.
   </Card>
   <Card title="MCP Server" icon="microchip-ai" href="/ai/introduction">
     Connect AI assistants (Claude, Copilot, Cursor, etc.) to manage TryPost with natural language.

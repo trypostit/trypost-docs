@@ -6,45 +6,35 @@ description: "Get the current workspace details."
 
 ## Response
 
-Returns the workspace associated with the API key.
+Returns the workspace bound to the API key.
 
-<ResponseField name="data" type="object">
-  <Expandable>
-    <ResponseField name="id" type="string">
-      The workspace ID.
-    </ResponseField>
-    <ResponseField name="name" type="string">
-      The workspace name.
-    </ResponseField>
-    <ResponseField name="timezone" type="string">
-      The workspace timezone (e.g., `America/Sao_Paulo`).
-    </ResponseField>
-    <ResponseField name="created_at" type="string">
-      The creation timestamp.
-    </ResponseField>
-    <ResponseField name="updated_at" type="string">
-      The last update timestamp.
-    </ResponseField>
-  </Expandable>
+<ResponseField name="id" type="string">
+  The workspace UUID.
+</ResponseField>
+<ResponseField name="name" type="string">
+  The workspace name.
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  Creation timestamp in `Y-m-d H:i:s` format.
+</ResponseField>
+<ResponseField name="updated_at" type="string">
+  Last update timestamp in `Y-m-d H:i:s` format.
 </ResponseField>
 
 <RequestExample>
 ```bash
 curl -X GET https://app.trypost.it/api/workspace \
-  -H "Authorization: Bearer tp_your_api_key"
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 </RequestExample>
 
 <ResponseExample>
 ```json
 {
-  "data": {
-    "id": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a",
-    "name": "My Brand",
-    "timezone": "America/Sao_Paulo",
-    "created_at": "2025-01-01 00:00:00",
-    "updated_at": "2025-01-01 00:00:00"
-  }
+  "id": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a",
+  "name": "My Brand",
+  "created_at": "2025-01-01 00:00:00",
+  "updated_at": "2025-01-01 00:00:00"
 }
 ```
 </ResponseExample>

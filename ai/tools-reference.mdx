@@ -5,50 +5,79 @@ description: "Complete reference of all TryPost MCP tools available to your AI a
 
 This page lists every tool available through the TryPost MCP server. Your AI assistant can call any of these tools to manage your TryPost account.
 
+## Recommended workflow
+
+To create and publish a post end-to-end:
+
+1. **`list-social-accounts-tool`** — discover connected accounts
+2. **`list-content-types-tool`** — discover valid `content_type` per platform with limits
+3. **`create-post-tool`** — create the draft with content + chosen platforms
+4. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
+5. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
+6. **`publish-post-tool`** — publish immediately or schedule for a future time
+7. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
+
 ## Posts
 
 | Tool | Description |
 |------|-------------|
-| **ListPosts** | List all posts for the current workspace. Returns posts with their platform-specific content, social accounts, labels, status, and scheduled date. Paginated with 50 posts per page. |
-| **GetPost** | Get a specific post by ID with all its platform content, media attachments, and assigned labels. |
-| **CreatePost** | Create a new draft post in the current workspace. A post platform entry is automatically created for each connected social account. Optionally set a scheduled date. |
-| **DeletePost** | Delete a post by ID. Removes the post and all its platform entries. |
+| **list-posts-tool** | List posts for the current workspace, ordered by scheduled date (newest first). Supports filters: `status` (draft \| scheduled \| published \| failed), `search` (case-insensitive substring on content), `limit` (1–100, default 50). |
+| **get-post-tool** | Get a specific post by ID with all its platform entries, media, and labels. |
+| **create-post-tool** | Create a draft post. Accepts `content`, `scheduled_at` (ISO 8601), `label_ids[]`, and `platforms[]` — each entry has `social_account_id` + `content_type`. Cross-validates that the content_type matches the account's platform. |
+| **update-post-tool** | Update a draft: content, scheduled_at, status (draft \| scheduled), labels, and which platforms are enabled. Cannot edit a published post. |
+| **publish-post-tool** | Publish a draft — immediately or scheduled for a future time. Requires at least one enabled platform. Marked `IsDestructive` so the AI confirms with you first. |
+| **preview-post-tool** | Preview how the post will render on each enabled platform — applies platform-specific sanitization (length truncation, etc.) without publishing. |
+| **attach-media-from-url-tool** | Download images or videos from public URLs and attach them to a post. Up to 10 URLs per call, 50 MB per file. Allowed types are intersected with the enabled platforms (e.g. video rejected if no enabled platform supports it). |
+| **delete-post-tool** | Delete a post permanently. Marked `IsDestructive`. |
+| **get-post-metrics-tool** | Fetch engagement metrics (likes, comments, shares, etc.) for a published post across every platform. Returns `unsupported` entries for platforms that don't expose post-level metrics. |
 
-## Hashtags
+## Platforms (read-only)
 
 | Tool | Description |
 |------|-------------|
-| **ListHashtags** | List all hashtag groups for the current workspace. Returns each group's name and hashtags string. |
-| **CreateHashtag** | Create a new hashtag group with a name and hashtag string. Hashtags are stored as a single string (e.g., "#tech #ai #startup"). |
-| **UpdateHashtag** | Update a hashtag group's name or hashtags string. |
-| **DeleteHashtag** | Delete a hashtag group by ID. |
+| **list-content-types-tool** | List valid `content_type` values per social platform plus their constraints — `max_content_length`, `recommended_content_length`, `max_media_count`, `requires_media`, `default_content_type`, `allowed_media_types`. Use this before `create-post-tool` / `update-post-tool` so the AI doesn't guess. |
+
+## Signatures
+
+| Tool | Description |
+|------|-------------|
+| **list-signatures-tool** | List all signatures for the current workspace. Signatures are reusable text blocks (hashtags, links, custom text) that can be appended to posts. |
+| **create-signature-tool** | Create a new signature with a name and content (hashtags, links, custom text — anything you want to append to posts). |
+| **update-signature-tool** | Update a signature's name or content. |
+| **delete-signature-tool** | Delete a signature. Marked `IsDestructive`. |
 
 ## Labels
 
 | Tool | Description |
 |------|-------------|
-| **ListLabels** | List all labels for the current workspace. Returns each label's name and hex color code. |
-| **CreateLabel** | Create a new label with a name and hex color code (e.g., `#FF5733`). Labels are used to categorize and organize posts. |
-| **UpdateLabel** | Update a label's name or color. |
-| **DeleteLabel** | Delete a label by ID. |
+| **list-labels-tool** | List all labels for the current workspace. Each label has a name and hex color. |
+| **create-label-tool** | Create a new label with a name and hex color (e.g. `#FF5733`). |
+| **update-label-tool** | Update a label's name or color. |
+| **delete-label-tool** | Delete a label. Detaches it from all posts that referenced it. Marked `IsDestructive`. |
 
-## Social Accounts
+## Social accounts
 
 | Tool | Description |
 |------|-------------|
-| **ListSocialAccounts** | List all connected social accounts for the current workspace. Returns each account's platform, display name, username, active status, and connection status. |
-| **ToggleSocialAccount** | Toggle a social account between active and inactive states. Inactive accounts won't have platform entries created for new posts. |
+| **list-social-accounts-tool** | List all connected social accounts for the current workspace (LinkedIn, X, Instagram, etc.). Returns id, platform, display_name, username, is_active, status. |
+| **toggle-social-account-tool** | Toggle a social account active/inactive. When inactive, the account is skipped during publishing. |
 
 ## Workspace
 
 | Tool | Description |
 |------|-------------|
-| **GetWorkspace** | Get the current workspace details including name and timezone. |
+| **get-workspace-tool** | Get the current workspace details (id, name, timestamps). |
 
-## API Keys
+## API keys
 
 | Tool | Description |
 |------|-------------|
-| **ListApiKeys** | List all API keys for the current workspace. Returns each key's name, status, expiration date, and last used timestamp. |
-| **CreateApiKey** | Create a new API key. Returns the plain text token which is only shown once and cannot be retrieved later. Optionally set an expiration date. |
-| **DeleteApiKey** | Delete an API key by ID. Any integrations using this key will immediately stop working. |
+| **list-api-keys-tool** | List Personal Access Tokens for the current workspace. Returns metadata only — the secret token value is shown only once at creation. OAuth-flow tokens (e.g. ChatGPT MCP sessions) are excluded. |
+| **create-api-key-tool** | Create a new Personal Access Token. The plain token is returned once — store it immediately, it cannot be retrieved later. |
+| **delete-api-key-tool** | Revoke a Personal Access Token. The current OAuth session token cannot be revoked through this tool. Marked `IsDestructive`. |
+
+## Notes
+
+- **Workspace scoping** — every tool operates on the user's currently-selected workspace. To act on a different workspace, switch it in the TryPost UI (or, for personal API tokens, create a new key in that workspace).
+- **Cross validation** — `create-post-tool` and `update-post-tool` reject mismatched combos (e.g. `content_type=x_post` on a LinkedIn account). Inactive social accounts are also rejected at validation time.
+- **Destructive tools** — operations that delete data or publish to the world (`publish-post-tool`, `delete-*`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.

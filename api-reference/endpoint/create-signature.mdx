@@ -1,0 +1,45 @@
+---
+title: "Create signature"
+api: "POST /signatures"
+description: "Create a new signature."
+---
+
+Signatures are reusable text blocks (hashtags, links, custom text) that can be appended to posts.
+
+## Request
+
+<ParamField body="name" type="string" required>
+  The signature name. Maximum 255 characters.
+</ParamField>
+
+<ParamField body="content" type="string" required>
+  The signature content (e.g. `#tech #ai #startup`, a link, a tagline — anything you want to append to posts).
+</ParamField>
+
+## Response
+
+Returns `201` with the created signature. Same shape as one entry in [`GET /signatures`](/api-reference/endpoint/list-signatures).
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/signatures \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Tech Stack",
+    "content": "#tech #ai #startup #saas"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b",
+  "name": "Tech Stack",
+  "content": "#tech #ai #startup #saas",
+  "created_at": "2025-01-10 08:00:00",
+  "updated_at": "2025-01-10 08:00:00"
+}
+```
+</ResponseExample>

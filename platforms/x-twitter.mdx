@@ -19,13 +19,20 @@ TryPost supports posting to X (formerly Twitter) accounts.
 |------|-------------|
 | **Post** | Text with up to 4 images or 1 video |
 
+## OAuth scopes
+
+`tweet.read`, `tweet.write`, `users.read`, `media.write`, `offline.access`
+
+`offline.access` is required so TryPost can refresh the access token in the background — without it, you'd have to reauthorize regularly.
+
 ## Self-hosting setup
 
 <Accordion title="Configure X API credentials">
   1. Go to [X Developer Portal](https://developer.twitter.com/) and create a project/app
   2. Enable **OAuth 2.0** in your app settings
-  3. Set the redirect URL to `{APP_URL}/accounts/x/callback`
-  4. Add to your `.env`:
+  3. On the User authentication settings page, enable the scopes listed above
+  4. Set the redirect URL to `{APP_URL}/accounts/x/callback`
+  5. Add to your `.env`:
 
   ```env
   X_CLIENT_ID=your_client_id

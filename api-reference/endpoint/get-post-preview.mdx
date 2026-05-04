@@ -1,0 +1,56 @@
+---
+title: "Preview post per platform"
+api: "GET /posts/{post}/preview"
+description: "Preview how a post will render on each enabled platform — applies platform-specific sanitization (length truncation, forbidden chars, etc.) without publishing."
+---
+
+## Path parameters
+
+<ParamField path="post" type="string" required>
+  The UUID of the post.
+</ParamField>
+
+## Behaviour
+
+- The post must belong to the caller's current workspace; otherwise the response is `404`.
+- Returns the original content alongside per-platform sanitized versions and length statistics.
+- `truncated` is `true` when the platform's `max_content_length` forced the content to be shortened.
+
+## Response
+
+<ResponseExample>
+```json
+{
+  "post_id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "original_content": "Launch day! ... very long text ...",
+  "original_length": 850,
+  "platforms": [
+    {
+      "post_platform_id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      "platform": "x",
+      "content_type": "x_post",
+      "sanitized_content": "Launch day! ...",
+      "sanitized_length": 280,
+      "max_content_length": 280,
+      "truncated": true
+    },
+    {
+      "post_platform_id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
+      "platform": "linkedin",
+      "content_type": "linkedin_post",
+      "sanitized_content": "Launch day! ... very long text ...",
+      "sanitized_length": 850,
+      "max_content_length": 3000,
+      "truncated": false
+    }
+  ]
+}
+```
+</ResponseExample>
+
+<RequestExample>
+```bash
+curl https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c/preview \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>

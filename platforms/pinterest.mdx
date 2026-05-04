@@ -19,14 +19,21 @@ TryPost supports creating pins on Pinterest.
 |------|-------------|-------------|
 | **Pin** | 2:3 | Image pin (1 image, required) |
 | **Video Pin** | 9:16 | Video pin, 4 seconds to 15 minutes (1 video, required) |
-| **Carousel** | 2:3 | Multi-image pin (2-5 images) |
+| **Carousel** | 2:3 | Multi-image pin (up to 5 images, required) |
+
+## OAuth scopes
+
+`boards:read`, `boards:write`, `pins:read`, `pins:write`, `user_accounts:read`
+
+`pins:read` and `user_accounts:read` are required for the **Analytics** dashboard.
 
 ## Self-hosting setup
 
 <Accordion title="Configure Pinterest API credentials">
   1. Go to [Pinterest Developers](https://developers.pinterest.com/) and create an app
-  2. Set the redirect URL to `{APP_URL}/accounts/pinterest/callback`
-  3. Add to your `.env`:
+  2. Add the scopes listed above in the app's permissions
+  3. Set the redirect URL to `{APP_URL}/accounts/pinterest/callback`
+  4. Add to your `.env`:
 
   ```env
   PINTEREST_CLIENT_ID=your_app_id

@@ -1,0 +1,75 @@
+---
+title: "AI features"
+description: "Generate, review, and create posts with AI — drawing on your workspace's brand profile."
+icon: "sparkles"
+---
+
+## What's included
+
+TryPost ships three AI flows in the post editor, all backed by your workspace's [brand profile](/knowledge-base/brand-profile) so generated content matches your voice:
+
+| Flow | What it does | Where to find it |
+|------|--------------|------------------|
+| **Generate** | Draft or rewrite the post body from a short prompt and the current text | Post editor → AI button |
+| **Review** | Read the current content and surface concrete, actionable suggestions before you publish | Post editor → Review button |
+| **Create** | Wizard that builds an end-to-end post — picks a content_type, drafts the caption, and generates images — from a single prompt | Calendar → "Create with AI" |
+
+## Generate
+
+`POST` your prompt and the current content; the AI returns a refined draft.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `prompt` | Yes | Up to 2 000 chars. What you want changed or written. |
+| `current_content` | No | Up to 10 000 chars. The existing post body, if any. |
+
+Use it for:
+
+- Turning rough notes into a polished caption
+- Tightening a long draft
+- Swapping tone (e.g. "make this more conversational")
+
+## Review
+
+Submit your draft and get a structured review back — strengths, weaknesses, and concrete edits.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `content` | Yes | Up to 10 000 chars |
+
+The review is shown side-by-side with the editor so you can apply suggestions one by one.
+
+## Create (wizard)
+
+The wizard creates a draft post from scratch — including selecting media — based on a target format and prompt.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `format` | Yes | One of the AI-supported `content_type` values: `instagram_feed`, `instagram_carousel`, `instagram_story`, `linkedin_post`, `linkedin_page_post`, `x_post`, `threads_post`, `bluesky_post`, `mastodon_post`, `facebook_post`, `facebook_story`, `pinterest_pin` |
+| `social_account_id` | No | Pre-select which account to publish to |
+| `image_count` | No | 0–10 images to generate alongside the caption (carousels only) |
+| `prompt` | Yes | Up to 2 000 chars describing what the post is about |
+
+Reels, Shorts, and TikTok video formats are not in the AI Create wizard yet — the wizard intentionally only generates text + images.
+
+## How brand profile is used
+
+Each AI call is wrapped with your workspace's [brand profile](/knowledge-base/brand-profile): website, description, tone, voice notes, and content language. The prompt the model actually sees is your input plus those guardrails — that's why generated posts read in your voice and language without you having to spell it out every time.
+
+## Credits
+
+Every AI call deducts from your workspace's monthly credit balance. See [Plans &amp; billing](/knowledge-base/plans-and-billing#ai-credits) for the per-action cost and how the monthly quota resets.
+
+When the workspace runs out of credits, the API and dashboard respond with `402 Payment Required`. Upgrade your plan or wait for the next reset.
+
+## Self-hosted
+
+AI features require an OpenAI (or compatible) API key configured in your `.env`:
+
+```bash
+AI_TEXT_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+AI_TEXT_MODEL=gpt-5.4
+```
+
+Without those, the AI buttons stay disabled. Self-hosted instances skip the credit check entirely (`SELF_HOSTED=true` in `.env`).

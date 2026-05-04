@@ -34,12 +34,12 @@ When `SELF_HOSTED=true`, TryPost runs without any payment or subscription requir
 **What changes in self-hosted mode:**
 
 - No Stripe configuration required
-- No subscription or payment checks
-- Unlimited workspaces per user
-- All features available without restrictions
+- No subscription or payment checks (the `LoadWorkspaceFromToken` middleware skips the `402 Payment Required` gate)
+- Plan limits are not enforced — unlimited workspaces, social accounts, members, and AI credits per account
+- AI calls go straight to your configured provider; you pay the provider directly (no credit accounting)
 
 <Note>
-If you're running TryPost as a SaaS with payments, set `SELF_HOSTED=false` and configure Stripe.
+If you're running TryPost as a paid SaaS, set `SELF_HOSTED=false` and configure [Stripe](#stripe-cloud-paid-saas-deployments).
 </Note>
 
 ## Database
@@ -250,17 +250,18 @@ PINTEREST_CLIENT_REDIRECT="${APP_URL}/accounts/pinterest/callback"
 You can selectively enable or disable platforms without removing their credentials. This is useful when API credentials are pending approval or temporarily revoked.
 
 ```env
-TRYPOST_LINKEDIN_ENABLED=true
-TRYPOST_LINKEDIN_PAGE_ENABLED=true
-TRYPOST_X_ENABLED=true
-TRYPOST_TIKTOK_ENABLED=true
-TRYPOST_YOUTUBE_ENABLED=true
-TRYPOST_FACEBOOK_ENABLED=true
-TRYPOST_INSTAGRAM_ENABLED=true
-TRYPOST_THREADS_ENABLED=true
-TRYPOST_PINTEREST_ENABLED=true
-TRYPOST_BLUESKY_ENABLED=true
-TRYPOST_MASTODON_ENABLED=true
+LINKEDIN_ENABLED=true
+LINKEDIN_PAGE_ENABLED=true
+X_ENABLED=true
+TIKTOK_ENABLED=true
+YOUTUBE_ENABLED=true
+FACEBOOK_ENABLED=true
+INSTAGRAM_ENABLED=true
+INSTAGRAM_FACEBOOK_ENABLED=true
+THREADS_ENABLED=true
+PINTEREST_ENABLED=true
+BLUESKY_ENABLED=true
+MASTODON_ENABLED=true
 ```
 
 Set any platform to `false` to hide it from the UI. All platforms are enabled by default.
@@ -278,6 +279,73 @@ GOOGLE_AUTH_CALLBACK="${APP_URL}/auth/google/callback"
 In the [Google Cloud Console](https://console.cloud.google.com), add both callback URLs to your OAuth 2.0 client:
 - `https://your-domain.com/accounts/youtube/callback` (YouTube connection)
 - `https://your-domain.com/auth/google/callback` (Google login)
+
+## AI features (optional)
+
+The Generate / Review / Create AI flows in the post editor need a configured text-generation provider. Without one, the AI buttons stay disabled.
+
+```env
+AI_TEXT_PROVIDER=openai
+AI_TEXT_MODEL=gpt-5.4
+OPENAI_API_KEY=sk-...
+
+# Optional — image generation for the AI Create wizard
+AI_IMAGE_PROVIDER=openai
+
+# Optional — voiceover / TTS (used by future video flows)
+AI_AUDIO_PROVIDER=elevenlabs
+ELEVENLABS_API_KEY=
+ELEVENLABS_DEFAULT_VOICE=
+```
+
+| Variable | Description |
+|----------|-------------|
+| `AI_TEXT_PROVIDER` | `openai`, `anthropic`, `gemini`, `azure`, `groq`, `xai`, `deepseek`, `mistral`, or `ollama`. Defaults to `openai`. |
+| `AI_TEXT_MODEL` | Model identifier for the text provider. Defaults to `gpt-5.4`. |
+| `AI_IMAGE_PROVIDER` | Provider used for AI image generation in the Create wizard. Defaults to `openai`. |
+| `OPENAI_API_KEY` | Your OpenAI API key. Each provider has its own key (`ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, etc.). |
+
+Self-hosted instances skip the credit/quota check entirely (`SELF_HOSTED=true`), so AI calls go straight to the configured provider — you pay the provider directly.
+
+## Asset library (Unsplash & Giphy)
+
+The **Assets** page exposes optional Unsplash and Giphy tabs. Configure these to enable them:
+
+```env
+UNSPLASH_ACCESS_KEY=
+UNSPLASH_SECRET_KEY=
+
+GIPHY_API_KEY=
+```
+
+Without these keys, the Library tab still works — only the stock-photo and GIF tabs are hidden.
+
+## Stripe (Cloud / paid SaaS deployments)
+
+Only required when running TryPost as a paid SaaS (`SELF_HOSTED=false`). Self-hosted instances skip all subscription and billing checks.
+
+```env
+SELF_HOSTED=false
+
+STRIPE_KEY=pk_live_...
+STRIPE_SECRET=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+CASHIER_TRIAL_DAYS=8
+
+# Plan price IDs from Stripe (one each for monthly + yearly)
+STRIPE_STARTER_MONTHLY=price_...
+STRIPE_STARTER_YEARLY=price_...
+STRIPE_PLUS_MONTHLY=price_...
+STRIPE_PLUS_YEARLY=price_...
+STRIPE_PRO_MONTHLY=price_...
+STRIPE_PRO_YEARLY=price_...
+STRIPE_MAX_MONTHLY=price_...
+STRIPE_MAX_YEARLY=price_...
+```
+
+Webhook endpoint: `{APP_URL}/stripe/webhook`. Configure it in your Stripe dashboard and copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
+
+After updating these, run `php artisan db:seed --class=PlanSeeder` so the `plans` table picks up the price IDs.
 
 ## Analytics (optional)
 

@@ -1,106 +1,109 @@
 ---
 title: "Media"
-description: "Attach images, videos, and documents to your social media posts."
+description: "Attach images and videos to your social media posts."
 icon: "image"
 ---
 
 ## Supported media types
 
-| Type | Description | Common formats |
-|------|-------------|----------------|
-| **Image** | Photos and graphics | JPG, PNG, GIF, WebP |
-| **Video** | Video content | MP4, MOV |
-| **Document** | PDFs for LinkedIn carousels | PDF |
+| Type | Common formats | MIME types accepted on upload |
+|------|----------------|-------------------------------|
+| **Image** | JPG, PNG, GIF, WebP | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
+| **Video** | MP4 | `video/mp4` |
 
-## Upload limits
+The standard upload endpoint only accepts those MIME types. The [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media) URL-fetch endpoint additionally accepts `video/quicktime` (MOV) and `video/webm`.
 
-TryPost supports uploads up to **2 GB** per file, which covers even long-form video content. Large video files are uploaded using chunked uploads for reliability.
+## Upload limit
+
+**1 GB per file.** Files over 1 MB are sent in chunks (the dashboard streams them via `Content-Range` to the chunked upload endpoint) so big videos transfer reliably even on flaky connections.
 
 ## Platform content types and media requirements
 
-Each platform supports different content formats with specific media requirements:
+Each platform supports different content formats with specific media requirements. Use [`GET /content-types`](/api-reference/endpoint/list-content-types) for the live, machine-readable version.
 
 ### LinkedIn / LinkedIn Page
 
-| Content type | Media | Max files | Aspect ratio | Notes |
-|-------------|-------|-----------|-------------|-------|
-| **Post** | Optional | 1 | — | Text with optional image or video |
-| **Carousel** | Required | 20 | — | Multi-page PDF document |
+| Content type | Media | Max files | Notes |
+|-------------|-------|-----------|-------|
+| `linkedin_post` / `linkedin_page_post` | Optional | 1 image or 1 video | Standard text post with optional media |
+| `linkedin_carousel` / `linkedin_page_carousel` | Required | Up to 20 images | Multi-image swipeable post |
 
 ### X (Twitter)
 
 | Content type | Media | Max files | Notes |
 |-------------|-------|-----------|-------|
-| **Post** | Optional | 4 images or 1 video | Images and video cannot be mixed |
+| `x_post` | Optional | 4 images or 1 video | Images and video can't be mixed in the same post |
 
 ### Facebook
 
-| Content type | Media | Max files | Aspect ratio | Notes |
-|-------------|-------|-----------|-------------|-------|
-| **Post** | Optional | 10 images or 1 video | — | Standard page post |
-| **Reel** | Required | 1 video | 9:16 | Short-form vertical video |
-| **Story** | Required | 1 | 9:16 | Disappears after 24 hours |
+| Content type | Media | Max files | Aspect | Notes |
+|-------------|-------|-----------|--------|-------|
+| `facebook_post` | Optional | 10 images or 1 video | — | Standard page post |
+| `facebook_reel` | Required | 1 video | 9:16 | Short-form vertical video |
+| `facebook_story` | Required | 1 image or 1 video | 9:16 | Disappears after 24 hours |
 
-### Instagram
+### Instagram (and Instagram via Facebook)
 
-| Content type | Media | Max files | Aspect ratio | Notes |
-|-------------|-------|-----------|-------------|-------|
-| **Feed** | Required | 10 images or 1 video | 1:1 | Main feed post |
-| **Reel** | Required | 1 video | 9:16 | Short-form vertical video |
-| **Story** | Required | 1 | 9:16 | Disappears after 24 hours |
+| Content type | Media | Max files | Aspect | Notes |
+|-------------|-------|-----------|--------|-------|
+| `instagram_feed` | Optional | 1 image or 1 video | 4:5 | Single-asset feed post |
+| `instagram_carousel` | Required | Up to 10 images | 4:5 | Swipeable feed carousel (images only) |
+| `instagram_reel` | Required | 1 video | 9:16 | Short-form vertical video |
+| `instagram_story` | Required | 1 image or 1 video | 9:16 | Disappears after 24 hours |
 
 ### TikTok
 
-| Content type | Media | Max files | Aspect ratio | Notes |
-|-------------|-------|-----------|-------------|-------|
-| **Video** | Required | 1 video | 9:16 | Short or long-form video |
+| Content type | Media | Max files | Aspect | Notes |
+|-------------|-------|-----------|--------|-------|
+| `tiktok_video` | Required | 1 video | 9:16 | Short or long-form video |
 
 ### YouTube
 
-| Content type | Media | Max files | Aspect ratio | Notes |
-|-------------|-------|-----------|-------------|-------|
-| **Short** | Required | 1 video | 9:16 | Vertical video, up to 60 seconds |
+| Content type | Media | Max files | Aspect | Notes |
+|-------------|-------|-----------|--------|-------|
+| `youtube_short` | Required | 1 video | 9:16 | Vertical short |
 
 ### Threads
 
 | Content type | Media | Max files | Notes |
 |-------------|-------|-----------|-------|
-| **Post** | Optional | 10 images | Text post with optional images |
+| `threads_post` | Optional | Up to 10 images or 1 video | Text post with optional media |
 
 ### Pinterest
 
-| Content type | Media | Max files | Aspect ratio | Notes |
-|-------------|-------|-----------|-------------|-------|
-| **Pin** | Required | 1 image | 2:3 | Standard image pin |
-| **Video Pin** | Required | 1 video | 9:16 | 4 seconds to 15 minutes |
-| **Carousel** | Required | 2–5 images | 2:3 | Multi-image swipeable pin |
+| Content type | Media | Max files | Aspect | Notes |
+|-------------|-------|-----------|--------|-------|
+| `pinterest_pin` | Required | 1 image | 2:3 | Standard image pin |
+| `pinterest_video_pin` | Required | 1 video | 9:16 | Video pin |
+| `pinterest_carousel` | Required | Up to 5 images | 2:3 | Multi-image swipeable pin |
 
 ### Bluesky
 
 | Content type | Media | Max files | Notes |
 |-------------|-------|-----------|-------|
-| **Post** | Optional | 4 images | Text post with optional images |
+| `bluesky_post` | Optional | Up to 4 images or 1 video | Text post with optional media |
 
 ### Mastodon
 
 | Content type | Media | Max files | Notes |
 |-------------|-------|-----------|-------|
-| **Post** | Optional | 4 images or video | Text post with optional media |
+| `mastodon_post` | Optional | Up to 4 images or 1 video | Text post with optional media |
 
 ## Media ordering
 
-You can reorder media attachments by dragging them in the post editor. The order you set is the order they'll appear on the social platform (important for carousels and multi-image posts).
+Drag attachments in the post editor to reorder them. The order you set is the order they'll appear on the social platform — important for carousels and multi-image posts.
 
 ## File storage
 
-Media files can be stored in different backends depending on your setup:
+Media files are stored on the disk configured by `FILESYSTEM_DISK`. Out of the box, TryPost ships with these drivers:
 
-| Storage | Use case |
-|---------|----------|
-| **Local** | Development or small self-hosted instances |
-| **AWS S3** | Production cloud storage |
-| **Cloudflare R2** | Cost-effective S3-compatible storage |
-| **Any S3-compatible** | MinIO, DigitalOcean Spaces, etc. |
+| Driver | Use case |
+|--------|----------|
+| `local` | Development or small self-hosted setups |
+| `s3` | AWS S3 |
+| `r2` | Cloudflare R2 (S3-compatible — the default in shipped config) |
+
+Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under the `s3` driver with the right endpoint.
 
 <Note>
   On **TryPost Cloud**, media storage is handled automatically. Self-hosted users should configure cloud storage for production — see the [Configuration guide](/self-hosting/configuration).
@@ -110,15 +113,15 @@ Media files can be stored in different backends depending on your setup:
 
 <AccordionGroup>
   <Accordion title="What's the maximum file size?">
-    2 GB per file. Large files use chunked uploads for reliability.
+    1 GB per file. Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers.
   </Accordion>
   <Accordion title="Can I use the same media in multiple posts?">
-    You can duplicate media attachments within the same post (e.g., to use the same image on different platforms). For different posts, you'll need to upload the media again.
+    Each post stores its own media records. To reuse the same image, upload it again or copy from the asset library.
   </Accordion>
   <Accordion title="What happens to media when I delete a post?">
-    The media files are removed along with the post.
+    The media records are removed along with the post.
   </Accordion>
   <Accordion title="Are images compressed or resized?">
-    TryPost uploads your media to social platforms as-is. Each platform applies its own compression and resizing rules.
+    TryPost uploads media to social platforms as-is. Each platform applies its own compression and resizing rules afterwards.
   </Accordion>
 </AccordionGroup>

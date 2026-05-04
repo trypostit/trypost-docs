@@ -50,13 +50,13 @@ Manage labels and assign them to posts programmatically:
 ```bash
 # Create a label
 curl -X POST https://app.trypost.it/api/labels \
-  -H "Authorization: Bearer tp_your_api_key" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"name": "Product Launch", "color": "#4f46e5"}'
 
 # Assign labels when updating a post
 curl -X PUT https://app.trypost.it/api/posts/{post_id} \
-  -H "Authorization: Bearer tp_your_api_key" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"label_ids": ["label-uuid-1", "label-uuid-2"]}'
 ```
