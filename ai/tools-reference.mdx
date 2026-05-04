@@ -27,7 +27,7 @@ To create and publish a post end-to-end:
 | **update-post-tool** | Update a draft: content, scheduled_at, status (draft \| scheduled), labels, and which platforms are enabled. Cannot edit a published post. |
 | **publish-post-tool** | Publish a draft — immediately or scheduled for a future time. Requires at least one enabled platform. Marked `IsDestructive` so the AI confirms with you first. |
 | **preview-post-tool** | Preview how the post will render on each enabled platform — applies platform-specific sanitization (length truncation, etc.) without publishing. |
-| **attach-media-from-url-tool** | Download images or videos from public URLs and attach them to a post. Up to 10 URLs per call, 50 MB per file. Allowed types are intersected with the enabled platforms (e.g. video rejected if no enabled platform supports it). |
+| **attach-media-from-url-tool** | Download images or videos from public URLs and attach them to a post. Up to 10 URLs per call. Per-file size caps: 10 MB for images, 1 GB for videos. Allowed types are intersected with the enabled platforms (e.g. video rejected if no enabled platform supports it). |
 | **delete-post-tool** | Delete a post permanently. Marked `IsDestructive`. |
 | **get-post-metrics-tool** | Fetch engagement metrics (likes, comments, shares, etc.) for a published post across every platform. Returns `unsupported` entries for platforms that don't expose post-level metrics. |
 

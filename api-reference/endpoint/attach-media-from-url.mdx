@@ -1,8 +1,10 @@
 ---
 title: "Attach media from URLs"
-api: "POST /posts/{post}/media"
+api: "POST /posts/{post}/media/from-url"
 description: "Download images or videos from public URLs and attach them to a post."
 ---
+
+For uploading a file directly from your machine instead of fetching a URL, use [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media).
 
 ## Path parameters
 
@@ -13,12 +15,12 @@ description: "Download images or videos from public URLs and attach them to a po
 ## Request
 
 <ParamField body="urls" type="array" required>
-  Public HTTP/HTTPS URLs of images or videos. **Max 10 URLs per call**, **50 MB per file**.
+  Public HTTP/HTTPS URLs of images or videos. **Max 10 URLs per call.** Size caps are enforced per type (10 MB for images, 1 GB for videos).
 
   Allowed MIME types:
 
   - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp`
-  - **Videos**: `video/mp4`, `video/quicktime`, `video/webm`
+  - **Videos**: `video/mp4`, `video/quicktime` (MOV)
 
   URLs are downloaded server-side and stored as Media records on the workspace.
 </ParamField>
@@ -45,7 +47,7 @@ Returns an object with three fields:
 
 <RequestExample>
 ```bash
-curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c/media \
+curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c/media/from-url \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

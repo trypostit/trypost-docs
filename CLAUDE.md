@@ -69,7 +69,7 @@ Same paths, user configures `APP_URL` in `.env`:
 ### Endpoints
 | Group | Endpoints |
 |-------|-----------|
-| Posts | `GET /posts`, `POST /posts`, `GET /posts/{post}`, `PUT /posts/{post}`, `DELETE /posts/{post}`, `POST /posts/{post}/media`, `GET /posts/{post}/metrics`, `GET /posts/{post}/preview` |
+| Posts | `GET /posts`, `POST /posts`, `GET /posts/{post}`, `PUT /posts/{post}`, `DELETE /posts/{post}`, `POST /posts/{post}/media`, `POST /posts/{post}/media/from-url`, `GET /posts/{post}/metrics`, `GET /posts/{post}/preview` |
 | Platforms | `GET /content-types` |
 | Workspace | `GET /workspace` |
 | Signatures | `GET /signatures`, `POST /signatures`, `PUT /signatures/{id}`, `DELETE /signatures/{id}` |
@@ -83,7 +83,7 @@ Same paths, user configures `APP_URL` in `.env`:
 - Resources are returned **unwrapped** (`JsonResource::withoutWrapping()` is set globally). A single resource looks like `{ "id": ..., ... }` — no `data:` envelope.
 - Non-paginated collections return a plain JSON array (`[ {...}, {...} ]`).
 - Only `GET /posts` returns the Laravel pagination envelope (`{ data, links, meta }`).
-- `attach-media`, `metrics`, and `preview` are bespoke — not Resource-shaped (no `data:` wrapper, just the documented fields at top level).
+- `attach-media-from-url`, `metrics`, and `preview` are bespoke — not Resource-shaped (no `data:` wrapper, just the documented fields at top level). The multipart `/media` upload returns a regular Post resource.
 - `POST /api-keys` returns `{ "token": {...}, "plain_token": "..." }`. The plain token is shown ONCE.
 
 ### Pagination

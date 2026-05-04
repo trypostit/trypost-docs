@@ -27,7 +27,7 @@ Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](
 </ParamField>
 
 <ParamField body="media" type="array">
-  Media items to attach to the post. Each item should match the shape returned by [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media) — `id`, `path`, `url`, `type`, `mime_type`, `original_filename`. Most callers use the dedicated attach-media endpoint instead.
+  Media items to attach to the post. Each item should match the shape returned by [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — `id`, `path`, `url`, `type`, `mime_type`, `original_filename`. Most callers use the dedicated upload or [attach-from-URL](/api-reference/endpoint/attach-media-from-url) endpoint instead.
 </ParamField>
 
 <ParamField body="scheduled_at" type="string">

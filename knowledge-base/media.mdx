@@ -9,9 +9,9 @@ icon: "image"
 | Type | Common formats | MIME types accepted on upload |
 |------|----------------|-------------------------------|
 | **Image** | JPG, PNG, GIF, WebP | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
-| **Video** | MP4 | `video/mp4` |
+| **Video** | MP4, MOV | `video/mp4`, `video/quicktime` |
 
-The standard upload endpoint only accepts those MIME types. The [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media) URL-fetch endpoint additionally accepts `video/quicktime` (MOV) and `video/webm`.
+Both the file upload endpoint ([`POST /posts/{post}/media`](/api-reference/endpoint/upload-media)) and the URL-fetch endpoint ([`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url)) accept the same MIME set. WebM is intentionally excluded — every major social platform rejects it, so accepting it would just produce platform-specific publish failures.
 
 ## Upload limit
 

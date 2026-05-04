@@ -27,15 +27,13 @@ Click **Upload** to add files from your machine. Supported formats:
 | Type | MIME types accepted on upload |
 |------|-------------------------------|
 | Image | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
-| Video | `video/mp4` |
+| Video | `video/mp4`, `video/quicktime` (MOV) |
 
-Max file size: **1 GB**. Files larger than ~1 MB are sent in chunks via `Content-Range` for reliability on flaky connections.
+Max file size: **10 MB for images, 1 GB for videos**. Files larger than ~1 MB are sent in chunks via `Content-Range` for reliability on flaky connections.
 
 ## Importing from URL
 
-The post composer also accepts public URLs — TryPost downloads the file server-side, validates the MIME type and size against the enabled platforms on the post, and stores the result. From the API, this is [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media).
-
-URL imports additionally accept `video/quicktime` (MOV) and `video/webm` on top of the standard formats above.
+The post composer also accepts public URLs — TryPost downloads the file server-side, validates the MIME type and size against the enabled platforms on the post, and stores the result. From the API, this is [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
 
 ## Searching
 
@@ -51,7 +49,7 @@ From the Library tab, click any asset → trash icon. Deletion removes the file 
 
 ## API access
 
-There's no public API for the asset library yet. The closest equivalent is [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media), which downloads from a URL and attaches the result directly to a specific post in one shot.
+There's no public API for the asset library yet. The closest equivalents are post-scoped: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) for direct file uploads and [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) for URL-based attachments. Both upload to workspace storage and append to the post's `media[]` array in one shot.
 
 ## Self-hosted
 

@@ -25,7 +25,7 @@ description: "Update a post's content, schedule, enabled platforms, or labels â€
 </ParamField>
 
 <ParamField body="media" type="array">
-  Media items to associate with the post (use [`POST /posts/{post}/media`](/api-reference/endpoint/attach-media) to upload from URLs first).
+  Media items to associate with the post. Most callers upload first via [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) (URL) and let those endpoints append to `media[]` directly.
 </ParamField>
 
 <ParamField body="platforms" type="array">
