@@ -1,0 +1,73 @@
+---
+title: "Upload media file"
+api: "POST /posts/{post}/media"
+description: "Upload an image or video from your machine and attach it to a post."
+---
+
+For attaching media from a public URL instead of uploading bytes, use [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
+
+## Path parameters
+
+<ParamField path="post" type="string" required>
+  The UUID of the post to attach the file to.
+</ParamField>
+
+## Request
+
+Send as `multipart/form-data` with a single `media` field.
+
+<ParamField body="media" type="file" required>
+  The file to upload. Must be one of the allowed types:
+
+  - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp` — up to **10 MB**
+  - **Videos**: `video/mp4`, `video/quicktime` (MOV) — up to **1 GB**
+</ParamField>
+
+## Behaviour
+
+- The post must belong to the caller's current workspace; otherwise the response is `404`.
+- The file's MIME type is **intersected with the platforms enabled on the post**. For example, uploading an image to a TikTok-only post returns `422` because TikTok doesn't accept images.
+- Per-type size caps are enforced after MIME detection (a video over 1 GB returns `422` even if the FormRequest's overall cap allowed it).
+- PNG and WebP still images are normalized to JPEG (q100) at storage time for universal platform compatibility. GIF is preserved.
+- The new media is appended to the post's `media[]` array.
+
+## Response
+
+Returns the updated post — same shape as [`GET /posts/{post}`](/api-reference/endpoint/get-post), with the newly-uploaded item in `media[]`.
+
+On validation failure (unsupported type, file too large, no enabled platform accepts the type) the response is `422` with `errors.media[]`.
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c/media \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Accept: application/json" \
+  -F "media=@./photo.jpg"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "content": "Launch day!",
+  "media": [
+    {
+      "id": "01HX1A2B3C4D5E6F7G8H9I0J1K",
+      "path": "medias/01HX1A2B-photo.jpg",
+      "url": "https://app.trypost.it/storage/medias/01HX1A2B-photo.jpg",
+      "type": "image",
+      "mime_type": "image/jpeg",
+      "original_filename": "photo.jpg"
+    }
+  ],
+  "status": "draft",
+  "scheduled_at": null,
+  "published_at": null,
+  "platforms": [],
+  "labels": [],
+  "created_at": "2025-01-14 09:00:00",
+  "updated_at": "2025-01-14 09:30:00"
+}
+```
+</ResponseExample>
