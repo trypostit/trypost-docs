@@ -3,11 +3,11 @@
   "theme": "mint",
   "name": "TryPost Docs",
   "colors": {
-    "primary": "#4f46e5",
-    "light": "#818cf8",
-    "dark": "#4f46e5"
+    "primary": "#7c3aed",
+    "light": "#a78bfa",
+    "dark": "#7c3aed"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.png",
   "navigation": {
     "anchors": [
       {
