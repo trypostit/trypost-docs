@@ -7,6 +7,12 @@
     "light": "#a78bfa",
     "dark": "#7c3aed"
   },
+  "background": {
+    "color": {
+      "light": "#faf8f5",
+      "dark": "#0a0a0a"
+    }
+  },
   "favicon": "/favicon.png",
   "navigation": {
     "anchors": [
@@ -224,12 +230,12 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/trypost-it/trypost",
+          "href": "https://github.com/trypostit/trypost",
           "icon": "github"
         },
         {
           "anchor": "Discussions",
-          "href": "https://github.com/trypost-it/trypost/discussions",
+          "href": "https://github.com/trypostit/trypost/discussions",
           "icon": "comments"
         }
       ]
@@ -242,8 +248,8 @@
   "navbar": {
     "links": [
       {
-        "label": "Discord",
-        "href": "https://trypost.it/discord"
+        "label": "GitHub",
+        "href": "https://github.com/trypostit/trypost"
       }
     ],
     "primary": {
@@ -272,8 +278,9 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/trypost_it",
-      "github": "https://github.com/trypost-it"
+      "x": "https://x.com/trypostit",
+      "github": "https://github.com/trypostit",
+      "youtube": "https://www.youtube.com/@trypostit"
     }
   }
 }
