@@ -9,19 +9,27 @@ TryPost supports posting to LinkedIn personal profiles and company pages.
 
 ## Connect your account
 
+### Personal profile
+
 1. Go to **Accounts** in the TryPost dashboard
-2. Click **Connect LinkedIn** (for profiles) or **Connect LinkedIn Page** (for company pages)
-3. Authorize TryPost on LinkedIn
-4. Select your profile or page
+2. Click **Connect LinkedIn**
+3. Authorize TryPost on LinkedIn — your profile is connected directly, no extra picker needed
+
+### Company page
+
+1. Go to **Accounts** and click **Connect LinkedIn Page**
+2. Authorize TryPost on LinkedIn with organization admin scope
+3. TryPost loads every Page you administer and redirects you to a dedicated **Select a LinkedIn Page** screen
+4. Pick the Page you want to schedule for. Each Page connects as its own social account — repeat the flow to add more.
 
 ## Supported content types
 
 | Type | Description |
 |------|-------------|
-| **Post** | Text with optional images or video |
-| **Carousel** | Swipeable post — up to 20 images or a single PDF document |
+| **Post** | Text with optional 1 image or 1 video |
+| **Carousel** | Swipeable image carousel — up to 20 images |
 
-Both content types are available for personal profiles and company pages.
+Both content types are available for personal profiles (`linkedin_post` / `linkedin_carousel`) and company pages (`linkedin_page_post` / `linkedin_page_carousel`).
 
 ## OAuth scopes
 

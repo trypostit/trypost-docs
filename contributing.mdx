@@ -14,12 +14,16 @@ Thank you for your interest in contributing to TryPost! This guide will help you
 - **Improve docs** - Fix typos, add examples, clarify instructions
 - **Write code** - Fix bugs or implement new features
 
+## Tech stack
+
+TryPost is a Laravel app with an Inertia.js + **Vue 3** front-end. Queues run on Horizon; real-time updates use Reverb.
+
 ## Development Setup
 
 ### Prerequisites
 
 - PHP 8.2+
-- Node.js 18+
+- Node.js 20+
 - PostgreSQL or MySQL
 - Redis
 - Composer
@@ -33,38 +37,21 @@ git clone https://github.com/YOUR_USERNAME/trypost.git
 cd trypost
 ```
 
-2. Install dependencies:
+2. Install dependencies and run first-time setup:
 
 ```bash
-composer install
-npm install
+composer setup
 ```
 
-3. Configure environment:
+This runs `composer install`, copies `.env`, generates an app key, migrates the database, runs `npm install`, and builds the front-end.
+
+3. Start all dev processes with one command:
 
 ```bash
-cp .env.example .env
-php artisan key:generate
+composer dev
 ```
 
-4. Set up database and run migrations:
-
-```bash
-php artisan migrate
-```
-
-5. Start development servers:
-
-```bash
-# Terminal 1 - Laravel
-php artisan serve
-
-# Terminal 2 - Vite
-npm run dev
-
-# Terminal 3 - Queue worker
-php artisan horizon:watch
-```
+That runs `php artisan serve`, `php artisan queue:listen`, `php artisan pail` (logs), and `npm run dev` concurrently. For SSR development use `composer dev:ssr` instead.
 
 ## Code Style
 
@@ -74,10 +61,10 @@ We use [Laravel Pint](https://laravel.com/docs/pint) for PHP code formatting:
 
 ```bash
 # Check code style
-vendor/bin/pint --test
+composer test:lint
 
 # Fix code style
-vendor/bin/pint
+composer lint
 ```
 
 ### JavaScript/TypeScript
@@ -94,7 +81,13 @@ npm run format
 
 ## Testing
 
-Run the test suite before submitting changes:
+Run the full suite (lint + tests) with:
+
+```bash
+composer test
+```
+
+To run just the test suite:
 
 ```bash
 php artisan test
@@ -102,7 +95,7 @@ php artisan test
 
 ## Pull Request Process
 
-1. **Create a branch** from `develop`:
+1. **Create a branch** from `main`:
 
 ```bash
 git checkout -b feature/your-feature-name
@@ -115,12 +108,12 @@ git checkout -b feature/your-feature-name
 4. **Run code formatters**:
 
 ```bash
-vendor/bin/pint
+composer lint
 npm run lint
 npm run format
 ```
 
-5. **Push** and create a pull request to the `develop` branch
+5. **Push** and create a pull request against the `main` branch
 
 6. **Describe your changes** in the PR description
 
@@ -135,9 +128,9 @@ Write clear commit messages:
 
 ## Questions?
 
-- [GitHub Discussions](https://github.com/trypost-it/trypost/discussions) - For questions and ideas
-- [GitHub Issues](https://github.com/trypost-it/trypost/issues) - For bugs and feature requests
+- [GitHub Discussions](https://github.com/trypostit/trypost/discussions) - For questions and ideas
+- [GitHub Issues](https://github.com/trypostit/trypost/issues) - For bugs and feature requests
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the project (FSL).
+By contributing, you agree that your contributions will be licensed under the same license as the project — **GNU AGPL v3** (see `LICENSE.md` in the repo).

@@ -23,16 +23,16 @@ Pick a plan that matches your busiest month — the dashboard returns `402 Payme
 
 ## Trial
 
-New accounts start on an **8-day trial** of the plan you pick at signup. No card required to begin — Stripe collects the payment method once the trial converts to paid. Cancel any time during the trial to avoid charges.
+New accounts start on a **7-day trial** of the Starter plan. **No card required at sign-up** — you get full access for 7 days without entering any payment details. The countdown is visible at **Settings &gt; Account &gt; Billing**.
 
-The trial countdown is visible at **Settings &gt; Account &gt; Billing**.
+When the trial ends, AI/credit-gated actions return `402 Payment Required` until you subscribe. You can subscribe at any time before or after the trial expires.
 
 ## Subscribing
 
 1. Go to **Settings &gt; Account &gt; Billing**
 2. Pick **Monthly** or **Yearly** at the top of the plan picker
 3. Click the plan you want
-4. Confirm in Stripe Checkout — payment method is captured but you're not charged until the trial ends
+4. Complete payment in Stripe Checkout — your card is charged immediately for the first period (subscriptions started from the dashboard are not trialed; the no-card trial only applies to fresh sign-ups)
 
 Yearly billing applies a per-plan discount versus monthly. The exact discount is shown next to each plan in Checkout.
 
@@ -56,7 +56,7 @@ Every AI feature deducts credits from your workspace's monthly quota. The quota 
 | Action | Cost |
 |--------|------|
 | Text generation (Generate, Review, Create caption) | 1 credit per ~150 tokens (input + output combined) |
-| Image generation | 50 credits per image (default model). HD variant: 100 credits. Flux Pro: 30 credits. |
+| Image generation | 15 credits per image (current default model, OpenAI `gpt-image-2` at low quality) |
 | Video generation | 500 credits per video |
 
 Track usage at **Settings &gt; Account &gt; Usage** — the page shows how many credits are used, the monthly limit, and live counts for workspaces / social accounts / members against your plan caps.

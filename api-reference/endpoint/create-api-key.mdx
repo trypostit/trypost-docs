@@ -11,7 +11,7 @@ description: "Create a new API key. Returns the plain text token which is only s
 </ParamField>
 
 <ParamField body="expires_at" type="string">
-  Optional expiration. ISO 8601 datetime, must be in the future. Omit for a non-expiring key.
+  Optional expiration. Any date string the server can parse (e.g. `2026-12-31`, `2026-12-31T15:00:00Z`), must be after today. Omit for a non-expiring key.
 </ParamField>
 
 ## Response

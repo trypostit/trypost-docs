@@ -26,7 +26,7 @@ You can also delete your account from this page — see [Deleting your account](
 ### Password
 
 - If you signed up with email/password, you can change it here.
-- If you signed up with Google and never set a password, the page shows a "Set password" form instead. Setting one lets you log in either way.
+- If you signed up with Google or GitHub and never set a password, the page shows a "Set password" form instead. Setting one lets you log in either way.
 
 ### Active sessions
 
@@ -36,7 +36,12 @@ This calls `DELETE /settings/authentication/sessions` and forces re-login on eve
 
 ### Connected accounts
 
-If Google login is configured (Cloud has it on; self-hosted needs `GOOGLE_CLIENT_ID` etc.), you can link or unlink your Google account here. Unlinking is blocked if it would leave you with no way to sign in (e.g. you have no password set).
+You can link or unlink third-party logins here:
+
+- **Google** — available on Cloud; self-hosted needs `GOOGLE_AUTH_ENABLED=true` plus `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_AUTH_CALLBACK`
+- **GitHub** — available on Cloud; self-hosted needs `GITHUB_AUTH_ENABLED=true` plus `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` / `GITHUB_AUTH_CALLBACK`
+
+Unlinking is blocked if it would leave you with no way to sign in (e.g. you have no password set and only one provider is linked).
 
 ### Email verification
 
@@ -51,7 +56,7 @@ From **Settings &gt; Profile**, scroll to the danger zone. Account deletion is *
 - Deletes workspaces you own (along with their posts, accounts, signatures, labels) — workspaces you only belong to as admin/member are unaffected; you're just removed from them
 - Disconnects your social accounts on TryPost's side. Posts already published to social platforms are unaffected — TryPost has no way to retract them.
 
-You'll be asked to type your password (or "DELETE", if you're a Google-only user) to confirm.
+You'll be asked to type your password (or "DELETE", if your account only signs in via Google or GitHub) to confirm.
 
 ## Notifications
 

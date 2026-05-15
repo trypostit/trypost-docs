@@ -9,7 +9,7 @@ icon: "terminal"
 ## Prerequisites
 
 - Gemini CLI installed
-- A TryPost API key
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
 ## Setup
 
@@ -22,22 +22,18 @@ icon: "terminal"
       "mcpServers": {
         "trypost": {
           "httpUrl": "https://app.trypost.it/mcp/trypost",
-          "headers": {
-            "Authorization": "Bearer YOUR_API_KEY"
+          "oauth": {
+            "enabled": true
           }
         }
       }
     }
     ```
 
-    <Note>
-      Replace `YOUR_API_KEY` with your actual API key from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
-
-    For project-level configuration, create `.gemini/settings.json` in your project root instead.
+    With `oauth.enabled`, Gemini CLI discovers TryPost's OAuth metadata from the URL and registers dynamically. For project-level configuration, create `.gemini/settings.json` in your project root instead.
   </Step>
-  <Step title="Restart Gemini CLI">
-    Close and reopen Gemini CLI to load the new configuration.
+  <Step title="Restart Gemini CLI and sign in">
+    Close and reopen Gemini CLI. The first TryPost call prompts you to sign in — Gemini CLI prints the authorize URL or opens your browser. Approve and return to the terminal.
   </Step>
   <Step title="Verify the connection">
     Ask Gemini to interact with your TryPost account:
@@ -49,8 +45,27 @@ icon: "terminal"
 </Steps>
 
 <Tip>
-  Gemini CLI uses `"httpUrl"` for HTTP streaming servers (not `"url"`). The `"url"` field is used for SSE transport only.
+  Gemini CLI uses `"httpUrl"` for HTTP-streaming servers (not `"url"`). The `"url"` field is used for SSE transport only.
 </Tip>
+
+<Accordion title="Bearer token fallback">
+  For headless environments, use a Personal Access Token instead of OAuth:
+
+  ```json
+  {
+    "mcpServers": {
+      "trypost": {
+        "httpUrl": "https://app.trypost.it/mcp/trypost",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
+</Accordion>
 
 ## Example prompts
 

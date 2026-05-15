@@ -6,31 +6,33 @@ icon: "users"
 
 ## Team roles
 
-Each workspace member has a role that determines what they can do:
+TryPost has one **owner** per account (the user who signed up — set on `Account.owner_id`) plus three workspace-scoped roles that can be assigned to additional members.
 
-| | Owner | Admin | Member |
-|---|:---:|:---:|:---:|
-| Create and edit posts | Yes | Yes | Yes |
-| Use signatures and labels | Yes | Yes | Yes |
-| View the calendar and post list | Yes | Yes | Yes |
-| Manage social accounts | Yes | Yes | No |
-| Create and manage labels | Yes | Yes | No |
-| Create and manage signatures | Yes | Yes | No |
-| Invite and remove members | Yes | Yes | No |
-| Change member roles | Yes | Yes | No |
-| Manage workspace settings | Yes | Yes | No |
-| Manage API keys | Yes | Yes | No |
-| Manage billing | Yes | No | No |
-| Delete workspace | Yes | No | No |
+| | Owner | Admin | Member | Viewer |
+|---|:---:|:---:|:---:|:---:|
+| View posts, calendar, analytics | Yes | Yes | Yes | Yes |
+| Use signatures and labels | Yes | Yes | Yes | Read-only |
+| Create and edit posts | Yes | Yes | Yes | No |
+| Manage social accounts | Yes | Yes | No | No |
+| Create and manage labels | Yes | Yes | No | No |
+| Create and manage signatures | Yes | Yes | No | No |
+| Invite and remove members | Yes | Yes | No | No |
+| Change member roles | Yes | Yes | No | No |
+| Manage workspace settings | Yes | Yes | No | No |
+| Manage API keys | Yes | Yes | No | No |
+| Manage billing | Yes | No | No | No |
+| Delete workspace | Yes | No | No | No |
 
-Each workspace has exactly **one owner** — the user who created it. The owner role cannot be transferred.
+**Owner** is not a role you assign — it's the account owner (the user who created the account). The owner has full access to every workspace under the account. The owner role cannot be transferred today.
+
+**Viewer** is read-only. Useful for stakeholders or clients who need visibility into what's scheduled and how posts performed, without the ability to change anything.
 
 ## Inviting members
 
 1. Go to **Settings > Team**
 2. Click **Invite Member**
 3. Enter the email address
-4. Select a role (Admin or Member)
+4. Select a role — **Admin**, **Member**, or **Viewer**
 5. Click **Send Invite**
 
 The invited person receives an email with a link to join. If they don't have a TryPost account, they'll be prompted to create one first.
@@ -50,7 +52,7 @@ When you receive an invitation:
 
 ## Changing roles
 
-Owners and admins can change a member's role at any time from **Settings > Team**. Click on the member's current role to change it.
+The account owner and workspace admins can change a member's role at any time from **Settings > Team**. Click on the member's current role to change it.
 
 ## Removing members
 
@@ -66,20 +68,23 @@ The removed member receives a notification about the removal.
 
 A single TryPost account can belong to multiple workspaces with different roles in each. For example:
 
-- **Owner** of your personal workspace
-- **Admin** of your company workspace
-- **Member** of a client workspace
+- **Owner** of your own account's workspaces
+- **Admin** of a company workspace
+- **Viewer** of a client workspace
 
 Use the workspace switcher in the sidebar to navigate between them.
 
 ## FAQ
 
 <AccordionGroup>
-  <Accordion title="Can I have multiple owners?">
-    No. Each workspace has exactly one owner — the person who created it. Use the Admin role for other team members who need full management access.
+  <Accordion title="Can I transfer ownership to another user?">
+    Not yet. The account owner is set at sign-up and stays fixed. For shared management, use the Admin role.
+  </Accordion>
+  <Accordion title="What can a Viewer actually do?">
+    Viewers can see posts, the calendar, analytics, signatures, and labels — but they cannot create, edit, publish, or delete anything. They also can't connect social accounts or manage team.
   </Accordion>
   <Accordion title="Can a member see all posts or only their own?">
-    All members can see all posts in the workspace, regardless of who created them.
+    All members (and viewers) can see all posts in the workspace, regardless of who created them.
   </Accordion>
   <Accordion title="What happens when I remove someone who has scheduled posts?">
     Their scheduled posts remain and will still be published as planned. Only access to the workspace is revoked.

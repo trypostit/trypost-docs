@@ -9,27 +9,22 @@ icon: "terminal"
 ## Prerequisites
 
 - Claude Code installed (`npm install -g @anthropic-ai/claude-code`)
-- A TryPost API key
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
 ## Setup
 
 <Steps>
-  <Step title="Add the MCP server">
+  <Step title="Add the TryPost MCP server">
     Run the following command in your terminal:
 
     ```bash
-    claude mcp add --transport http trypost https://app.trypost.it/mcp/trypost \
-      --header "Authorization: Bearer YOUR_API_KEY"
+    claude mcp add --transport http trypost https://app.trypost.it/mcp/trypost
     ```
 
-    <Note>
-      Replace `YOUR_API_KEY` with your actual API key from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
-
-    This adds the server to your project's `.mcp.json` file. To add it globally instead, append the `--scope user` flag.
+    This registers the server in the project's `.mcp.json`. Append `--scope user` to make it available across all projects.
   </Step>
-  <Step title="Verify the connection">
-    Start Claude Code and ask it to interact with your TryPost account:
+  <Step title="Sign in through your browser">
+    Start Claude Code and trigger the first TryPost call:
 
     ```bash
     claude
@@ -38,32 +33,40 @@ icon: "terminal"
     ```
     List all my scheduled posts
     ```
+
+    Claude Code opens a browser window asking you to sign in to TryPost and authorize the connection. Click **Allow** — Claude Code stores the OAuth token and refreshes it automatically from then on.
   </Step>
 </Steps>
 
 ## Manual configuration
 
-You can also configure the server manually by creating a `.mcp.json` file in your project root:
+If you prefer to edit the config file directly, this is what `claude mcp add` writes (no `Authorization` header — OAuth is discovered from the URL):
 
 ```json
 {
   "mcpServers": {
     "trypost": {
       "type": "http",
-      "url": "https://app.trypost.it/mcp/trypost",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
-      }
+      "url": "https://app.trypost.it/mcp/trypost"
     }
   }
 }
 ```
 
-For global configuration, add the same to `~/.claude.json`.
+Drop it in `.mcp.json` for project scope or `~/.claude.json` for user scope.
+
+<Accordion title="Bearer token fallback (CI, scripts, no browser available)">
+  When you can't open a browser — CI runners, remote SSH boxes, scripts — use a Personal Access Token instead:
+
+  ```bash
+  claude mcp add --transport http trypost https://app.trypost.it/mcp/trypost \
+    --header "Authorization: Bearer YOUR_API_KEY"
+  ```
+
+  Create the key from **Settings &gt; API Keys** in the [TryPost dashboard](https://app.trypost.it). Store it in your secrets manager, not in a committed file.
+</Accordion>
 
 ## Example prompts
-
-Once connected, you can use natural language to manage your TryPost account:
 
 ```
 Create a new post scheduled for tomorrow at 10am

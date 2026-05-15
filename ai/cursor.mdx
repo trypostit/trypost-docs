@@ -8,8 +8,8 @@ icon: "arrow-pointer"
 
 ## Prerequisites
 
-- Cursor editor installed
-- A TryPost API key
+- Cursor 1.0 or later (earlier versions don't support OAuth for remote MCP servers)
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
 ## Setup
 
@@ -21,22 +21,16 @@ icon: "arrow-pointer"
     {
       "mcpServers": {
         "trypost": {
-          "type": "http",
-          "url": "https://app.trypost.it/mcp/trypost",
-          "headers": {
-            "Authorization": "Bearer YOUR_API_KEY"
-          }
+          "url": "https://app.trypost.it/mcp/trypost"
         }
       }
     }
     ```
 
-    <Note>
-      Replace `YOUR_API_KEY` with your actual API key from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
+    No `Authorization` header is needed — Cursor detects OAuth from the URL and registers itself dynamically.
   </Step>
-  <Step title="Restart Cursor">
-    Restart Cursor to load the new MCP configuration.
+  <Step title="Sign in through your browser">
+    Open Cursor's MCP settings (or the AI chat) and click **Connect** next to **trypost**. Cursor opens a browser window for the TryPost sign-in. Approve the request and return to Cursor.
   </Step>
   <Step title="Verify the connection">
     Open the AI chat panel and ask:
@@ -46,6 +40,25 @@ icon: "arrow-pointer"
     ```
   </Step>
 </Steps>
+
+<Accordion title="Bearer token fallback">
+  For environments where the OAuth callback can't reach Cursor (some sandboxed setups), set the `Authorization` header explicitly with a Personal Access Token:
+
+  ```json
+  {
+    "mcpServers": {
+      "trypost": {
+        "url": "https://app.trypost.it/mcp/trypost",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
+</Accordion>
 
 ## Example prompts
 

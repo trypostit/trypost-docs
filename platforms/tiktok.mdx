@@ -5,7 +5,7 @@ description: Connect your TikTok account to TryPost
 
 # TikTok
 
-TryPost supports posting videos to TikTok.
+TryPost supports posting videos and photo carousels to TikTok.
 
 ## Connect your account
 
@@ -15,9 +15,21 @@ TryPost supports posting videos to TikTok.
 
 ## Supported content types
 
-| Type | Aspect ratio | Description |
-|------|-------------|-------------|
-| **Video** | 9:16 | Short or long-form video (required) |
+| Type | `content_type` | Aspect ratio | Description |
+|------|---------------|--------------|-------------|
+| **Video** | `tiktok_video` | 9:16 | Short or long-form video (1 video, required) |
+| **Photo carousel** | `tiktok_photo` | 1:1 | Multi-image post — up to 35 images per carousel |
+
+## Per-post options
+
+TikTok exposes extra publishing options that you can set per post in the editor sidebar (or via `platforms[].meta` on the API):
+
+| Option | Values | Applies to |
+|--------|--------|------------|
+| `privacy_level` | `PUBLIC_TO_EVERYONE`, `MUTUAL_FOLLOW_FRIENDS`, `FOLLOWER_OF_CREATOR`, `SELF_ONLY` | Video + Photo |
+| `disable_comment` | boolean | Video + Photo |
+| `disable_duet` / `disable_stitch` | boolean | Video only — ignored for photo carousels |
+| `brand_content_toggle` / `brand_organic_toggle` | boolean (required if your post contains branded content per TikTok policy) | Video only |
 
 ## OAuth scopes
 

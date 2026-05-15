@@ -13,9 +13,14 @@ icon: "image"
 
 Both the file upload endpoint ([`POST /posts/{post}/media`](/api-reference/endpoint/upload-media)) and the URL-fetch endpoint ([`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url)) accept the same MIME set. WebM is intentionally excluded — every major social platform rejects it, so accepting it would just produce platform-specific publish failures.
 
-## Upload limit
+## Upload limits
 
-**1 GB per file.** Files over 1 MB are sent in chunks (the dashboard streams them via `Content-Range` to the chunked upload endpoint) so big videos transfer reliably even on flaky connections.
+| Type | Default cap | Override (self-hosted) |
+|------|-------------|-----------------------|
+| Image | 10 MB per file | `MEDIA_IMAGE_MAX_SIZE_MB` |
+| Video | 1 GB per file | `MEDIA_VIDEO_MAX_SIZE_MB` |
+
+Files over 1 MB are sent in chunks (the dashboard streams them via `Content-Range` to the chunked upload endpoint) so big videos transfer reliably even on flaky connections. On self-hosted instances, raising the video cap also requires bumping PHP's `upload_max_filesize` / `post_max_size` and any reverse-proxy body-size cap to match.
 
 ## Platform content types and media requirements
 
@@ -32,7 +37,7 @@ Each platform supports different content formats with specific media requirement
 
 | Content type | Media | Max files | Notes |
 |-------------|-------|-----------|-------|
-| `x_post` | Optional | 4 images or 1 video | Images and video can't be mixed in the same post |
+| `x_post` | Optional | 4 images or 1 video | X's API doesn't accept images + video mixed in the same post |
 
 ### Facebook
 
@@ -46,7 +51,7 @@ Each platform supports different content formats with specific media requirement
 
 | Content type | Media | Max files | Aspect | Notes |
 |-------------|-------|-----------|--------|-------|
-| `instagram_feed` | Optional | 1 image or 1 video | 4:5 | Single-asset feed post |
+| `instagram_feed` | Required | 1 image or 1 video | 4:5 | Single-asset feed post — Instagram rejects empty posts at publish time |
 | `instagram_carousel` | Required | Up to 10 images | 4:5 | Swipeable feed carousel (images only) |
 | `instagram_reel` | Required | 1 video | 9:16 | Short-form vertical video |
 | `instagram_story` | Required | 1 image or 1 video | 9:16 | Disappears after 24 hours |
@@ -56,6 +61,7 @@ Each platform supports different content formats with specific media requirement
 | Content type | Media | Max files | Aspect | Notes |
 |-------------|-------|-----------|--------|-------|
 | `tiktok_video` | Required | 1 video | 9:16 | Short or long-form video |
+| `tiktok_photo` | Required | Up to 35 images | 1:1 | Photo carousel — images only, no video |
 
 ### YouTube
 
@@ -113,7 +119,7 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
 
 <AccordionGroup>
   <Accordion title="What's the maximum file size?">
-    1 GB per file. Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers.
+    10 MB per image and 1 GB per video by default. Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers. Self-hosters can raise the caps with `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB`.
   </Accordion>
   <Accordion title="Can I use the same media in multiple posts?">
     Each post stores its own media records. To reuse the same image, upload it again or copy from the asset library.

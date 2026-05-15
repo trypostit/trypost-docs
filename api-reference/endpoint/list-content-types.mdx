@@ -6,7 +6,7 @@ description: "List the valid content_types per platform plus their constraints (
 
 ## Why this endpoint
 
-`POST /api/posts` and `PUT /api/posts/{id}` accept a `platforms[]` array where each entry has a `social_account_id` and a `content_type`. The valid `content_type` values depend on the platform: `linkedin_post` for LinkedIn, `x_post` for X, `instagram_feed` / `instagram_reel` / `instagram_story` for Instagram, etc.
+`POST /api/posts` and `PUT /api/posts/{id}` accept a `platforms[]` array where each entry has a `social_account_id` and a `content_type`. The valid `content_type` values depend on the platform: `linkedin_post` for LinkedIn, `x_post` for X, `instagram_feed` / `instagram_carousel` / `instagram_reel` / `instagram_story` for Instagram, etc.
 
 This endpoint exposes the catalog so clients can build correct payloads without hard-coding the matrix.
 
@@ -20,8 +20,8 @@ This endpoint exposes the catalog so clients can build correct payloads without 
       "platform": "linkedin",
       "label": "LinkedIn",
       "max_content_length": 3000,
-      "recommended_content_length": 1500,
-      "allowed_media_types": ["image", "video", "document"],
+      "recommended_content_length": 1200,
+      "allowed_media_types": ["image", "video"],
       "default_content_type": "linkedin_post",
       "content_types": [
         {
@@ -35,23 +35,23 @@ This endpoint exposes the catalog so clients can build correct payloads without 
           "value": "linkedin_carousel",
           "label": "Carousel",
           "description": "A LinkedIn document carousel post.",
-          "max_media_count": 1,
+          "max_media_count": 20,
           "requires_media": true
         }
       ]
     },
     {
       "platform": "x",
-      "label": "X (Twitter)",
+      "label": "X",
       "max_content_length": 280,
-      "recommended_content_length": 240,
+      "recommended_content_length": 220,
       "allowed_media_types": ["image", "video"],
       "default_content_type": "x_post",
       "content_types": [
         {
           "value": "x_post",
           "label": "Post",
-          "description": "A standard X post (tweet).",
+          "description": "A standard X post.",
           "max_media_count": 4,
           "requires_media": false
         }
@@ -74,9 +74,9 @@ curl https://app.trypost.it/api/content-types \
 | Field | Description |
 |---|---|
 | `platform` | Platform identifier used in `social_accounts.platform` (e.g. `linkedin`, `x`, `instagram`). |
-| `max_content_length` | Hard cap enforced at publish time. Posts exceeding this are truncated. |
+| `max_content_length` | Hard cap enforced at schedule time (via `ContentFitsPlatformLimits`) and again at publish time. Posts exceeding this are **rejected**, not truncated — schedule fails with a validation error; publish fails the platform with a content-length error message. |
 | `recommended_content_length` | Soft target — the platform's "good post" length. Useful for AI generation. |
-| `allowed_media_types` | Media types accepted by the platform (`image`, `video`, `document`). |
+| `allowed_media_types` | Media types accepted by the platform (`image`, `video`). |
 | `default_content_type` | The `content_type` to use when the caller doesn't pick one. |
 | `content_types[].value` | Pass this in `platforms[].content_type` on `POST /api/posts`. |
 | `content_types[].max_media_count` | Max number of media items for this format. |

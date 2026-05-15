@@ -8,11 +8,11 @@ icon: "github"
 
 ## Prerequisites
 
-- VS Code with GitHub Copilot extension installed
+- VS Code with the GitHub Copilot extension installed
 - Copilot agent mode enabled
-- A TryPost API key
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
-## Setup
+## Setup (IDE agent mode)
 
 <Steps>
   <Step title="Create the MCP configuration file">
@@ -23,30 +23,26 @@ icon: "github"
       "servers": {
         "trypost": {
           "type": "http",
-          "url": "https://app.trypost.it/mcp/trypost",
-          "headers": {
-            "Authorization": "Bearer YOUR_API_KEY"
-          }
+          "url": "https://app.trypost.it/mcp/trypost"
         }
       }
     }
     ```
 
-    <Note>
-      Replace `YOUR_API_KEY` with your actual API key from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
+    No `Authorization` header — Copilot uses VS Code's MCP layer, which discovers OAuth from the URL.
   </Step>
   <Step title="Reload VS Code">
-    Reload the window or restart VS Code to load the MCP configuration.
+    Reload the window to load the new MCP configuration.
+  </Step>
+  <Step title="Sign in through your browser">
+    Open Copilot Chat in agent mode. VS Code prompts you to sign in to TryPost. Approve the request in the browser and the server flips to **Connected**.
   </Step>
   <Step title="Verify the connection">
-    Open Copilot Chat in agent mode and ask:
+    Ask Copilot:
 
     ```
     List all my TryPost posts
     ```
-
-    You should see Copilot use the TryPost tools to fetch your data.
   </Step>
 </Steps>
 
@@ -54,9 +50,31 @@ icon: "github"
   VS Code uses `"servers"` as the top-level key (not `"mcpServers"`). This is different from most other MCP clients.
 </Tip>
 
-## Global configuration
+## Copilot coding agent (cloud) — Bearer required
 
-To make TryPost available across all projects, use the command palette and run **MCP: Open User Configuration** to add the server to your user-level settings.
+GitHub's **coding agent** (the one that runs on GitHub's infrastructure to handle issues and PRs) does not yet support OAuth for remote MCP servers. To use TryPost there, you must use a Personal Access Token.
+
+In your repository's **Settings → Copilot → Coding agent → MCP servers**, add a JSON entry like:
+
+```json
+{
+  "servers": {
+    "trypost": {
+      "type": "http",
+      "url": "https://app.trypost.it/mcp/trypost",
+      "headers": {
+        "Authorization": "Bearer $TRYPOST_API_KEY"
+      }
+    }
+  }
+}
+```
+
+Add `TRYPOST_API_KEY` to the repo's **Copilot agent secrets** (not regular Actions secrets). Issue the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
+
+## Global IDE configuration
+
+To make TryPost available across all projects in your IDE, open the command palette and run **MCP: Open User Configuration** to add the server to your user-level settings.
 
 ## Example prompts
 

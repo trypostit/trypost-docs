@@ -14,6 +14,8 @@ description: "Toggle a social account between active and inactive states."
 
 Returns the updated social account. Same shape as one entry in [`GET /social-accounts`](/api-reference/endpoint/list-social-accounts).
 
+Returns `404` with `{ "message": "Account not found." }` if the account doesn't exist or belongs to a different workspace.
+
 <RequestExample>
 ```bash
 curl -X PUT https://app.trypost.it/api/social-accounts/b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e/toggle \

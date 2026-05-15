@@ -75,7 +75,13 @@ Toggle an account's active state from the **Accounts** page or via the [API](/ap
 | **Disconnected** | Authorization was revoked or token expired | Reconnect the account |
 | **Token expired** | Access token expired and couldn't be refreshed | Reconnect the account |
 
-TryPost runs a **daily check** on all connected accounts to verify their tokens are still valid. If an account is found disconnected, the workspace owner receives a notification (in-app and email).
+TryPost runs three scheduled jobs to keep social connections healthy:
+
+- **`social:refresh-expiring-tokens`** (hourly) — proactively refreshes OAuth tokens that are about to expire, before the platform forces them out
+- **`social:check-connections`** (daily) — verifies every connected account still authenticates correctly
+- **`social:recover-stuck-posts`** (every 30 minutes) — sweeps posts left in `publishing` and either retries or marks them failed
+
+If any of these detects a disconnected or expired account, the workspace owner receives a notification (in-app and email).
 
 ### Why accounts get disconnected
 

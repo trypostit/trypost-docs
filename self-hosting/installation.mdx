@@ -5,80 +5,70 @@ description: Install TryPost on your server
 
 # Installation
 
-This guide will walk you through installing TryPost on your server.
+This guide walks through installing TryPost on a server (bare-metal or VM). For Docker-first setups, see [Docker](/self-hosting/docker).
 
 ## Requirements
 
 - PHP 8.2 or higher
-- Node.js 18 or higher
+- Node.js 20 or higher
 - PostgreSQL 14+ or MySQL 8+
-- Redis
-- Composer
+- Redis 6+
+- Composer 2.x
 
-## Quick Install
+## Install
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/trypost-it/trypost.git
+git clone https://github.com/trypostit/trypost.git
 cd trypost
 ```
 
-### 2. Install PHP dependencies
+### 2. First-time setup (one command)
+
+```bash
+composer setup
+```
+
+This runs `composer install`, copies `.env.example` to `.env`, generates `APP_KEY`, runs `php artisan migrate --force`, installs npm packages, and runs `npm run build`. After it finishes, edit `.env` to point at your real database, Redis, and any social platform credentials — see [Configuration](/self-hosting/configuration).
+
+If you prefer doing each step yourself:
 
 ```bash
 composer install
-```
-
-### 3. Install Node.js dependencies
-
-```bash
-npm install
-```
-
-### 4. Configure environment
-
-```bash
 cp .env.example .env
 php artisan key:generate
-```
-
-Edit the `.env` file with your database credentials and other settings. See [Configuration](/self-hosting/configuration) for details.
-
-### 5. Run database migrations
-
-```bash
+# edit .env now
 php artisan migrate
-```
-
-### 6. Build frontend assets
-
-```bash
+npm install
 npm run build
 ```
 
-### 7. Start the application
-
-For development:
+### 3. Run all dev processes in one terminal
 
 ```bash
-# Terminal 1 - Laravel server
-php artisan serve
-
-# Terminal 2 - Queue worker
-php artisan horizon
-
-# Terminal 3 - Vite dev server (optional, for hot reload)
-npm run dev
+composer dev
 ```
 
-For production, configure your web server (Nginx, Apache) to serve the application.
+This concurrently starts:
 
-## Verify Installation
+- `php artisan serve` — HTTP server on `http://localhost:8000`
+- `php artisan queue:listen` — queue worker
+- `php artisan pail` — live log tail
+- `npm run dev` — Vite with hot reload
 
-Visit `http://localhost:8000` (or your configured domain) and you should see the TryPost welcome page.
+For Inertia SSR development, use `composer dev:ssr` instead.
+
+### 4. Production process supervisors
+
+For production you don't use `composer dev`. Configure separate supervisor entries for the web server (PHP-FPM / Octane), Horizon (queues), Reverb (WebSockets), and the cron job for `php artisan schedule:run` — see [Production setup](/self-hosting/production).
+
+## Verify the install
+
+Visit `http://localhost:8000` (or your configured `APP_URL`) and you should see the TryPost welcome page. Create the first account from `/register` and you'll land in the dashboard.
 
 ## Next Steps
 
 - [Configure your environment](/self-hosting/configuration)
 - [Connect your first social account](/platforms/overview)
+- [Production deployment](/self-hosting/production)

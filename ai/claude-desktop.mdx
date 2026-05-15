@@ -9,22 +9,25 @@ icon: "message-bot"
 ## Prerequisites
 
 - Claude Desktop installed
-- A TryPost API key
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
 ## Setup
 
 <Steps>
-  <Step title="Open integrations settings">
-    In Claude Desktop, go to **Settings** > **Integrations** and click **Add custom connector**.
+  <Step title="Open the Connectors settings">
+    In Claude Desktop, go to **Settings** → **Connectors** and click **Add custom connector**.
   </Step>
-  <Step title="Add the TryPost server">
-    Enter the following server URL:
+  <Step title="Add the TryPost server URL">
+    Paste the server URL:
 
     ```
     https://app.trypost.it/mcp/trypost
     ```
 
-    When prompted for authentication, provide your API key as a Bearer token.
+    Leave the **Advanced settings** (Client ID / Client Secret) empty — TryPost supports Dynamic Client Registration, so Claude Desktop registers itself automatically.
+  </Step>
+  <Step title="Sign in through your browser">
+    Claude Desktop opens a browser window to TryPost asking you to sign in and authorize. Click **Allow** and return to Claude Desktop — the connector flips to **Connected**.
   </Step>
   <Step title="Verify the connection">
     Start a new conversation and ask Claude to interact with your TryPost account:
@@ -33,9 +36,13 @@ icon: "message-bot"
     List all my scheduled posts
     ```
 
-    You should see Claude use the TryPost tools to fetch your posts.
+    Claude will use the TryPost tools to fetch your posts.
   </Step>
 </Steps>
+
+<Note>
+  Claude Desktop's connector runs from Anthropic's cloud, not from your machine, so the MCP server has to be reachable over the public internet. The hosted endpoint `https://app.trypost.it/mcp/trypost` is. Self-hosted instances must be exposed publicly (or use a tunnel) for Claude Desktop to reach them.
+</Note>
 
 ## Example prompts
 

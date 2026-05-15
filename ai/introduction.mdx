@@ -25,15 +25,19 @@ TryPost exposes a full set of MCP tools for end-to-end content workflows. See th
 
 ## How it works
 
+<Note>
+  MCP access on **TryPost Cloud** requires an active trial or subscription. New accounts get a 7-day trial automatically — no credit card required to start. See [Plans & billing](/knowledge-base/plans-and-billing) for details. Self-hosted instances skip this check.
+</Note>
+
 <Steps>
-  <Step title="Get your API key">
-    Create an API key from the [TryPost dashboard](https://app.trypost.it).
+  <Step title="Add the TryPost MCP server in your assistant">
+    Use your assistant's MCP configuration to add a remote HTTP server pointing to `https://app.trypost.it/mcp/trypost`. Each [client guide](#next-steps) below has the exact command or settings file.
   </Step>
-  <Step title="Configure your AI assistant">
-    Add the TryPost MCP server to your assistant's configuration using the server URL and your API key.
+  <Step title="Sign in through your browser">
+    The first time the assistant calls a tool, TryPost opens a browser window asking you to sign in and authorize the connection. Click **Allow** and you're done — the assistant holds the OAuth token from then on, with automatic refresh.
   </Step>
   <Step title="Start using natural language">
-    Ask your assistant to manage your TryPost account. For example: "Create a new post for LinkedIn" or "List all my scheduled posts."
+    Ask your assistant to manage your TryPost account. For example: "Create a new post for LinkedIn next Tuesday at 9am" or "List all my scheduled posts."
   </Step>
 </Steps>
 
@@ -43,7 +47,32 @@ TryPost exposes a full set of MCP tools for end-to-end content workflows. See th
 https://app.trypost.it/mcp/trypost
 ```
 
-Authentication uses the same API keys as the REST API, passed as a Bearer token.
+## Authentication
+
+TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude Code, Claude Desktop, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
+
+<Accordion title="Bearer token fallback (CI, scripts, or clients without OAuth)">
+  If your environment can't open a browser — for example a CI pipeline, the GitHub Copilot cloud coding agent, or a client that doesn't speak OAuth yet — you can authenticate with a Personal Access Token instead. Create one in **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it) and send it as `Authorization: Bearer YOUR_API_KEY`. The same token works for both the REST API and the MCP endpoint.
+
+  Keep the token in a secret store, not committed to source. Rotate from **Settings &gt; API Keys** if a key leaks.
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="HTTP 402 — Active subscription required">
+    Your token is valid and the config is correct — the account behind it just doesn't have an active trial or subscription. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan (no card required to start the trial), then reconnect the MCP server. Self-hosted instances skip this check.
+  </Accordion>
+  <Accordion title="HTTP 401 — Unauthenticated">
+    The OAuth session expired and refresh failed, or (in the Bearer fallback) the token is missing/malformed/revoked. Re-run the assistant's connect flow to re-authenticate, or issue a new PAT from **Settings &gt; API Keys**.
+  </Accordion>
+  <Accordion title="Server shows as “Failed to connect”">
+    Run the connection probe your assistant exposes (for example `claude mcp list`). The HTTP status from the probe tells you which case you're in: `402` → see above; `401` → re-authenticate; anything else → open an issue on [GitHub](https://github.com/trypostit/trypost/issues).
+  </Accordion>
+  <Accordion title="Browser doesn't open during sign-in">
+    Some clients print the authorize URL to the terminal instead of launching the browser when running over SSH or inside a container. Copy the URL into a local browser, complete the flow, and the assistant will pick up the callback automatically. If the callback port is blocked, use the Bearer fallback.
+  </Accordion>
+</AccordionGroup>
 
 ## Next steps
 
@@ -61,7 +90,7 @@ Authentication uses the same API keys as the REST API, passed as a Bearer token.
     Editor with Cascade AI.
   </Card>
   <Card title="VS Code" icon="code" href="/ai/vs-code">
-    VS Code with MCP extensions.
+    Native MCP support in Copilot Chat.
   </Card>
   <Card title="GitHub Copilot" icon="github" href="/ai/github-copilot">
     Copilot agent mode.

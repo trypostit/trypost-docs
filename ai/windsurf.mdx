@@ -9,33 +9,31 @@ icon: "water"
 ## Prerequisites
 
 - Windsurf editor installed
-- A TryPost API key
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
 ## Setup
 
 <Steps>
   <Step title="Open the MCP configuration file">
-    Edit the Windsurf MCP configuration at `~/.codeium/windsurf/mcp_config.json`:
+    Edit `~/.codeium/windsurf/mcp_config.json`:
 
     ```json
     {
       "mcpServers": {
         "trypost": {
-          "serverUrl": "https://app.trypost.it/mcp/trypost",
-          "headers": {
-            "Authorization": "Bearer YOUR_API_KEY"
-          }
+          "serverUrl": "https://app.trypost.it/mcp/trypost"
         }
       }
     }
     ```
 
-    <Note>
-      Replace `YOUR_API_KEY` with your actual API key from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
+    No `Authorization` header — Windsurf discovers OAuth from the URL.
   </Step>
-  <Step title="Restart Windsurf">
-    Restart Windsurf to load the new configuration.
+  <Step title="Reload Windsurf">
+    Reload the window so Windsurf picks up the new configuration.
+  </Step>
+  <Step title="Sign in through your browser">
+    The first time Cascade calls a TryPost tool, Windsurf opens a browser window for the TryPost sign-in. Approve the request and Cascade continues automatically.
   </Step>
   <Step title="Verify the connection">
     Open Cascade and ask:
@@ -45,6 +43,25 @@ icon: "water"
     ```
   </Step>
 </Steps>
+
+<Accordion title="Bearer token fallback">
+  If your environment blocks the OAuth callback, use a Personal Access Token instead:
+
+  ```json
+  {
+    "mcpServers": {
+      "trypost": {
+        "serverUrl": "https://app.trypost.it/mcp/trypost",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
+</Accordion>
 
 ## Example prompts
 

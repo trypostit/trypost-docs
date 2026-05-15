@@ -6,6 +6,10 @@ description: "Create a new draft post targeting one or more social accounts. Ret
 
 Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](/api-reference/endpoint/update-post) using `status=scheduled` or `status=publishing`.
 
+<Note>
+  **Pinterest posts**: `POST /posts` does not accept per-platform `meta`. After creating, call [`PUT /posts/{post}`](/api-reference/endpoint/update-post) and set `platforms[].meta.board_id` for each Pinterest entry — otherwise the publish job fails with `Pinterest board_id is required`.
+</Note>
+
 ## Request
 
 <ParamField body="platforms" type="array" required>
@@ -17,13 +21,13 @@ Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](
     <ParamField body="content_type" type="string" required>
       Format for this platform — must match the social account's platform. Discover the catalog with [`GET /content-types`](/api-reference/endpoint/list-content-types).
 
-      Allowed values: `linkedin_post`, `linkedin_carousel`, `linkedin_page_post`, `linkedin_page_carousel`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_carousel`, `instagram_reel`, `instagram_story`, `tiktok_video`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`.
+      Allowed values: `linkedin_post`, `linkedin_carousel`, `linkedin_page_post`, `linkedin_page_carousel`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_carousel`, `instagram_reel`, `instagram_story`, `tiktok_video`, `tiktok_photo`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="content" type="string">
-  The post body shared across all platforms. Up to 63 206 characters. Defaults to empty.
+  The post body shared across all platforms. Up to 10 000 characters at the API level (per-platform hard caps are enforced separately — see [`GET /content-types`](/api-reference/endpoint/list-content-types) for the matrix). Defaults to empty.
 </ParamField>
 
 <ParamField body="media" type="array">

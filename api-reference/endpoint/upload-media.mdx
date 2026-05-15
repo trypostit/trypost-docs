@@ -26,10 +26,10 @@ Send as `multipart/form-data` with a single `media` field.
 ## Behaviour
 
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
-- The file's MIME type is **intersected with the platforms enabled on the post**. For example, uploading an image to a TikTok-only post returns `422` because TikTok doesn't accept images.
-- Per-type size caps are enforced after MIME detection (a video over 1 GB returns `422` even if the FormRequest's overall cap allowed it).
-- PNG and WebP still images are normalized to JPEG (q100) at storage time for universal platform compatibility. GIF is preserved.
-- The new media is appended to the post's `media[]` array.
+- The file's MIME type is **intersected with the platforms enabled on the post**. For example, uploading an image to a TikTok-only post returns `422` unless the post targets `tiktok_photo`.
+- Per-type size caps are enforced after MIME detection (a video over 1 GB returns `422` even if the FormRequest's overall cap allowed it). On self-hosted, caps come from `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB`.
+- PNG and WebP still images are normalized to **JPEG (q100)** at storage time for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon). MP4 and MOV videos are stored as-is.
+- The new media is stored under `medias/{uuid}.{ext}` on the configured filesystem disk (`local`, `s3`, or `r2`) and appended to the post's `media[]` array.
 
 ## Response
 
@@ -54,8 +54,8 @@ curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b
   "media": [
     {
       "id": "01HX1A2B3C4D5E6F7G8H9I0J1K",
-      "path": "medias/01HX1A2B-photo.jpg",
-      "url": "https://app.trypost.it/storage/medias/01HX1A2B-photo.jpg",
+      "path": "medias/2681a1bf-131f-41b1-9866-755c1cb51f97.jpg",
+      "url": "https://media.trypost.it/medias/2681a1bf-131f-41b1-9866-755c1cb51f97.jpg",
       "type": "image",
       "mime_type": "image/jpeg",
       "original_filename": "photo.jpg"

@@ -38,7 +38,12 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
       Override the content_type for this platform (e.g. `linkedin_carousel` instead of the default `linkedin_post`). Use [`GET /content-types`](/api-reference/endpoint/list-content-types) to discover valid values. Cross-validated against the platform of the underlying social account.
     </ParamField>
     <ParamField body="meta" type="object">
-      Per-platform metadata override (e.g. `aspect_ratio`, Pinterest `board_id`).
+      Per-platform metadata override. Examples:
+
+      - **Pinterest** (`pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`) — `meta.board_id` is **required to publish**. If you don't pass it per-post and the social account doesn't have a `default_board_id` set, the publish job fails with `Pinterest board_id is required`. Fetch board IDs from Pinterest's `/v5/boards` endpoint or pick one in the dashboard's Accounts page.
+      - **TikTok** (videos) — `meta.privacy_level` (`PUBLIC_TO_EVERYONE`, `MUTUAL_FOLLOW_FRIENDS`, `FOLLOWER_OF_CREATOR`, `SELF_ONLY`), `meta.disable_comment`, `meta.disable_duet`, `meta.disable_stitch`, `meta.brand_content_toggle`, `meta.brand_organic_toggle`. For `tiktok_photo`, only `privacy_level` and `disable_comment` apply.
+
+      The REST endpoint does not strictly validate `meta` keys — unknown keys are stored and ignored at publish time. The web app validates `meta.board_id` upfront for Pinterest content types; REST callers must enforce it themselves.
     </ParamField>
   </Expandable>
 </ParamField>

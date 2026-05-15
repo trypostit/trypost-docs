@@ -14,9 +14,14 @@ TryPost sends notifications to keep you informed about important events — succ
 
 | Type | When it's sent | What it tells you |
 |------|---------------|-------------------|
-| **Post published** | A post was published to all platforms | Which platforms were published with links to the live posts |
-| **Post failed** | A post failed on one or more platforms | Which platforms failed and the error messages |
-| **Post partially published** | A post succeeded on some platforms but failed on others | Success and failure details for each platform |
+| **Post published** | A post was published to all enabled platforms successfully | Which platforms were published with links to the live posts |
+| **Post failed** | A post failed on one or more platforms (covers both full failures and partial publishes) | Which platforms failed and the error messages |
+
+### AI
+
+| Type | When it's sent | What it tells you |
+|------|---------------|-------------------|
+| **Post ready** | The AI **Create** flow finished generating a post (text + images) in the background | A link to the new draft so you can review and schedule it |
 
 ### Accounts
 
@@ -40,7 +45,10 @@ TryPost sends notifications to keep you informed about important events — succ
 | **In-app** | Bell icon in the top nav. Delivered in real time via Reverb (WebSockets) — no refresh needed |
 | **Email** | Sent to the address on your TryPost account, via the configured mailer (SendKit by default) |
 
-In-app notifications are always created. Email is sent in addition to in-app, except for `mentioned_in_comment` — if you're online, only the in-app toast fires; if you're offline, you get both.
+In-app notifications are always created. Email is sent in addition to in-app for most types, with a couple of carve-outs:
+
+- `mentioned_in_comment` — if you're online, only the in-app toast fires; if you're offline, you get both.
+- `post_ready` — in-app only. The AI Create flow is short enough that a banner inside the app is all you need.
 
 ## Notification preferences
 
@@ -51,10 +59,10 @@ Today the page exposes three toggles:
 | Toggle | Controls email for |
 |--------|--------------------|
 | **Post published** | `post_published` |
-| **Post failed** | `post_failed` and `post_partially_published` (one toggle covers both) |
+| **Post failed** | `post_failed` (covers both full failures and partial publishes) |
 | **Account disconnected** | `account_disconnected` |
 
-`mentioned_in_comment`, `invite_received`, `member_joined`, and `member_removed` use sensible defaults today and aren't user-configurable yet.
+`mentioned_in_comment`, `invite_received`, `member_joined`, `member_removed`, and `post_ready` use sensible defaults today and aren't user-configurable yet.
 
 <Tip>
   Keep **Post failed** and **Account disconnected** emails on. They need immediate action and you might not be looking at the dashboard when they fire.

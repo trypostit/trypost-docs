@@ -9,36 +9,33 @@ icon: "terminal"
 ## Prerequisites
 
 - Codex CLI installed (`npm install -g @openai/codex`)
-- A TryPost API key
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
 ## Setup
 
 <Steps>
-  <Step title="Set your API key as an environment variable">
-    Add your TryPost API key to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.):
-
-    ```bash
-    export TRYPOST_API_KEY="YOUR_API_KEY"
-    ```
-
-    <Note>
-      Replace `YOUR_API_KEY` with your actual API key from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
-  </Step>
   <Step title="Open the configuration file">
     Edit `~/.codex/config.toml` and add the TryPost server:
 
     ```toml
     [mcp_servers.trypost]
+    type = "http"
     url = "https://app.trypost.it/mcp/trypost"
-    bearer_token_env_var = "TRYPOST_API_KEY"
     ```
+
+    No `Authorization` header — Codex discovers OAuth from the URL.
   </Step>
-  <Step title="Restart Codex">
-    Close and reopen Codex to load the new configuration.
+  <Step title="Sign in via codex mcp login">
+    Run the OAuth flow so Codex caches the token:
+
+    ```bash
+    codex mcp login trypost
+    ```
+
+    Codex opens your browser to TryPost; approve the request and return to the terminal.
   </Step>
   <Step title="Verify the connection">
-    Ask Codex to interact with your TryPost account:
+    Start Codex and ask:
 
     ```
     List all my TryPost posts
@@ -47,8 +44,25 @@ icon: "terminal"
 </Steps>
 
 <Tip>
-  Codex uses TOML for configuration (not JSON). It provides `bearer_token_env_var` to securely reference API keys from environment variables instead of hardcoding them in the config file.
+  Codex uses TOML for configuration (not JSON). For sandboxed environments where the default callback port isn't reachable, set `mcp_oauth_callback_port` or `mcp_oauth_callback_url` in `config.toml`.
 </Tip>
+
+<Accordion title="Bearer token fallback">
+  For headless environments, use a Personal Access Token via environment variable:
+
+  ```bash
+  export TRYPOST_API_KEY="YOUR_API_KEY"
+  ```
+
+  ```toml
+  [mcp_servers.trypost]
+  type = "http"
+  url = "https://app.trypost.it/mcp/trypost"
+  bearer_token_env_var = "TRYPOST_API_KEY"
+  ```
+
+  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). `bearer_token_env_var` keeps the token out of the config file.
+</Accordion>
 
 ## Example prompts
 

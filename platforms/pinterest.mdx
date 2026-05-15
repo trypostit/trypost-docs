@@ -13,6 +13,15 @@ TryPost supports creating pins on Pinterest.
 2. Click **Connect Pinterest**
 3. Authorize TryPost on Pinterest
 
+## Board selection
+
+Pinterest requires every pin to belong to a **board**. TryPost loads your boards over the API and lets you pick one in two places:
+
+- **Per post** — when you target a Pinterest account in the post editor, the platform sidebar shows a **Board** dropdown. Pick the board for that specific pin.
+- **Default board (optional)** — set a workspace default in **Accounts → your Pinterest account → Default board**. New Pinterest posts pre-fill the picker with this board; you can still override per post.
+
+If neither a per-post `board_id` nor a default board is set, publishing fails with `Pinterest board_id is required`. The post editor blocks scheduling until you pick a board; the REST API and MCP only fail at publish time, so callers must provide `platforms[].meta.board_id` themselves.
+
 ## Supported content types
 
 | Type | Aspect ratio | Description |
@@ -25,7 +34,7 @@ TryPost supports creating pins on Pinterest.
 
 `boards:read`, `boards:write`, `pins:read`, `pins:write`, `user_accounts:read`
 
-`pins:read` and `user_accounts:read` are required for the **Analytics** dashboard.
+`pins:read` and `user_accounts:read` are required for the **Analytics** dashboard. `boards:read` powers the board picker.
 
 ## Self-hosting setup
 

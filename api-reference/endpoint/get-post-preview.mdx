@@ -1,7 +1,7 @@
 ---
 title: "Preview post per platform"
 api: "GET /posts/{post}/preview"
-description: "Preview how a post will render on each enabled platform — applies platform-specific sanitization (length truncation, forbidden chars, etc.) without publishing."
+description: "Preview how a post will render on each enabled platform — applies platform-specific HTML sanitization and shows length stats against each platform's max."
 ---
 
 ## Path parameters
@@ -14,7 +14,11 @@ description: "Preview how a post will render on each enabled platform — applie
 
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
 - Returns the original content alongside per-platform sanitized versions and length statistics.
-- `truncated` is `true` when the platform's `max_content_length` forced the content to be shortened.
+- `original_content` is the plain text stored on the post (the editor saves plain text, not HTML).
+- `sanitized_content` is the platform-specific rendering of that text. For most platforms this is identical to the original. Exceptions:
+  - **LinkedIn / LinkedIn Page** — Unicode bold/underline substitution if the source contained `<strong>`/`<b>`/`<u>` markers (used by the AI generator).
+  - **Mastodon** — a small allow-list of inline HTML is preserved (`p`, `strong`, `em`, `a`, `br`, `span`).
+- `truncated` is `true` only when sanitization actually shortened the byte count (e.g. an HTML entity got decoded). It is **not** a hard-cap signal — over-length content is rejected at publish time, never silently truncated. To detect over-limit content, compare `sanitized_length` against `max_content_length` yourself.
 
 ## Response
 
@@ -22,24 +26,24 @@ description: "Preview how a post will render on each enabled platform — applie
 ```json
 {
   "post_id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
-  "original_content": "Launch day! ... very long text ...",
-  "original_length": 850,
+  "original_content": "Launch day!\n\nExcited to share what we built.",
+  "original_length": 44,
   "platforms": [
     {
       "post_platform_id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
       "platform": "x",
       "content_type": "x_post",
-      "sanitized_content": "Launch day! ...",
-      "sanitized_length": 280,
+      "sanitized_content": "Launch day!\n\nExcited to share what we built.",
+      "sanitized_length": 44,
       "max_content_length": 280,
-      "truncated": true
+      "truncated": false
     },
     {
       "post_platform_id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
       "platform": "linkedin",
       "content_type": "linkedin_post",
-      "sanitized_content": "Launch day! ... very long text ...",
-      "sanitized_length": 850,
+      "sanitized_content": "Launch day!\n\nExcited to share what we built.",
+      "sanitized_length": 44,
       "max_content_length": 3000,
       "truncated": false
     }

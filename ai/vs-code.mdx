@@ -1,16 +1,16 @@
 ---
 title: "VS Code"
-description: "Connect TryPost to VS Code with any MCP-compatible extension"
+description: "Connect TryPost to VS Code's native MCP support in Copilot Chat"
 icon: "code"
 ---
 
-Visual Studio Code supports MCP servers natively. You can connect TryPost to VS Code and use it with GitHub Copilot agent mode or other MCP-compatible extensions.
+Visual Studio Code supports MCP servers natively (Copilot Chat in agent mode, plus any MCP-compatible extension). You can connect TryPost in a few clicks.
 
 ## Prerequisites
 
-- VS Code installed
-- An MCP-compatible extension (e.g. GitHub Copilot)
-- A TryPost API key
+- VS Code 1.101 or later (earlier versions don't support OAuth for remote MCP servers)
+- GitHub Copilot extension (or another MCP-compatible extension)
+- A TryPost Cloud account with an active trial or subscription ([no card required to start](/knowledge-base/plans-and-billing))
 
 ## Setup
 
@@ -23,24 +23,22 @@ Visual Studio Code supports MCP servers natively. You can connect TryPost to VS 
       "servers": {
         "trypost": {
           "type": "http",
-          "url": "https://app.trypost.it/mcp/trypost",
-          "headers": {
-            "Authorization": "Bearer YOUR_API_KEY"
-          }
+          "url": "https://app.trypost.it/mcp/trypost"
         }
       }
     }
     ```
 
-    <Note>
-      Replace `YOUR_API_KEY` with your actual API key from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
+    No `Authorization` header — VS Code discovers OAuth from the URL.
   </Step>
   <Step title="Reload VS Code">
-    Reload the window or restart VS Code to load the MCP configuration.
+    Reload the window so VS Code picks up the new configuration.
+  </Step>
+  <Step title="Sign in through your browser">
+    Open the **Accounts** menu (bottom-left gear) or the Copilot Chat panel — VS Code prompts you to sign in to TryPost. Approve in the browser and the server flips to **Connected**.
   </Step>
   <Step title="Verify the connection">
-    Open the AI chat in agent mode and ask:
+    Open Copilot Chat in agent mode and ask:
 
     ```
     List all my TryPost social accounts
@@ -54,4 +52,24 @@ Visual Studio Code supports MCP servers natively. You can connect TryPost to VS 
 
 ## Global configuration
 
-To make TryPost available across all projects, use the command palette and run **MCP: Open User Configuration** to add the server to your user-level settings.
+To make TryPost available across all projects, open the command palette and run **MCP: Open User Configuration** to add the server to your user-level settings.
+
+<Accordion title="Bearer token fallback">
+  For sandboxed or remote workspaces where the OAuth callback can't return to VS Code, set a Personal Access Token explicitly:
+
+  ```json
+  {
+    "servers": {
+      "trypost": {
+        "type": "http",
+        "url": "https://app.trypost.it/mcp/trypost",
+        "headers": {
+          "Authorization": "Bearer YOUR_API_KEY"
+        }
+      }
+    }
+  }
+  ```
+
+  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
+</Accordion>

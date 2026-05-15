@@ -1,12 +1,16 @@
 ---
 title: "List API keys"
 api: "GET /api-keys"
-description: "List all Personal Access Tokens for the current workspace, latest first. Returns a plain array (no pagination)."
+description: "List your Personal Access Tokens scoped to the current workspace, latest first. Returns a plain array (no pagination)."
 ---
 
 ## Response
 
 Plain array of API key objects. The plain token value is only shown once at creation — these objects are metadata only.
+
+<Note>
+  The list is scoped to **the calling user in the current workspace**. Tokens created by other workspace members are not returned, even though they may have access to the same workspace.
+</Note>
 
 <ResponseField name="id" type="string">
   API key UUID.

@@ -122,7 +122,8 @@ server {
     error_page 404 /index.php;
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
+        # Replace with the FPM socket for the PHP version you installed (e.g. php8.2-fpm.sock, php8.3-fpm.sock, php8.4-fpm.sock).
+        fastcgi_pass unix:/var/run/php/php-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -146,7 +147,14 @@ sudo certbot --nginx -d your-domain.com
 
 ## Scheduled Tasks (Cron)
 
-TryPost uses Laravel's task scheduler for recurring jobs like dispatching scheduled posts and cleaning up expired tokens. The scheduler **must** run every minute or scheduled posts won't be published on time.
+TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler **must** run every minute or scheduled posts won't publish, expiring tokens won't refresh, and stuck posts won't recover.
+
+| Command | Schedule | Purpose |
+|---------|----------|---------|
+| `posts:process-scheduled` | every minute | Dispatches `PublishPost` jobs for posts that are due |
+| `social:check-connections` | daily | Verifies every connected social account still has a valid token |
+| `social:refresh-expiring-tokens` | hourly | Refreshes OAuth tokens that are about to expire (proactive refresh) |
+| `social:recover-stuck-posts` | every 30 minutes | Detects posts stuck in `publishing` and either retries or marks them failed |
 
 Add the Laravel scheduler to cron:
 
@@ -161,7 +169,7 @@ Add this line:
 ```
 
 <Warning>
-  This is required. Without the cron job, scheduled posts will not be published automatically.
+  This is required. Without the cron job, scheduled posts will not be published automatically, and social tokens will expire silently.
 </Warning>
 
 ## WebSocket Server (Reverb)

@@ -19,7 +19,7 @@ Returns posts ordered by `scheduled_at` descending (latest first), 15 per page.
     <ResponseField name="id" type="string">UUID of the post.</ResponseField>
     <ResponseField name="content" type="string">The post text body. May be `null` for drafts.</ResponseField>
     <ResponseField name="media" type="array">
-      Media items attached to the post. Each item has `id`, `path`, `url`, `type` (`image` | `video` | `document`), `mime_type`, `original_filename`. Empty array if none.
+      Media items attached to the post. Each item has `id`, `path`, `url`, `type` (`image` | `video`), `mime_type`, `original_filename`. Empty array if none.
     </ResponseField>
     <ResponseField name="status" type="string">
       One of: `draft`, `scheduled`, `publishing`, `published`, `partially_published`, `failed`.
