@@ -13,9 +13,10 @@ To create and publish a post end-to-end:
 2. **`list-content-types-tool`** — discover valid `content_type` per platform with limits
 3. **`create-post-tool`** — create the draft with content + chosen platforms
 4. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
-5. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
-6. **`publish-post-tool`** — publish immediately or schedule for a future time
-7. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
+5. **`request-media-upload-tool`** + **`attach-media-from-upload-tool`** *(optional)* — upload a **local** file when no public URL exists
+6. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
+7. **`publish-post-tool`** — publish immediately or schedule for a future time
+8. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
 
 ## Posts
 
@@ -28,6 +29,8 @@ To create and publish a post end-to-end:
 | **publish-post-tool** | Publish a draft — immediately or scheduled for a future time. Requires at least one enabled platform. Marked `IsDestructive` so the AI confirms with you first. |
 | **preview-post-tool** | Preview how the post will render on each enabled platform — applies platform-specific sanitization (length truncation, etc.) without publishing. |
 | **attach-media-from-url-tool** | Download images or videos from public URLs and attach them to a post. Up to 10 URLs per call. Per-file size caps: 10 MB for images, 1 GB for videos. Allowed types are intersected with the enabled platforms (e.g. video rejected if no enabled platform supports it). |
+| **request-media-upload-tool** | Issue a one-shot signed POST URL so the user can upload a **local** file to their workspace. No input — workspace is resolved from the MCP session. Returns `upload_url`, `upload_token`, `expires_at` (ISO 8601, 15-minute TTL by default), `max_bytes` (50 MB default), and `field_name`. The agent hands the URL to the user (e.g. as a `curl -F media=@path/to/file '{upload_url}'` command) or to its client. Use when no public URL exists — otherwise prefer `attach-media-from-url-tool`. |
+| **attach-media-from-upload-tool** | Attach a Media uploaded via `request-media-upload-tool` to a post. Takes `post_id` + `upload_token`. The Media is resolved by the token within the current workspace, then appended to the post. Rejects if the media type isn't accepted by any enabled platform. |
 | **delete-post-tool** | Delete a post permanently. Marked `IsDestructive`. |
 | **get-post-metrics-tool** | Fetch engagement metrics (likes, comments, shares, etc.) for a published post across every platform. Returns `unsupported` entries for platforms that don't expose post-level metrics. |
 
@@ -81,3 +84,4 @@ To create and publish a post end-to-end:
 - **Workspace scoping** — every tool operates on the user's currently-selected workspace. To act on a different workspace, switch it in the TryPost UI (or, for personal API tokens, create a new key in that workspace).
 - **Cross validation** — `create-post-tool` and `update-post-tool` reject mismatched combos (e.g. `content_type=x_post` on a LinkedIn account). Inactive social accounts are also rejected at validation time.
 - **Destructive tools** — operations that delete data or publish to the world (`publish-post-tool`, `delete-*`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
+- **Local-file uploads** — `request-media-upload-tool` returns a single-use signed URL valid for 15 minutes, capped at 50 MB. The underlying endpoint is documented at [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload). After upload, call `attach-media-from-upload-tool` with the same `upload_token` to attach the resulting Media to a post.

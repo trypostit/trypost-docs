@@ -71,6 +71,7 @@
               "api-reference/endpoint/delete-post",
               "api-reference/endpoint/upload-media",
               "api-reference/endpoint/attach-media-from-url",
+              "api-reference/endpoint/request-media-upload",
               "api-reference/endpoint/get-post-metrics",
               "api-reference/endpoint/get-post-preview"
             ]

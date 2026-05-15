@@ -95,7 +95,7 @@ Only `GET /posts` paginates (15 per page). All other list endpoints return full 
 ## MCP Server
 
 - Tool names are auto-derived from class basenames as kebab-case + `-tool` suffix (Laravel MCP convention — no `#[Name]` overrides in `TryPostServer`).
-- Post tools: `list-posts-tool`, `get-post-tool`, `create-post-tool`, `update-post-tool`, `publish-post-tool`, `preview-post-tool`, `delete-post-tool`, `attach-media-from-url-tool`, `get-post-metrics-tool`.
+- Post tools: `list-posts-tool`, `get-post-tool`, `create-post-tool`, `update-post-tool`, `publish-post-tool`, `preview-post-tool`, `delete-post-tool`, `attach-media-from-url-tool`, `request-media-upload-tool`, `attach-media-from-upload-tool`, `get-post-metrics-tool`.
 - Plus: `list-content-types-tool` (Platforms), `list-signatures-tool` / `create-signature-tool` / `update-signature-tool` / `delete-signature-tool`, `list-labels-tool` / `create-label-tool` / `update-label-tool` / `delete-label-tool`, `list-social-accounts-tool` / `toggle-social-account-tool`, `get-workspace-tool`, `list-api-keys-tool` / `create-api-key-tool` / `delete-api-key-tool`.
 - `create-post-tool` accepts `platforms[]` (each with `social_account_id` and `content_type`), `scheduled_at`, `label_ids`, etc. — same shape as REST `POST /posts`.
 - `publish-post-tool` is a separate, destructive tool (annotated `IsDestructive`); REST clients use `PUT /posts/{id}` with `status=publishing` instead.
@@ -146,7 +146,7 @@ There is no `status` enum on tokens. `AccessToken` exposes `revoked` (boolean) a
 ### Media types (2 values)
 `image`, `video`
 
-There is no `document` type. Allowed MIME types: images = `image/jpeg`, `image/png`, `image/gif`, `image/webp` (PNG/WebP stills are normalized to JPEG q100); videos = `video/mp4`, `video/quicktime`. Default size caps: 10 MB image, 1024 MB video (overridable via `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB`).
+There is no `document` type. Allowed MIME types: images = `image/jpeg`, `image/png`, `image/gif`, `image/webp` (PNG/WebP stills are normalized to JPEG q100); videos = `video/mp4`, `video/quicktime`. Default size caps: 10 MB image, 1024 MB video (overridable via `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB`). The MCP signed-URL upload path has its own tighter cap of 50 MB regardless of type (overridable via `MCP_UPLOAD_MAX_SIZE_MB`), with a 15-minute single-use URL TTL (`MCP_UPLOAD_URL_TTL_MINUTES`) and a 10/min/IP rate limit.
 
 ### Notification types (9 values)
 `post_published`, `post_failed`, `post_partially_published`, `post_ready`, `account_disconnected`, `invite_received`, `member_joined`, `member_removed`, `mentioned_in_comment`

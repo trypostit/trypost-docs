@@ -79,14 +79,18 @@ REDIS_PORT=6379
 ```env
 MEDIA_IMAGE_MAX_SIZE_MB=10
 MEDIA_VIDEO_MAX_SIZE_MB=1024
+MCP_UPLOAD_MAX_SIZE_MB=50
+MCP_UPLOAD_URL_TTL_MINUTES=15
 ```
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MEDIA_IMAGE_MAX_SIZE_MB` | `10` | Max image upload size, in MB. Applied to direct uploads and URL fetches. |
 | `MEDIA_VIDEO_MAX_SIZE_MB` | `1024` | Max video upload size, in MB. Applied to direct uploads and URL fetches. |
+| `MCP_UPLOAD_MAX_SIZE_MB` | `50` | Hard cap (in MB) for files uploaded through the MCP `request-media-upload-tool` signed-URL flow. Intentionally smaller than the per-type caps because uploads stream through the app server. Raise it if your operators / nginx are sized for larger payloads. |
+| `MCP_UPLOAD_URL_TTL_MINUTES` | `15` | Lifetime of the signed upload URL returned by `request-media-upload-tool`. |
 
-If you raise the video limit, also bump PHP's `upload_max_filesize` and `post_max_size` and any reverse-proxy body-size cap to match.
+If you raise the video limit, also bump PHP's `upload_max_filesize` and `post_max_size` and any reverse-proxy body-size cap to match. The MCP upload endpoint is additionally rate-limited at **10 requests / minute / IP** — this is a hard-coded defense; tune the surrounding nginx/Cloudflare limits if you need a different floor.
 
 ## File Storage
 

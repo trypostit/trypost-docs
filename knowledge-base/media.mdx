@@ -11,7 +11,13 @@ icon: "image"
 | **Image** | JPG, PNG, GIF, WebP | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
 | **Video** | MP4, MOV | `video/mp4`, `video/quicktime` |
 
-Both the file upload endpoint ([`POST /posts/{post}/media`](/api-reference/endpoint/upload-media)) and the URL-fetch endpoint ([`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url)) accept the same MIME set. WebM is intentionally excluded — every major social platform rejects it, so accepting it would just produce platform-specific publish failures.
+Three upload paths share the same MIME set:
+
+- [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — direct upload with a Bearer token, attaches straight to a post.
+- [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) — server-side fetch of a public URL.
+- [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload) — one-shot **signed URL** issued by the MCP [`request-media-upload-tool`](/ai/tools-reference#posts) flow. Used by AI agents to upload local files without provisioning an API key.
+
+WebM is intentionally excluded — every major social platform rejects it, so accepting it would just produce platform-specific publish failures.
 
 ## Upload limits
 
@@ -19,8 +25,11 @@ Both the file upload endpoint ([`POST /posts/{post}/media`](/api-reference/endpo
 |------|-------------|-----------------------|
 | Image | 10 MB per file | `MEDIA_IMAGE_MAX_SIZE_MB` |
 | Video | 1 GB per file | `MEDIA_VIDEO_MAX_SIZE_MB` |
+| MCP signed-URL upload | 50 MB per file (any type) | `MCP_UPLOAD_MAX_SIZE_MB` |
 
 Files over 1 MB are sent in chunks (the dashboard streams them via `Content-Range` to the chunked upload endpoint) so big videos transfer reliably even on flaky connections. On self-hosted instances, raising the video cap also requires bumping PHP's `upload_max_filesize` / `post_max_size` and any reverse-proxy body-size cap to match.
+
+The MCP upload path uses a tighter cap on purpose — files route through the app server before being written to the configured storage disk, so a smaller ceiling keeps a single worker from being tied up by huge transfers. Each signed URL is single-use and expires after 15 minutes (configurable via `MCP_UPLOAD_URL_TTL_MINUTES`).
 
 ## Platform content types and media requirements
 

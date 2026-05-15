@@ -1,0 +1,111 @@
+---
+title: "Upload media via signed URL"
+api: "POST /uploads/{token}"
+description: "Receive an MCP-issued one-shot signed URL upload. Normally invoked by the request-media-upload-tool flow, not called directly."
+---
+
+This endpoint is the **destination** of a signed POST URL issued by the MCP [`request-media-upload-tool`](/ai/tools-reference#posts). It exists to let AI agents and their clients upload local files to your workspace without provisioning a Personal Access Token — the signed URL itself is the auth.
+
+You normally don't call this endpoint directly. The flow is:
+
+1. AI agent calls `request-media-upload-tool` → receives `upload_url` + `upload_token`
+2. The agent (or the user) POSTs the file to `upload_url`
+3. AI agent calls [`attach-media-from-upload-tool`](/ai/tools-reference#posts) with the same `upload_token` to attach the resulting Media to a post
+
+If you already have a Personal Access Token, the simpler endpoint is [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — direct upload to a specific post, no signed URL.
+
+## Path parameter
+
+<ParamField path="token" type="string" required>
+  The single-use UUID baked into the signed URL by `request-media-upload-tool`. Must be a valid UUID; non-UUID values 404.
+</ParamField>
+
+## Query parameters (added by the signed URL)
+
+These are added to the URL by Laravel's `URL::temporarySignedRoute` and are covered by the HMAC signature — never set them yourself.
+
+<ParamField query="workspace_id" type="string" required>
+  The workspace this upload belongs to. Tampering with this value invalidates the signature and the endpoint returns `403`.
+</ParamField>
+<ParamField query="expires" type="integer" required>
+  Unix timestamp when the URL expires. Default TTL is **15 minutes** from issuance (configurable via `MCP_UPLOAD_URL_TTL_MINUTES`).
+</ParamField>
+<ParamField query="signature" type="string" required>
+  HMAC-SHA256 of the URL + query parameters, signed with the app's `APP_KEY`. Verified by Laravel's `signed` middleware before the controller runs.
+</ParamField>
+
+## Request
+
+Send as `multipart/form-data` with a single `media` field.
+
+<ParamField body="media" type="file" required>
+  The file to upload. Subject to the **50 MB hard cap** for the MCP upload flow (configurable via `MCP_UPLOAD_MAX_SIZE_MB`), plus the standard per-type MIME whitelist:
+
+  - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp`
+  - **Videos**: `video/mp4`, `video/quicktime` (MOV)
+
+  The MIME type is detected from the file's magic bytes (not the extension or `Content-Type` header), so renaming `evil.exe` to `photo.png` doesn't bypass the whitelist.
+</ParamField>
+
+## Authentication
+
+**No Bearer token.** The signed URL is the credential.
+
+- The `signed` middleware verifies the HMAC against `APP_KEY` and rejects expired URLs with `403`.
+- An atomic `Cache::add` plus a `UNIQUE` constraint on `media.upload_token` ensure the URL is **single-use**: the second POST with the same `token` returns `409`.
+- The endpoint is rate-limited to **10 requests per minute per IP** as defense in depth against floods of leaked URLs.
+
+## Behaviour
+
+- The file is stored on the workspace's configured filesystem disk (`local`, `s3`, `r2`, etc.) at `medias/{uuid}.{ext}`. The path is generated server-side — client filenames are never used in the path.
+- PNG and WebP still images are normalized to **JPEG (q100)** for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon). Videos are stored as-is.
+- The resulting `Media` row is tagged with the `upload_token` so the AI agent can reference it later via `attach-media-from-upload-tool`. The Media is created as a **workspace asset** — not yet attached to any post.
+- This endpoint is **not** triggered by the [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) flow. It only handles MCP-issued signed URLs.
+
+## Response
+
+<ResponseField name="upload_token" type="string">
+  Echo of the `{token}` path parameter, for client convenience.
+</ResponseField>
+<ResponseField name="media_id" type="string">
+  The UUID of the created `Media` record. Pass this (or the `upload_token`) to `attach-media-from-upload-tool` to attach to a post.
+</ResponseField>
+<ResponseField name="type" type="string">
+  `image` or `video`.
+</ResponseField>
+<ResponseField name="mime_type" type="string">
+  The detected MIME type. Note that PNG/WebP inputs are reported as `image/jpeg` due to the normalization step.
+</ResponseField>
+<ResponseField name="original_filename" type="string">
+  The filename the client sent (stored as metadata, never used for the storage path).
+</ResponseField>
+
+## Status codes
+
+| Code | Meaning |
+|---|---|
+| `201` | Upload stored, Media created. |
+| `403` | Signature invalid, expired, or any query parameter was tampered with. |
+| `409` | Token already used (single-use enforcement). |
+| `422` | File missing, too large (> `MCP_UPLOAD_MAX_SIZE_MB`), or disallowed MIME type. |
+| `429` | Rate limit exceeded (more than 10 POSTs per minute from this IP). |
+
+<RequestExample>
+```bash
+# Assume {upload_url} came from request-media-upload-tool
+curl -X POST "{upload_url}" \
+  -F "media=@./photo.jpg"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "upload_token": "9f2c5b4e-1a3d-4e5f-8a7b-2c1d3e4f5a6b",
+  "media_id": "2681a1bf-131f-41b1-9866-755c1cb51f97",
+  "type": "image",
+  "mime_type": "image/jpeg",
+  "original_filename": "photo.jpg"
+}
+```
+</ResponseExample>
