@@ -44,7 +44,32 @@ npm install
 npm run build
 ```
 
-### 3. Run all dev processes in one terminal
+### 3. Seed default data and create the admin user
+
+Self-hosted installs default to `SELF_HOSTED=true`, which closes `/register` to the public — your instance only exists for you and the people you invite.
+
+On a fresh database, run this once:
+
+```bash
+php artisan migrate:fresh --seed && php artisan db:seed --class=UserSeeder
+```
+
+This rebuilds the schema, runs the default `DatabaseSeeder` (which provisions the **Laravel Passport Personal Access Client** required to issue API tokens, plus the plan rows), and then creates the admin user.
+
+<Warning>
+  `migrate:fresh` **drops every table**. Only run it on a brand-new database during initial install. If you already have data, run `php artisan db:seed && php artisan db:seed --class=UserSeeder` instead — both seeders are idempotent.
+</Warning>
+
+The admin account ships with fixed credentials — **change the password immediately on first login**:
+
+| Field | Value |
+|---|---|
+| Email | `admin@trypost.it` |
+| Password | `password` |
+
+After this, every other account on the instance comes from a workspace invite (Settings → Members) — invitees get a link that lets them sign up even though open registration stays off.
+
+### 4. Run all dev processes in one terminal
 
 ```bash
 composer dev
@@ -59,13 +84,13 @@ This concurrently starts:
 
 For Inertia SSR development, use `composer dev:ssr` instead.
 
-### 4. Production process supervisors
+### 5. Production process supervisors
 
 For production you don't use `composer dev`. Configure separate supervisor entries for the web server (PHP-FPM / Octane), Horizon (queues), Reverb (WebSockets), and the cron job for `php artisan schedule:run` — see [Production setup](/self-hosting/production).
 
 ## Verify the install
 
-Visit `http://localhost:8000` (or your configured `APP_URL`) and you should see the TryPost welcome page. Create the first account from `/register` and you'll land in the dashboard.
+Visit `http://localhost:8000` (or your configured `APP_URL`) and sign in with the admin credentials you set in step 3. You'll land in the dashboard.
 
 ## Next Steps
 
