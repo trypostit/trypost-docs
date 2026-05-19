@@ -138,9 +138,20 @@ R2_BUCKET=your_bucket
 R2_URL=https://your-custom-domain.com
 ```
 
+### DigitalOcean Spaces
+
+```env
+FILESYSTEM_DISK=spaces
+SPACES_ACCESS_KEY_ID=your_key
+SPACES_SECRET_ACCESS_KEY=your_secret
+SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
+SPACES_REGION=nyc3
+SPACES_BUCKET=your_bucket
+```
+
 ### Other S3-Compatible Storage
 
-Any S3-compatible storage (MinIO, DigitalOcean Spaces, etc.) can be used with the `s3` disk configuration.
+Any other S3-compatible storage (MinIO, Backblaze B2, etc.) can be used with the `s3` disk configuration.
 
 ## Mail
 
