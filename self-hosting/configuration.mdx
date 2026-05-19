@@ -29,8 +29,9 @@ APP_URL=http://localhost
 SELF_HOSTED=true
 ```
 
-`SELF_HOSTED=true` is the default. It bypasses everything billing-related so you never have to touch Stripe or Cashier:
+`SELF_HOSTED=true` is the default. It bypasses everything billing-related so you never have to touch Stripe or Cashier, and it locks down public sign-ups:
 
+- **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Create the admin user](/self-hosting/installation#3-create-the-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
 - No Stripe, Cashier, or `CASHIER_TRIAL_DAYS` configuration required
 - The `LoadWorkspaceFromToken` middleware skips the `402 Payment Required` gate
 - Plan limits are not enforced — unlimited workspaces, social accounts, members, and AI credits per account
@@ -94,15 +95,25 @@ If you raise the video limit, also bump PHP's `upload_max_filesize` and `post_ma
 
 ## File Storage
 
-TryPost supports local storage and S3-compatible cloud storage.
+TryPost supports local public storage and S3-compatible cloud storage.
 
-The default disk is **Cloudflare R2** (`FILESYSTEM_DISK=r2`). For self-hosted installs without object storage configured, switch to `local`.
+The default disk is **Cloudflare R2** (`FILESYSTEM_DISK=r2`). For self-hosted installs without object storage configured, switch to `public`.
 
-### Local Storage
+### Public Disk
+
+Stores files in `storage/app/public` and serves them directly from `${APP_URL}/storage`.
 
 ```env
-FILESYSTEM_DISK=local
+FILESYSTEM_DISK=public
 ```
+
+After switching, create the symlink from `public/storage` to `storage/app/public`:
+
+```bash
+php artisan storage:link
+```
+
+See Laravel's [public disk documentation](https://laravel.com/docs/13.x/filesystem#the-public-disk) for more details.
 
 ### AWS S3
 

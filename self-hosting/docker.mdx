@@ -69,14 +69,38 @@ REDIS_HOST=redis
 
 That brings up `laravel.test`, `pgsql`, `redis`, `mailpit`, and `selenium`.
 
-### 5. Generate the app key and run migrations
+### 5. Generate the app key
 
 ```bash
 ./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate
 ```
 
-### 6. Install npm packages and build the front-end
+Migrations run as part of the seed step below.
+
+### 6. Seed default data and create the admin user
+
+Self-hosted installs default to `SELF_HOSTED=true`, which closes `/register`. On a fresh database, run this once:
+
+```bash
+./vendor/bin/sail artisan migrate:fresh --seed && ./vendor/bin/sail artisan db:seed --class=UserSeeder
+```
+
+This rebuilds the schema, runs the default `DatabaseSeeder` (Passport personal access client + plan rows), and creates the admin user.
+
+<Warning>
+  `migrate:fresh` **drops every table**. Only run it on a brand-new database. If you already have data, run `sail artisan db:seed && sail artisan db:seed --class=UserSeeder` instead.
+</Warning>
+
+Default credentials — **change the password on first login**:
+
+| Field | Value |
+|---|---|
+| Email | `admin@trypost.it` |
+| Password | `password` |
+
+Additional accounts come from workspace invites (Settings → Members).
+
+### 7. Install npm packages and build the front-end
 
 ```bash
 ./vendor/bin/sail npm install

@@ -114,7 +114,7 @@ Media files are stored on the disk configured by `FILESYSTEM_DISK`. Out of the b
 
 | Driver | Use case |
 |--------|----------|
-| `local` | Development or small self-hosted setups |
+| `public` | Self-hosted setups serving files directly from `${APP_URL}/storage` — requires `php artisan storage:link` |
 | `s3` | AWS S3 |
 | `r2` | Cloudflare R2 (S3-compatible — the default in shipped config) |
 
