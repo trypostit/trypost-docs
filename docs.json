@@ -256,7 +256,7 @@
     "primary": {
       "type": "button",
       "label": "Sign up on Cloud",
-      "href": "https://app.trypost.it/register"
+      "href": "https://trypost.it"
     }
   },
   "contextual": {
