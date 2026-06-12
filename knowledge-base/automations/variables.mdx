@@ -1,0 +1,124 @@
+---
+title: "Variables and expressions"
+description: "Pass data between nodes with double-brace expressions and reusable workflow variables"
+icon: "code"
+---
+
+Automations move data between nodes with **expressions**. Wrap a path in double braces and TryPost replaces it at run time with the real value:
+
+```text
+Write a short post about {{ fetched.title }} and link to {{ fetched.link }}.
+```
+
+Expressions work in **any text field** of any node — prompts, webhook payloads, HTTP bodies, condition fields, and more.
+
+## What data is in scope
+
+This is the rule that trips people up most:
+
+<Warning>
+  A node can only use data from nodes connected **before** it (upstream). If a node isn't on the path leading into the current node, its data isn't available.
+</Warning>
+
+So a Generate node placed after a **Fetch RSS** node can use `{{ fetched.title }}`, but a node that runs *before* the fetch cannot — the data doesn't exist yet at that point in the flow.
+
+<Tip>
+  In any field, type `{{` to open an autocomplete of exactly what's in scope at that node. Known references are highlighted; unknown ones are flagged so you catch typos before running.
+</Tip>
+
+## Expression reference
+
+Which expressions exist depends on which nodes run upstream.
+
+### Schedule trigger
+
+Available when the flow starts from a **Schedule** trigger.
+
+| Expression | Value |
+| --- | --- |
+| `{{ trigger.event }}` | The trigger event name |
+| `{{ trigger.fired_at }}` | When the trigger fired |
+
+### Post trigger
+
+Available when the flow starts from a **Post published** or **Post scheduled** trigger.
+
+| Expression | Value |
+| --- | --- |
+| `{{ trigger.post.id }}` | The triggering post's ID |
+| `{{ trigger.post.content }}` | Its content |
+| `{{ trigger.post.status }}` | Its status |
+| `{{ trigger.post.scheduled_at }}` | When it's scheduled |
+| `{{ trigger.post.published_at }}` | When it was published |
+
+### Fetch RSS
+
+Available downstream of a **Fetch RSS** node.
+
+| Expression | Value |
+| --- | --- |
+| `{{ fetched.title }}` | The feed item's title |
+| `{{ fetched.link }}` | Its link |
+| `{{ fetched.description }}` | Its description |
+| `{{ fetched.pubDate }}` | Its publish date |
+
+### HTTP Request
+
+Available downstream of an **HTTP Request** node. The whole JSON response is exposed as `fetched`, so you append whatever path you need:
+
+```text
+{{ fetched.data.0.title }}
+{{ fetched.user.name }}
+```
+
+| Expression | Value |
+| --- | --- |
+| `{{ fetched.<field> }}` | Any field from the JSON response |
+
+### Generate
+
+Available downstream of a **Generate** node.
+
+| Expression | Value |
+| --- | --- |
+| `{{ generated.content }}` | The AI-generated post content |
+| `{{ generated.post_url }}` | The generated post's URL |
+
+### Always available
+
+These work anywhere in any flow.
+
+| Expression | Value |
+| --- | --- |
+| `{{ variables.YOUR_KEY }}` | A workflow variable (see below) |
+| `{{ now }}` | The current date and time |
+
+## Workflow variables
+
+Workflow variables are **reusable values** you define once and reference anywhere with `{{ variables.KEY }}`. They're scoped to a single automation.
+
+Use them for values you repeat across nodes or want to keep out of node fields — API keys, base URLs, account handles, a default hashtag.
+
+<Steps>
+  <Step title="Open the Variables tab">
+    In the Workflow editor, switch to the **Variables** tab in the right sidebar.
+  </Step>
+  <Step title="Add a variable">
+    Give it a **key** (letters, numbers, and underscores — e.g. `API_KEY`) and a **value**.
+  </Step>
+  <Step title="Reference it">
+    Use `{{ variables.API_KEY }}` in any field, in any node.
+  </Step>
+</Steps>
+
+<Note>
+  Variable values are **stored encrypted**. They're safe for secrets like API keys.
+</Note>
+
+## See it in action
+
+The surest way to learn what's available is to run the flow:
+
+<Tip>
+  Click **Run test** in the editor and open the result panel. Each node shows its exact **input** and **output**, so you can see precisely what every expression resolves to. See [Testing and monitoring](/knowledge-base/automations/monitoring).
+</Tip>

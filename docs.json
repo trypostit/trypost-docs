@@ -181,6 +181,15 @@
             ]
           },
           {
+            "group": "Automations",
+            "pages": [
+              "knowledge-base/automations/introduction",
+              "knowledge-base/automations/triggers-and-nodes",
+              "knowledge-base/automations/variables",
+              "knowledge-base/automations/monitoring"
+            ]
+          },
+          {
             "group": "Accounts",
             "pages": [
               "knowledge-base/social-accounts",
@@ -281,7 +290,9 @@
     "socials": {
       "x": "https://x.com/trypostit",
       "github": "https://github.com/trypostit",
-      "youtube": "https://www.youtube.com/@trypostit"
+      "youtube": "https://www.youtube.com/@trypostit",
+      "instagram": "https://www.instagram.com/trypost.it",
+      "discord": "https://trypost.it/discord"
     }
   }
 }

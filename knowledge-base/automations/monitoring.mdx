@@ -1,0 +1,90 @@
+---
+title: "Testing and monitoring"
+description: "Test runs, the invocations log, metrics, and lifecycle settings"
+icon: "chart-line"
+---
+
+Once a flow is built, you can test it before going live and watch how it performs once it's running.
+
+## Testing
+
+Click **Run test** in the Workflow editor to execute the whole flow end-to-end and inspect what each node does. The result panel shows every node's **input** and **output** as it runs — the fastest way to confirm your expressions resolve correctly.
+
+There are two modes:
+
+| Mode | What it does |
+| --- | --- |
+| **Dry run** (default) | Runs every node, including AI generation, but **never publishes** a post or triggers external side effects. The generated content is shown but not saved. |
+| **With real data** | Actually publishes posts and fires webhooks. Use it for a final end-to-end check. |
+
+<Warning>
+  A **With real data** test really publishes and fires side effects. Use it deliberately.
+</Warning>
+
+<Note>
+  Test runs never appear in the Invocations log or Metrics — those report only on real, automatic executions.
+</Note>
+
+## Invocations
+
+The **Invocations** tab is the run log: every time the live automation fires, it lands here, newest first.
+
+Each row shows:
+
+- **Timestamp** — when the run started
+- **Run** — its ID (click to copy)
+- **Status** — completed, failed, running, waiting, pending, or cancelled
+- **Last message** — a summary and the number of steps it ran
+- **Duration** — how long it took
+
+Click any row to expand it and see the **per-node breakdown** of that run. Use the **status filter** to narrow to failures, and the **search** box to find a run by ID.
+
+<Tip>
+  Only real executions show up here. Tests you run from the editor are kept out so the log stays meaningful.
+</Tip>
+
+## Metrics
+
+The **Metrics** tab charts the automation's health and output over a date range you pick with the range picker.
+
+**Run health**
+
+- Total runs, completed, failed, in progress
+- Success rate and average duration
+- A chart of runs started, completed, and failed over time
+
+**Output**
+
+- Posts created by the automation
+- A breakdown of those posts by platform
+
+<Note>
+  Like Invocations, Metrics count only real runs — test runs never inflate the numbers.
+</Note>
+
+## Settings and lifecycle
+
+The **Settings** tab is where you operate the automation:
+
+<AccordionGroup>
+  <Accordion title="Rename" icon="pencil">
+    Change the automation's name without touching the flow.
+  </Accordion>
+  <Accordion title="Activate or pause" icon="toggle-on">
+    Flip the status switch to go live or stop. Pausing keeps the flow intact — the trigger simply stops firing until you reactivate.
+  </Accordion>
+  <Accordion title="Delete" icon="trash">
+    In the **danger zone**, permanently remove the automation and its run history. This can't be undone.
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Automations overview" icon="bolt" href="/knowledge-base/automations/introduction">
+    The big picture and a build walkthrough.
+  </Card>
+  <Card title="Variables and expressions" icon="code" href="/knowledge-base/automations/variables">
+    Pass data between nodes.
+  </Card>
+</CardGroup>

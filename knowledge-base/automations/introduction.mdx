@@ -1,0 +1,93 @@
+---
+title: "Automations"
+description: "Build flows that fetch, generate, and publish content on autopilot"
+icon: "bolt"
+---
+
+<Note>
+  Automations are in **beta**. The building blocks below are stable, but expect new node types and refinements over time.
+</Note>
+
+Automations let you wire together a **flow** that runs on its own: a trigger starts it, action nodes fetch data and generate content, and output nodes publish posts or call webhooks. Think of it as a visual pipeline for content that would otherwise be manual.
+
+A few things you can build:
+
+- Turn a blog or news **RSS feed** into a daily AI-written post.
+- React whenever you **publish a post** and notify an external service.
+- Pull data from any **HTTP API** and generate a post from it on a schedule.
+
+## How a flow works
+
+Every automation is a graph of **nodes** connected by lines:
+
+<Steps>
+  <Step title="A trigger starts the flow">
+    A schedule, or a post being published or scheduled. There is exactly one trigger per automation.
+  </Step>
+  <Step title="Action nodes do the work">
+    Fetch an RSS feed or HTTP endpoint, generate content with AI, branch on a condition, or wait.
+  </Step>
+  <Step title="Output nodes deliver the result">
+    Publish the generated post, or send a webhook to another system.
+  </Step>
+</Steps>
+
+Data flows **downstream**: each node can use the data produced by the nodes connected before it. See [Variables and expressions](/knowledge-base/automations/variables) for the full picture.
+
+## The editor
+
+Open an automation to land in the **Workflow** editor — a canvas where you drag nodes from the sidebar and connect them. Click any node to open its settings in that same panel.
+
+The detail screen has four tabs:
+
+<CardGroup cols={2}>
+  <Card title="Workflow" icon="diagram-project">
+    The visual editor where you build and save the flow.
+  </Card>
+  <Card title="Invocations" icon="list">
+    A log of every real run, with per-node detail. See [Monitoring](/knowledge-base/automations/monitoring).
+  </Card>
+  <Card title="Metrics" icon="chart-line">
+    Run health and output charts over a date range.
+  </Card>
+  <Card title="Settings" icon="gear">
+    Rename, activate or pause, and delete the automation.
+  </Card>
+</CardGroup>
+
+## Build your first automation
+
+<Steps>
+  <Step title="Create the automation">
+    Go to **Automations** and click **New automation**. It opens in the Workflow editor with a schedule trigger already in place.
+  </Step>
+  <Step title="Configure the trigger">
+    Click the trigger node and pick when it fires — a schedule, or a post event. See [Triggers and nodes](/knowledge-base/automations/triggers-and-nodes).
+  </Step>
+  <Step title="Add action nodes">
+    Drag nodes from the sidebar onto the canvas and connect them by dragging from one node's handle to the next.
+  </Step>
+  <Step title="Reference data between nodes">
+    In any text field, type `{{` to autocomplete the data available at that point in the flow.
+  </Step>
+  <Step title="Test it">
+    Click **Run test** to execute the flow end-to-end with synthesized data before going live.
+  </Step>
+  <Step title="Save and activate">
+    Click **Save**, then open the **Settings** tab and flip the status switch to activate. The automation now runs on its own.
+  </Step>
+</Steps>
+
+## Statuses
+
+An automation is always in one of three states:
+
+| Status | Meaning |
+| --- | --- |
+| **Draft** | Being built. It never runs. |
+| **Active** | Live. The trigger fires and the flow runs. |
+| **Paused** | Stopped. The trigger no longer fires until you reactivate it. |
+
+<Tip>
+  Activating and pausing live in the **Settings** tab. You can pause anytime without losing your flow.
+</Tip>

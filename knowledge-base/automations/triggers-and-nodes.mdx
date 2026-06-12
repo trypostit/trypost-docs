@@ -1,0 +1,106 @@
+---
+title: "Triggers and nodes"
+description: "Every building block you can drop into a flow"
+icon: "diagram-project"
+---
+
+A flow is built from **nodes**. One trigger starts it; the rest fetch data, shape the flow, or deliver output. Drag nodes from the editor sidebar and connect them by dragging from a node's handle to the next node.
+
+## Triggers
+
+Every automation has exactly one trigger. It decides **when** the flow runs.
+
+| Trigger | Fires when | Provides |
+| --- | --- | --- |
+| **Schedule** | A cron-style schedule you set (every N minutes/hours/days, weekly, monthly, or a custom expression) | `trigger.event`, `trigger.fired_at` |
+| **Post published** | One of your posts is published | `trigger.post.*` |
+| **Post scheduled** | One of your posts is scheduled | `trigger.post.*` |
+
+<Note>
+  The trigger is created with the automation and can't be removed — you can only change its type. The schedule editor lets you pick an interval, time, weekdays, or a custom cron expression, and the timezone defaults to your workspace timezone.
+</Note>
+
+## Source nodes
+
+Source nodes pull external data into the flow. Both expose two output handles — **has items** and **no items** — so you can branch on whether anything new came back.
+
+<AccordionGroup>
+  <Accordion title="Fetch RSS" icon="rss">
+    Reads an RSS/Atom feed from a **Feed URL** and exposes the matched item as `fetched.title`, `fetched.link`, `fetched.description`, and `fetched.pubDate`.
+
+    TryPost remembers which items it has already seen, so the flow only runs for genuinely **new** entries.
+  </Accordion>
+  <Accordion title="HTTP Request" icon="globe">
+    Calls any HTTP endpoint. Configure the **URL**, **method** (GET/POST/PUT/PATCH/DELETE), authentication (none, bearer, basic, or API key), headers, and a body template. Auth tokens and passwords are stored encrypted.
+
+    The JSON response becomes `fetched`, so you reference any field with `{{ fetched.<path> }}`. Optional **items path**, **item key path**, and **item date path** settings let it walk a list response and dedupe items the same way the RSS node does.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  **First run sets a baseline.** The first time a source node polls an existing feed or endpoint, it records what's already there and produces nothing — only items that appear *after* that trigger the flow.
+
+  **New items fan out.** When a source node then finds several new items at once, each one runs the downstream nodes independently — five new feed entries produce five posts. A test run only ever processes the first item, so it stays predictable.
+</Note>
+
+## Content node
+
+<Accordion title="Generate" icon="sparkles">
+  Generates a post with AI and attaches it to one or more social accounts.
+
+  - **Accounts** — which connected accounts and content types to post to. The most restrictive selected platform (smallest character limit) drives the generated copy so it fits everywhere.
+  - **Prompt** — your instruction. Reference upstream data with `{{ }}`, e.g. `Write a post about {{ fetched.title }}`.
+  - **Image count** — `0` for text-only (LinkedIn, X, Threads), `1` for a single image, or `2–10` for a carousel. The picker only offers counts the selected accounts support.
+  - **Use brand voice** — when off, the post stays faithful to the source instead of being rewritten in your brand persona. Useful for news curation.
+  - **Use brand visuals** — when off, generated images skip your brand colors and identity.
+
+  Provides `generated.content` and `generated.post_url`.
+</Accordion>
+
+<Tip>
+  The Generate node uses the same content engine as **Create with AI** — see [AI features](/knowledge-base/ai-features) and [Brand profile](/knowledge-base/brand-profile).
+</Tip>
+
+## Flow nodes
+
+These shape the path the run takes.
+
+<AccordionGroup>
+  <Accordion title="Condition" icon="code-branch">
+    Branches the flow. Compares a **field** (any `{{ }}` expression) against a **value** using one of: `contains`, `not contains`, `equals`, `not equals`, `matches` (regex), `greater than`, or `less than`. The flow continues down the matching branch.
+  </Accordion>
+  <Accordion title="Delay" icon="clock">
+    Pauses the flow for a **duration** in minutes, hours, or days before continuing. Useful for spacing out actions.
+  </Accordion>
+</AccordionGroup>
+
+## Output nodes
+
+<AccordionGroup>
+  <Accordion title="Publish" icon="paper-plane">
+    Publishes the post created by an upstream Generate node. Choose a **mode**:
+
+    | Mode | Result |
+    | --- | --- |
+    | **Now** | Publishes immediately |
+    | **Scheduled** | Schedules it, offset by N minutes from now (default 60) |
+    | **Draft** | Leaves it as a draft for you to review |
+  </Accordion>
+  <Accordion title="Webhook" icon="arrow-up-right-from-square">
+    Sends an HTTP request to an external system. Configure the **URL**, **method**, headers, and a **payload template** where you can inject any `{{ }}` expression.
+  </Accordion>
+  <Accordion title="End" icon="circle-stop">
+    Stops the automation at that point. Optional — a branch ends on its own when it has no more nodes.
+  </Accordion>
+</AccordionGroup>
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="Variables and expressions" icon="code" href="/knowledge-base/automations/variables">
+    Pass data between nodes with `{{ }}`.
+  </Card>
+  <Card title="Testing and monitoring" icon="chart-line" href="/knowledge-base/automations/monitoring">
+    Test runs, the invocations log, and metrics.
+  </Card>
+</CardGroup>
