@@ -1,0 +1,57 @@
+---
+title: Telegram
+description: Connect a Telegram channel or group to TryPost
+---
+
+# Telegram
+
+TryPost publishes to Telegram **channels and groups** through a shared TryPost bot that you add as an administrator.
+
+## Connect a channel
+
+1. Go to **Accounts** in the TryPost dashboard
+2. Click **Connect** on **Telegram**
+3. Add the bot (e.g. **@TryPostBot**) as an **administrator** of your channel or group
+4. Copy the `/connect <code>` command shown in the dialog and post it in that channel
+5. TryPost links the channel automatically — the dialog closes once it's connected
+
+<Note>
+  The bot must be an **administrator** of the channel. Telegram only delivers channel posts (including the `/connect` command and reactions) to bots that are admins, and the bot needs admin rights to publish.
+</Note>
+
+You can connect as many channels and groups as you like — each one becomes its own account.
+
+## Supported content types
+
+| Type | Description |
+|------|-------------|
+| **Post** (`telegram_post`) | Text with up to 10 images/videos (multiple media are sent as an album) |
+
+Telegram allows up to **4096** characters of text. Media captions are capped at **1024**, so a longer post is sent as the media followed by a separate text message. Formatting (bold, italic, links, `code`) and plain `@username` mentions are preserved — Telegram auto-links public usernames.
+
+## Analytics
+
+Telegram's Bot API exposes **no post view counts**. TryPost surfaces what is available:
+
+- **Subscribers** — the channel's member count (shown account-wide and on each post)
+- **Reactions** — per-post reaction counts (👍 ❤️ 🔥 …), pushed in real time by Telegram
+
+## Self-hosting setup
+
+Telegram uses a single shared bot. Create one with [@BotFather](https://t.me/BotFather), then configure:
+
+```env
+TELEGRAM_BOT_TOKEN=123456:ABC...
+TELEGRAM_BOT_USERNAME=YourBot
+TELEGRAM_WEBHOOK_SECRET=a-long-random-string
+```
+
+Register the webhook so Telegram can deliver `/connect` commands and reactions:
+
+```bash
+php artisan telegram:set-webhook
+```
+
+<Note>
+  The webhook URL is `{APP_URL}/telegram/webhook`, so `APP_URL` must be a **public HTTPS URL** Telegram can reach. Re-run `telegram:set-webhook` whenever it changes. See the [Self-Hosting configuration guide](/self-hosting/configuration).
+</Note>

@@ -34,7 +34,7 @@ Returns posts ordered by `scheduled_at` descending (latest first), 15 per page.
       One entry per `post_platform` (one social account targeted by this post).
       <Expandable>
         <ResponseField name="id" type="string">UUID of the post_platform row. Use this in `PUT /posts/{post}` to enable/disable platforms.</ResponseField>
-        <ResponseField name="platform" type="string">Platform identifier — e.g. `linkedin`, `linkedin-page`, `x`, `facebook`, `instagram`, `instagram-facebook`, `tiktok`, `youtube`, `threads`, `pinterest`, `bluesky`, `mastodon`.</ResponseField>
+        <ResponseField name="platform" type="string">Platform identifier — e.g. `linkedin`, `linkedin-page`, `x`, `facebook`, `instagram`, `instagram-facebook`, `tiktok`, `youtube`, `threads`, `pinterest`, `bluesky`, `mastodon`, `telegram`.</ResponseField>
         <ResponseField name="content_type" type="string">Format used for this platform — e.g. `linkedin_post`, `instagram_reel`. See [`GET /content-types`](/api-reference/endpoint/list-content-types).</ResponseField>
         <ResponseField name="status" type="string">Per-platform publish status: `pending`, `publishing`, `published`, or `failed`.</ResponseField>
         <ResponseField name="enabled" type="boolean">Whether this platform will be published to.</ResponseField>

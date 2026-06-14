@@ -15,6 +15,7 @@ description: "Fetch engagement metrics (likes, comments, shares, etc.) for a pub
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
 - Returns one entry per **enabled** platform on the post.
 - A platform entry returns `metrics: { unsupported: true, reason: "not_published" }` when the platform hasn't been published yet, and `{ unsupported: true, reason: "platform_not_supported" }` for platforms that don't expose post-level metrics. Today that's **TikTok** and **personal LinkedIn** (`linkedin`); LinkedIn Pages (`linkedin-page`) and every other platform return real metrics.
+- **Telegram metrics use a different shape.** The Bot API exposes no likes, comments, shares, or views, so each metric entry carries an extra `kind` field: `"subscribers"` for the channel's member count, and `"reaction"` for each reaction type (where `label` is the emoji). Standard platforms omit `kind` and return likes/comments/shares.
 - Successful metrics responses are cached for 5 minutes per `post_platform`.
 
 ## Response
@@ -45,6 +46,18 @@ description: "Fetch engagement metrics (likes, comments, shares, etc.) for a pub
         "unsupported": true,
         "reason": "not_published"
       }
+    },
+    {
+      "post_platform_id": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
+      "platform": "telegram",
+      "status": "published",
+      "platform_post_id": "42",
+      "platform_url": "https://t.me/c/1234567890/42",
+      "metrics": [
+        { "label": "Subscribers", "value": 1280, "kind": "subscribers" },
+        { "label": "👍", "value": 34, "kind": "reaction" },
+        { "label": "🔥", "value": 12, "kind": "reaction" }
+      ]
     }
   ]
 }

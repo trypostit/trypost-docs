@@ -18,6 +18,7 @@ description: "Preview how a post will render on each enabled platform — applie
 - `sanitized_content` is the platform-specific rendering of that text. For most platforms this is identical to the original. Exceptions:
   - **LinkedIn / LinkedIn Page** — Unicode bold/underline substitution if the source contained `<strong>`/`<b>`/`<u>` markers (used by the AI generator).
   - **Mastodon** — a small allow-list of inline HTML is preserved (`p`, `strong`, `em`, `a`, `br`, `span`).
+  - **Telegram** — rendered as Telegram's HTML allow-list (`b`, `i`, `u`, `s`, `a`, `code`, `pre`); block elements become line breaks and `@mentions` are kept.
 - `truncated` is `true` only when sanitization actually shortened the byte count (e.g. an HTML entity got decoded). It is **not** a hard-cap signal — over-length content is rejected at publish time, never silently truncated. To detect over-limit content, compare `sanitized_length` against `max_content_length` yourself.
 
 ## Response

@@ -245,7 +245,7 @@ VITE_REVERB_SCHEME="${REVERB_SCHEME}"
 Each social platform requires API credentials from its developer portal. See each [platform's documentation](/platforms/overview) for step-by-step setup.
 
 <Note>
-  **Bluesky** and **Mastodon** don't require API credentials — they work out of the box.
+  **Bluesky** and **Mastodon** don't require API credentials — they work out of the box. **Telegram** uses a single shared bot you create with [@BotFather](https://t.me/BotFather), not a per-user OAuth app — see its credentials below.
 </Note>
 
 ### All platform credentials
@@ -291,7 +291,16 @@ GOOGLE_CLIENT_REDIRECT="${APP_URL}/accounts/youtube/callback"
 PINTEREST_CLIENT_ID=
 PINTEREST_CLIENT_SECRET=
 PINTEREST_CLIENT_REDIRECT="${APP_URL}/accounts/pinterest/callback"
+
+# Telegram (single shared bot — create one with https://t.me/BotFather)
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_BOT_USERNAME=
+TELEGRAM_WEBHOOK_SECRET=
 ```
+
+<Note>
+  Telegram delivers `/connect` commands and reactions over a webhook. After setting the variables above, register it with `php artisan telegram:set-webhook`. The webhook URL is `{APP_URL}/telegram/webhook`, so `APP_URL` must be a public HTTPS URL Telegram can reach — re-run the command whenever it changes. The bot must be added as an **administrator** of each channel or group it publishes to.
+</Note>
 
 ### Enabling/disabling platforms
 
@@ -310,6 +319,7 @@ THREADS_ENABLED=true
 PINTEREST_ENABLED=true
 BLUESKY_ENABLED=true
 MASTODON_ENABLED=true
+TELEGRAM_ENABLED=true
 ```
 
 Set any platform to `false` to hide it from the UI. All platforms are enabled by default.

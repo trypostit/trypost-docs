@@ -40,7 +40,8 @@
               "platforms/threads",
               "platforms/pinterest",
               "platforms/bluesky",
-              "platforms/mastodon"
+              "platforms/mastodon",
+              "platforms/telegram"
             ]
           },
           {
