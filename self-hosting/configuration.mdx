@@ -245,7 +245,7 @@ VITE_REVERB_SCHEME="${REVERB_SCHEME}"
 Each social platform requires API credentials from its developer portal. See each [platform's documentation](/platforms/overview) for step-by-step setup.
 
 <Note>
-  **Bluesky** and **Mastodon** don't require API credentials — they work out of the box. **Telegram** uses a single shared bot you create with [@BotFather](https://t.me/BotFather), not a per-user OAuth app — see its credentials below.
+  **Bluesky** and **Mastodon** don't require API credentials — they work out of the box. **Telegram** uses a single shared bot you create with [@BotFather](https://t.me/BotFather), and **Discord** uses a single shared bot application from the [Discord Developer Portal](https://discord.com/developers/applications) — neither is a per-user OAuth app. See their credentials below.
 </Note>
 
 ### All platform credentials
@@ -296,10 +296,20 @@ PINTEREST_CLIENT_REDIRECT="${APP_URL}/accounts/pinterest/callback"
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_BOT_USERNAME=
 TELEGRAM_WEBHOOK_SECRET=
+
+# Discord (single shared bot app — https://discord.com/developers/applications)
+DISCORD_CLIENT_ID=
+DISCORD_CLIENT_SECRET=
+DISCORD_BOT_TOKEN=
+DISCORD_CLIENT_REDIRECT="${APP_URL}/accounts/discord/callback"
 ```
 
 <Note>
   Telegram delivers `/connect` commands and reactions over a webhook. After setting the variables above, register it with `php artisan telegram:set-webhook`. The webhook URL is `{APP_URL}/telegram/webhook`, so `APP_URL` must be a public HTTPS URL Telegram can reach — re-run the command whenever it changes. The bot must be added as an **administrator** of each channel or group it publishes to.
+</Note>
+
+<Note>
+  Discord uses a single shared bot application (create one in the [Discord Developer Portal](https://discord.com/developers/applications)). Use the OAuth2 **Client Secret** — not the application's **Public Key** — for `DISCORD_CLIENT_SECRET`, and add the redirect URL above under **OAuth2 → Redirects**. The bot invite permissions and scopes are configurable via `DISCORD_PERMISSIONS` (default `248832`) and `DISCORD_SCOPES` (default `bot,identify,guilds`). See the [Discord platform guide](/platforms/discord) for the full setup.
 </Note>
 
 ### Enabling/disabling platforms
@@ -320,6 +330,7 @@ PINTEREST_ENABLED=true
 BLUESKY_ENABLED=true
 MASTODON_ENABLED=true
 TELEGRAM_ENABLED=true
+DISCORD_ENABLED=true
 ```
 
 Set any platform to `false` to hide it from the UI. All platforms are enabled by default.

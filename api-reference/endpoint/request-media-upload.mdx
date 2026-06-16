@@ -58,7 +58,7 @@ Send as `multipart/form-data` with a single `media` field.
 ## Behaviour
 
 - The file is stored on the workspace's configured filesystem disk (`local`, `s3`, `r2`, etc.) at `medias/{uuid}.{ext}`. The path is generated server-side — client filenames are never used in the path.
-- PNG and WebP still images are normalized to **JPEG (q100)** for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram). Videos are stored as-is.
+- PNG and WebP still images are normalized to **JPEG (q100)** for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram / Discord). Videos are stored as-is.
 - The resulting `Media` row is tagged with the `upload_token` so the AI agent can reference it later via `attach-media-from-upload-tool`. The Media is created as a **workspace asset** — not yet attached to any post.
 - This endpoint is **not** triggered by the [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) flow. It only handles MCP-issued signed URLs.
 

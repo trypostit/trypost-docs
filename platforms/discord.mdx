@@ -1,0 +1,81 @@
+---
+title: Discord
+description: Connect a Discord server to TryPost and publish to its channels
+---
+
+# Discord
+
+TryPost publishes to **Discord servers** through a shared TryPost bot that you add to your server. Each connected account is a **server (guild)** — you pick which **channel** to post in on each post.
+
+## Connect a server
+
+1. Go to **Accounts** in the TryPost dashboard
+2. Click **Connect** on **Discord**
+3. You'll be redirected to Discord — choose the **server** to add the TryPost bot to and authorize it
+4. You're returned to TryPost with that server connected as an account
+
+<Note>
+  You need the **Manage Server** permission on a Discord server to add a bot to it. The authorization adds the bot with the permissions it needs to post: View Channel, Send Messages, Embed Links, Attach Files, Read Message History, and Mention Everyone.
+</Note>
+
+Connect as many servers as you like — each one becomes its own account.
+
+## Choosing a channel
+
+A Discord account is the whole server, so every Discord post must target a **channel**. In the post editor's Discord settings, pick the channel from the searchable list.
+
+Only channels the bot can actually post in are shown — **text** and **announcement** channels where the bot has *View Channel* + *Send Messages*. Forum, voice, stage, and category channels are excluded (they don't accept a direct message), as are channels the bot has no access to.
+
+<Note>
+  If a channel is missing from the list, give the TryPost bot access to it in Discord (channel or role permissions), or move it under a category the bot can see. The list is cached for a few minutes after a change.
+</Note>
+
+## Supported content types
+
+| Type | Description |
+|------|-------------|
+| **Message** (`discord_message`) | Text with up to 10 images/videos, optional mentions and rich embeds |
+
+Discord allows up to **2000** characters of message text. Images are optimized to Discord's limits; videos and GIFs are sent as-is.
+
+### Mentions
+
+Add **mentions** (e.g. `@everyone`, a role, or a member) in the Discord settings. Mentions only ping on Discord — they're stored separately from the shared post text, so they never leak as literal `<@id>` markup to your other platforms. Only the mentions you explicitly add will ping; a literal "@everyone" typed into the shared caption does **not**.
+
+### Embeds
+
+Attach one or more rich **embeds** (title, description, URL, image, and accent color) to make announcements stand out. They render as Discord's native embed cards.
+
+## Analytics
+
+Discord exposes **no impressions or reach** for bot messages. TryPost surfaces what is available:
+
+- **Members** — the server's member count (shown account-wide and on each post)
+- **Reactions** — per-post reaction counts (🎉 👍 …)
+- **Comments** — replies in the post's thread, when one exists
+
+## Self-hosting setup
+
+Discord uses a single shared bot application. Create one in the [Discord Developer Portal](https://discord.com/developers/applications) (**New Application → Bot**), copy its **Bot Token**, and grab the **Client ID** / **Client Secret** from the OAuth2 settings. Then configure:
+
+```env
+DISCORD_CLIENT_ID=
+DISCORD_CLIENT_SECRET=
+DISCORD_BOT_TOKEN=
+DISCORD_CLIENT_REDIRECT="${APP_URL}/accounts/discord/callback"
+```
+
+In the Developer Portal, add the redirect URL above to your application's **OAuth2 → Redirects**.
+
+<Note>
+  Use the OAuth2 **Client Secret** for `DISCORD_CLIENT_SECRET` — not the application's **Public Key**. They're different values, and the Public Key causes an `invalid_client` error on connect.
+</Note>
+
+The bot is invited with a fixed permission bitfield (`248832` = View Channel + Send Messages + Embed Links + Attach Files + Read Message History + Mention Everyone) and the `bot identify guilds` scopes. Both are configurable if you need to change them:
+
+```env
+DISCORD_PERMISSIONS=248832
+DISCORD_SCOPES=bot,identify,guilds
+```
+
+See the [Self-Hosting configuration guide](/self-hosting/configuration) for the full platform credentials reference.

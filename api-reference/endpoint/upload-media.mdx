@@ -28,7 +28,7 @@ Send as `multipart/form-data` with a single `media` field.
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
 - The file's MIME type is **intersected with the platforms enabled on the post**. For example, uploading an image to a TikTok-only post returns `422` unless the post targets `tiktok_photo`.
 - Per-type size caps are enforced after MIME detection (a video over 1 GB returns `422` even if the FormRequest's overall cap allowed it). On self-hosted, caps come from `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB`.
-- PNG and WebP still images are normalized to **JPEG (q100)** at storage time for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram). MP4 and MOV videos are stored as-is.
+- PNG and WebP still images are normalized to **JPEG (q100)** at storage time for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram / Discord). MP4 and MOV videos are stored as-is.
 - The new media is stored under `medias/{uuid}.{ext}` on the configured filesystem disk (`local`, `s3`, or `r2`) and appended to the post's `media[]` array.
 
 ## Response

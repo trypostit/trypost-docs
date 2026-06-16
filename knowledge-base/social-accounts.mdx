@@ -25,6 +25,7 @@ Social accounts are the connections between TryPost and your social media profil
 | **Bluesky** | `bluesky` | Personal accounts | App Password |
 | **Mastodon** | `mastodon` | Any instance | OAuth (per instance) |
 | **Telegram** | `telegram` | Channels and groups | Bot (added as admin) |
+| **Discord** | `discord` | Servers (channel chosen per post) | Bot + OAuth |
 
 ## Connecting an account
 
@@ -38,6 +39,7 @@ Go to **Accounts** in the dashboard and click the platform you want to connect. 
 - **Bluesky** — enter your handle and an [App Password](https://bsky.app/settings/app-passwords) (not your main password)
 - **Mastodon** — enter your instance URL first, then authorize on that instance
 - **Telegram** — add the TryPost bot as an admin to your channel or group, then post the `/connect` command shown in the dialog
+- **Discord** — authorize TryPost and choose which server to add the bot to (requires *Manage Server*); the whole server connects as one account and you pick the channel on each post
 
 <Note>
   You can connect multiple accounts per platform — for example, both your personal LinkedIn and three company pages.

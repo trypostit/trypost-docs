@@ -15,7 +15,7 @@ description: "Fetch engagement metrics (likes, comments, shares, etc.) for a pub
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
 - Returns one entry per **enabled** platform on the post.
 - A platform entry returns `metrics: { unsupported: true, reason: "not_published" }` when the platform hasn't been published yet, and `{ unsupported: true, reason: "platform_not_supported" }` for platforms that don't expose post-level metrics. Today that's **TikTok** and **personal LinkedIn** (`linkedin`); LinkedIn Pages (`linkedin-page`) and every other platform return real metrics.
-- **Telegram metrics use a different shape.** The Bot API exposes no likes, comments, shares, or views, so each metric entry carries an extra `kind` field: `"subscribers"` for the channel's member count, and `"reaction"` for each reaction type (where `label` is the emoji). Standard platforms omit `kind` and return likes/comments/shares.
+- **Telegram and Discord metrics use a different shape.** Neither Bot API exposes likes, shares, or views, so each metric entry carries an extra `kind` field: `"subscribers"` for the Telegram channel's member count (and the Discord server's member count), `"reaction"` for each reaction type (where `label` is the emoji), and — for Discord only — `"comments"` for the post thread's reply count. Standard platforms omit `kind` and return likes/comments/shares.
 - Successful metrics responses are cached for 5 minutes per `post_platform`.
 
 ## Response

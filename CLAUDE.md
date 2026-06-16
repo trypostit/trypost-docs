@@ -4,7 +4,7 @@ Docs for [TryPost](https://trypost.it) — open-source social media scheduling p
 
 ## Project Context
 
-TryPost is a Laravel + Inertia.js + **Vue 3** application that lets users schedule and publish posts across 10 social platforms (12 platform identifiers in code, since LinkedIn and Instagram each have two connection flavors). It has two deployment modes: **Cloud** (managed by us) and **Self-Hosted** (user deploys on their own server).
+TryPost is a Laravel + Inertia.js + **Vue 3** application that lets users schedule and publish posts across 12 social platforms (14 platform identifiers in code, since LinkedIn and Instagram each have two connection flavors). It has two deployment modes: **Cloud** (managed by us) and **Self-Hosted** (user deploys on their own server).
 
 The app source code lives at `~/Herd/trypost`. This repo (`trypost-docs`) is the documentation site only.
 
@@ -116,12 +116,12 @@ These are the exact string values used in API responses. Never use alternatives.
 
 **NOT `active`/`inactive` — those are for `is_active` boolean field.**
 
-### Social account platforms (12 values)
-`linkedin`, `linkedin-page`, `x`, `tiktok`, `youtube`, `facebook`, `instagram`, `instagram-facebook`, `threads`, `pinterest`, `bluesky`, `mastodon`
+### Social account platforms (14 values)
+`linkedin`, `linkedin-page`, `x`, `tiktok`, `youtube`, `facebook`, `instagram`, `instagram-facebook`, `threads`, `pinterest`, `bluesky`, `mastodon`, `telegram`, `discord`
 
 `instagram` is the standalone Basic Display flow; `instagram-facebook` is the Business-via-Facebook-Page flavor.
 
-### Content types (21 values)
+### Content types (23 values)
 | Platform | Content types |
 |----------|--------------|
 | LinkedIn | `linkedin_post`, `linkedin_carousel` |
@@ -135,6 +135,8 @@ These are the exact string values used in API responses. Never use alternatives.
 | Pinterest | `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel` |
 | Bluesky | `bluesky_post` |
 | Mastodon | `mastodon_post` |
+| Telegram | `telegram_post` |
+| Discord | `discord_message` |
 
 Instagram content types work for both `instagram` and `instagram-facebook` accounts.
 

@@ -7,7 +7,7 @@ description: "Create a new draft post targeting one or more social accounts. Ret
 Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](/api-reference/endpoint/update-post) using `status=scheduled` or `status=publishing`.
 
 <Note>
-  **Pinterest posts**: `POST /posts` does not accept per-platform `meta`. After creating, call [`PUT /posts/{post}`](/api-reference/endpoint/update-post) and set `platforms[].meta.board_id` for each Pinterest entry — otherwise the publish job fails with `Pinterest board_id is required`.
+  Per-platform settings go in `platforms[].meta` and are accepted here on create (and on [`PUT /posts/{post}`](/api-reference/endpoint/update-post)). A few are **required to publish** — Pinterest `board_id`, TikTok `privacy_level`, Discord `channel_id` — but they're only enforced when you move the post to `scheduled`/`publishing`, not on this draft create. See [`PUT /posts/{post}`](/api-reference/endpoint/update-post) for the full `meta` reference.
 </Note>
 
 ## Request
@@ -21,7 +21,10 @@ Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](
     <ParamField body="content_type" type="string" required>
       Format for this platform — must match the social account's platform. Discover the catalog with [`GET /content-types`](/api-reference/endpoint/list-content-types).
 
-      Allowed values: `linkedin_post`, `linkedin_carousel`, `linkedin_page_post`, `linkedin_page_carousel`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_carousel`, `instagram_reel`, `instagram_story`, `tiktok_video`, `tiktok_photo`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`, `telegram_post`.
+      Allowed values: `linkedin_post`, `linkedin_carousel`, `linkedin_page_post`, `linkedin_page_carousel`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_carousel`, `instagram_reel`, `instagram_story`, `tiktok_video`, `tiktok_photo`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`, `telegram_post`, `discord_message`.
+    </ParamField>
+    <ParamField body="meta" type="object">
+      Optional per-platform settings (Instagram/Facebook `aspect_ratio`, TikTok `privacy_level` + flags, Pinterest `board_id`, Discord `channel_id`/`mentions`/`embeds`, …). Stored on the post platform and merged on update. See [`PUT /posts/{post}`](/api-reference/endpoint/update-post) for the full per-platform reference.
     </ParamField>
   </Expandable>
 </ParamField>
