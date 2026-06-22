@@ -11,11 +11,12 @@ TryPost has one **owner** per account (the user who signed up — set on `Accoun
 | | Owner | Admin | Member | Viewer |
 |---|:---:|:---:|:---:|:---:|
 | View posts, calendar, analytics | Yes | Yes | Yes | Yes |
-| Use signatures and labels | Yes | Yes | Yes | Read-only |
+| Comment on posts | Yes | Yes | Yes | Yes |
 | Create and edit posts | Yes | Yes | Yes | No |
+| Create and manage labels | Yes | Yes | Yes | No |
+| Create and manage signatures | Yes | Yes | Yes | No |
+| Upload and manage media assets | Yes | Yes | Yes | No |
 | Manage social accounts | Yes | Yes | No | No |
-| Create and manage labels | Yes | Yes | No | No |
-| Create and manage signatures | Yes | Yes | No | No |
 | Invite and remove members | Yes | Yes | No | No |
 | Change member roles | Yes | Yes | No | No |
 | Manage workspace settings | Yes | Yes | No | No |
@@ -25,7 +26,7 @@ TryPost has one **owner** per account (the user who signed up — set on `Accoun
 
 **Owner** is not a role you assign — it's the account owner (the user who created the account). The owner has full access to every workspace under the account. The owner role cannot be transferred today.
 
-**Viewer** is read-only. Useful for stakeholders or clients who need visibility into what's scheduled and how posts performed, without the ability to change anything.
+**Viewer** is read-only — but viewers *can* leave comments on posts. They can open any post to review it (every field is read-only) and add comments for feedback. This makes the role ideal for clients or stakeholders who review drafts and give feedback without being able to change anything.
 
 ## Inviting members
 
@@ -81,7 +82,7 @@ Use the workspace switcher in the sidebar to navigate between them.
     Not yet. The account owner is set at sign-up and stays fixed. For shared management, use the Admin role.
   </Accordion>
   <Accordion title="What can a Viewer actually do?">
-    Viewers can see posts, the calendar, analytics, signatures, and labels — but they cannot create, edit, publish, or delete anything. They also can't connect social accounts or manage team.
+    Viewers can see all posts, the calendar, and analytics, and they can open posts to review and leave comments for feedback. They cannot create, edit, publish, or delete anything, manage labels or signatures, connect social accounts, or manage the team.
   </Accordion>
   <Accordion title="Can a member see all posts or only their own?">
     All members (and viewers) can see all posts in the workspace, regardless of who created them.
