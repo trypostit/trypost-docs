@@ -41,22 +41,11 @@ Go to **Accounts** in the dashboard and click the platform you want to connect. 
 - **Telegram** — add the TryPost bot as an admin to your channel or group, then post the `/connect` command shown in the dialog
 - **Discord** — authorize TryPost and choose which server to add the bot to (requires *Manage Server*); the whole server connects as one account and you pick the channel on each post
 
-<Note>
-  You can connect multiple accounts per platform — for example, both your personal LinkedIn and three company pages.
-</Note>
-
 ## Connection limits (Cloud only)
 
-On TryPost Cloud, each plan caps the total number of connected accounts per workspace:
+On TryPost Cloud, each workspace connects one account on every supported network (its social set). To connect a second account on the same network, add another workspace.
 
-| Plan | Connected accounts |
-|------|--------------------|
-| Starter | 5 |
-| Plus | 10 |
-| Pro | 30 |
-| Max | 100 |
-
-Self-hosted instances have no cap. When you exceed the limit on Cloud, connecting a new account returns `402 Payment Required` and the dashboard prompts you to upgrade.
+Self-hosted instances have no cap.
 
 ## Active vs. inactive
 

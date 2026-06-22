@@ -34,7 +34,7 @@ SELF_HOSTED=true
 - **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Create the admin user](/self-hosting/installation#3-create-the-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
 - No Stripe, Cashier, or `CASHIER_TRIAL_DAYS` configuration required
 - The `LoadWorkspaceFromToken` middleware skips the `402 Payment Required` gate
-- Plan limits are not enforced — unlimited workspaces, social accounts, members, and AI credits per account
+- Subscription gating is not enforced, so workspaces, social accounts, members, and AI credits are unlimited per account
 - AI calls go straight to your configured provider; you pay the provider directly (no credit accounting)
 
 There's no reason to flip this to `false` on a self-hosted install. The Cloud SaaS deployment is the only place that runs with billing enabled.

@@ -41,18 +41,11 @@ Go to **Settings > Workspace** to manage:
 
 All scheduling times are stored and displayed in UTC.
 
-## Plan limits (Cloud only)
+## Pricing (Cloud only)
 
-On TryPost Cloud, each plan caps how many workspaces, social accounts, members, and AI credits an account can use. Self-hosted instances skip these checks.
+On TryPost Cloud, each workspace is billed separately at one flat price, with every feature included: one account on each network, unlimited team members, and 2,500 AI credits per month (pooled across your account). To run more brands or clients, add more workspaces.
 
-| Limit | Starter | Plus | Pro | Max |
-|-------|---------|------|-----|-----|
-| Workspaces | 1 | 5 | 15 | 50 |
-| Social accounts | 5 | 10 | 30 | 100 |
-| Members | 1 | 5 | 15 | 20 |
-| AI credits / month | 1,000 | 2,000 | 5,000 | 15,000 |
-
-When you hit a limit, the API and dashboard return `402 Payment Required` with a message telling you what's gating the action. Upgrade from **Settings > Account > Billing**.
+If you exhaust your pooled AI credits, the API and dashboard return `402 Payment Required` until the next reset. See [Plans & billing](/knowledge-base/plans-and-billing) for full pricing, trial, and credit details. Self-hosted instances skip these checks.
 
 ## Use cases
 
@@ -94,7 +87,7 @@ Go to **Settings > Workspace** and scroll to the danger zone.
 
 <AccordionGroup>
   <Accordion title="How many workspaces can I create?">
-    On TryPost Cloud, the cap depends on your plan (Starter 1 → Max 50 — see the table above). Self-hosted instances have no limit.
+    As many as you need. On TryPost Cloud each workspace is billed separately, so you add one per brand or client. Self-hosted instances have no limit.
   </Accordion>
   <Accordion title="Can I transfer a workspace to another user?">
     Not directly. The workspace owner cannot be changed. You would need to create a new workspace under the other user and reconnect the accounts.

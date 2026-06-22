@@ -1,6 +1,6 @@
 ---
 title: "Plans & billing"
-description: "Cloud subscription tiers, AI credits, and how billing works."
+description: "How TryPost Cloud pricing, AI credits, and billing work."
 icon: "credit-card"
 ---
 
@@ -8,37 +8,44 @@ icon: "credit-card"
   Everything on this page applies to **TryPost Cloud**. Self-hosted instances skip subscription and credit checks entirely (set `SELF_HOSTED=true` in `.env`).
 </Note>
 
-## Plans
+## The plan
 
-| | Starter | Plus | Pro | Max |
-|---|---|---|---|---|
-| Workspaces | 1 | 5 | 15 | 50 |
-| Social accounts | 5 | 10 | 30 | 100 |
-| Team members | 1 | 5 | 15 | 20 |
-| AI credits / month | 1,000 | 2,000 | 5,000 | 15,000 |
-| Monthly billing | Yes | Yes | Yes | Yes |
-| Yearly billing (discount) | Yes | Yes | Yes | Yes |
+TryPost Cloud has one plan, priced per workspace. Every feature is included on every workspace, with no tiers and no per-seat fees.
 
-Pick a plan that matches your busiest month — the dashboard returns `402 Payment Required` the moment you exceed any limit, with a message telling you which one is gating the action.
+| | Per workspace |
+|---|---|
+| Price | **$12 / month**, or **$10 / month** billed yearly (**$120 / year**) |
+| Social accounts | One account on each network (your social set) |
+| Team members | Unlimited, with roles and approvals |
+| AI credits | 2,500 per month, pooled across your account |
+| Included | Calendar, AI Copilot, automations, MCP server, REST API, analytics, signatures, labels |
+
+Pricing is localized in some regions (for example, **R$60 / month** in Brazil). See the [pricing page](https://trypost.it/pricing) for current rates.
+
+### One workspace, one social set
+
+Each workspace connects one account on every supported network (Instagram, Facebook, LinkedIn, X, TikTok, YouTube, Pinterest, Threads, Bluesky, Mastodon, Telegram, Discord) and runs them from a single calendar.
+
+To manage another brand or client, or a second account on the same network, add another workspace. Each workspace is billed at the same per-workspace price, and AI credits from every workspace are pooled across your account.
 
 ## Trial
 
-New accounts start on a **7-day trial** of the Starter plan. **No card required at sign-up** — you get full access for 7 days without entering any payment details. The countdown is visible at **Settings &gt; Account &gt; Billing**.
+New accounts start with a **7-day free trial** with full access to the product. A card is required to start the trial. You are not charged during the 7 days, and you can cancel any time before the trial ends to avoid billing. The countdown is visible at **Settings &gt; Account &gt; Billing**.
 
-When the trial ends, AI/credit-gated actions return `402 Payment Required` until you subscribe. You can subscribe at any time before or after the trial expires.
+When the trial ends, your subscription begins unless you cancel before then. If you let the trial lapse without subscribing, AI and credit-gated actions return `402 Payment Required` until you subscribe.
 
 ## Subscribing
 
 1. Go to **Settings &gt; Account &gt; Billing**
 2. Pick **Monthly** or **Yearly** at the top of the plan picker
-3. Click the plan you want
-4. Complete payment in Stripe Checkout — your card is charged immediately for the first period (subscriptions started from the dashboard are not trialed; the no-card trial only applies to fresh sign-ups)
+3. Choose how many workspaces to bill
+4. Complete payment in Stripe Checkout
 
-Yearly billing applies a per-plan discount versus monthly. The exact discount is shown next to each plan in Checkout.
+Yearly billing costs less per month than monthly. The exact saving is shown in Checkout.
 
-## Upgrading / downgrading
+## Adding or removing workspaces
 
-Use the same **Settings &gt; Account &gt; Billing** page to change plans. Upgrades take effect immediately; Stripe prorates the difference for the remainder of the billing period. Downgrades take effect at the end of the current period — you keep the higher-tier limits until then.
+Use the same **Settings &gt; Account &gt; Billing** page to add or remove workspaces. New workspaces take effect immediately, and Stripe prorates the difference for the remainder of the billing period. Removing a workspace takes effect at the end of the current period, so you keep access until then.
 
 ## Updating payment method &amp; invoices
 
@@ -51,7 +58,7 @@ Click **Manage subscription** on the Billing page to open the Stripe Customer Po
 
 ## AI credits
 
-Every AI feature deducts credits from your workspace's monthly quota. The quota resets on each billing cycle.
+Each workspace includes 2,500 AI credits per month. Credits are pooled across your account, so all of your workspaces draw from the same balance. The balance resets at the start of each billing cycle.
 
 | Action | Cost |
 |--------|------|
@@ -59,25 +66,28 @@ Every AI feature deducts credits from your workspace's monthly quota. The quota 
 | Image generation | 15 credits per image (current default model, OpenAI `gpt-image-2` at low quality) |
 | Video generation | 500 credits per video |
 
-Track usage at **Settings &gt; Account &gt; Usage** — the page shows how many credits are used, the monthly limit, and live counts for workspaces / social accounts / members against your plan caps.
+Track usage at **Settings &gt; Account &gt; Usage**. The page shows how many credits are used, the monthly limit, and live counts for your connected accounts and members.
 
-When credits hit zero, AI calls return `402 Payment Required` until the next reset (or until you upgrade).
+When credits hit zero, AI calls return `402 Payment Required` until the next reset.
 
-## Limit-exceeded behavior
+## Limit behavior
 
-When any plan limit is reached, the dashboard shows an upgrade dialog and the API/MCP layer returns `402 Payment Required` with a `message` explaining which limit was hit (e.g. `Workspace limit exceeded`, `Monthly AI credits exhausted`).
+When you reach a limit, the dashboard shows a dialog and the API/MCP layer returns `402 Payment Required` with a `message` explaining what was hit (for example, `Monthly AI credits exhausted`). The limits that apply are your pooled AI credits and one account per network in each workspace. Need more capacity on a network? Add another workspace.
 
 ## FAQ
 
 <AccordionGroup>
-  <Accordion title="Can I change plans mid-cycle?">
-    Yes. Upgrades are prorated and take effect immediately. Downgrades schedule at the end of the current billing period.
+  <Accordion title="How much does TryPost cost?">
+    One price per workspace: $12/month, or $10/month billed yearly ($120/year). Every feature is included, with no tiers and no per-seat fees.
+  </Accordion>
+  <Accordion title="Can I manage more than one brand?">
+    Yes. Add a workspace per brand or client. Each is billed at the same per-workspace price, and AI credits are pooled across your account.
   </Accordion>
   <Accordion title="Do unused credits roll over?">
-    No — the credit balance resets at the start of each billing cycle.
+    No. The credit balance resets at the start of each billing cycle.
   </Accordion>
   <Accordion title="What happens if my card fails?">
-    Stripe retries automatically. After the grace period set in your account, the subscription enters `past_due` and the dashboard shows a banner. New AI/credit-gated actions return `402` until billing recovers.
+    Stripe retries automatically. After the grace period set in your account, the subscription enters `past_due` and the dashboard shows a banner. New AI and credit-gated actions return `402` until billing recovers.
   </Accordion>
   <Accordion title="Can I cancel any time?">
     Yes. Cancel from the Stripe Customer Portal. The subscription stays active until the end of the current billing period, then expires.

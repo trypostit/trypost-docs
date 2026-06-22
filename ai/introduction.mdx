@@ -26,7 +26,7 @@ TryPost exposes a full set of MCP tools for end-to-end content workflows. See th
 ## How it works
 
 <Note>
-  MCP access on **TryPost Cloud** requires an active trial or subscription. New accounts get a 7-day trial automatically — no credit card required to start. See [Plans & billing](/knowledge-base/plans-and-billing) for details. Self-hosted instances skip this check.
+  MCP access on **TryPost Cloud** requires an active trial or subscription. New accounts get a 7-day trial automatically. See [Plans & billing](/knowledge-base/plans-and-billing) for details. Self-hosted instances skip this check.
 </Note>
 
 <Steps>
@@ -61,7 +61,7 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
 
 <AccordionGroup>
   <Accordion title="HTTP 402 — Active subscription required">
-    Your token is valid and the config is correct — the account behind it just doesn't have an active trial or subscription. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan (no card required to start the trial), then reconnect the MCP server. Self-hosted instances skip this check.
+    Your token is valid and the config is correct — the account behind it just doesn't have an active trial or subscription. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan (7-day free trial), then reconnect the MCP server. Self-hosted instances skip this check.
   </Accordion>
   <Accordion title="HTTP 401 — Unauthenticated">
     The OAuth session expired and refresh failed, or (in the Bearer fallback) the token is missing/malformed/revoked. Re-run the assistant's connect flow to re-authenticate, or issue a new PAT from **Settings &gt; API Keys**.
