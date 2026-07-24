@@ -51,7 +51,8 @@
               {
                 "group": "Community",
                 "pages": [
-                  "contributing"
+                  "contributing",
+                  "discussions"
                 ]
               }
         ]
@@ -261,11 +262,6 @@
           "anchor": "YouTube",
           "href": "https://www.youtube.com/@trypostit",
           "icon": "youtube"
-        },
-        {
-          "anchor": "Discussions",
-          "href": "https://github.com/trypostit/trypost/discussions",
-          "icon": "comments"
         }
       ]
     }
