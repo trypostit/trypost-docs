@@ -21,128 +21,38 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Docs",
+        "tab": "Documentation",
         "icon": "book-open",
-        "menu": [
+        "groups": [
           {
-            "item": "Documentation",
-            "icon": "book-open",
-            "groups": [
-              {
-                "group": "Getting Started",
-                "pages": [
-                  "index",
-                  "getting-started/quickstart"
-                ]
-              },
-              {
-                "group": "Platforms",
-                "pages": [
-                  "platforms/linkedin",
-                  "platforms/x-twitter",
-                  "platforms/facebook",
-                  "platforms/instagram",
-                  "platforms/tiktok",
-                  "platforms/youtube",
-                  "platforms/threads",
-                  "platforms/pinterest",
-                  "platforms/bluesky",
-                  "platforms/mastodon",
-                  "platforms/telegram",
-                  "platforms/discord"
-                ]
-              },
-              {
-                "group": "Community",
-                "pages": [
-                  "contributing",
-                  "discord"
-                ]
-              }
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "getting-started/quickstart"
             ]
           },
           {
-            "item": "Knowledge Base",
-            "icon": "book",
-            "groups": [
-              {
-                "group": "Getting Started",
-                "pages": [
-                  "knowledge-base/introduction"
-                ]
-              },
-              {
-                "group": "Content",
-                "pages": [
-                  "knowledge-base/posts",
-                  "knowledge-base/media",
-                  "knowledge-base/assets",
-                  "knowledge-base/signatures",
-                  "knowledge-base/labels",
-                  "knowledge-base/templates"
-                ]
-              },
-              {
-                "group": "AI",
-                "pages": [
-                  "knowledge-base/ai-features",
-                  "knowledge-base/brand-profile",
-                  "knowledge-base/analytics"
-                ]
-              },
-              {
-                "group": "Automations",
-                "pages": [
-                  "knowledge-base/automations/introduction",
-                  "knowledge-base/automations/triggers-and-nodes",
-                  "knowledge-base/automations/variables",
-                  "knowledge-base/automations/monitoring"
-                ]
-              },
-              {
-                "group": "Accounts",
-                "pages": [
-                  "knowledge-base/social-accounts",
-                  "knowledge-base/workspaces",
-                  "knowledge-base/team"
-                ]
-              },
-              {
-                "group": "Account & billing",
-                "pages": [
-                  "knowledge-base/account-and-security",
-                  "knowledge-base/plans-and-billing",
-                  "knowledge-base/api-keys",
-                  "knowledge-base/notifications"
-                ]
-              }
+            "group": "Platforms",
+            "pages": [
+              "platforms/linkedin",
+              "platforms/x-twitter",
+              "platforms/facebook",
+              "platforms/instagram",
+              "platforms/tiktok",
+              "platforms/youtube",
+              "platforms/threads",
+              "platforms/pinterest",
+              "platforms/bluesky",
+              "platforms/mastodon",
+              "platforms/telegram",
+              "platforms/discord"
             ]
           },
           {
-            "item": "Self-Hosting",
-            "icon": "server",
-            "groups": [
-              {
-                "group": "Getting Started",
-                "pages": [
-                  "self-hosting/overview",
-                  "self-hosting/requirements"
-                ]
-              },
-              {
-                "group": "Installation",
-                "pages": [
-                  "self-hosting/installation",
-                  "self-hosting/docker"
-                ]
-              },
-              {
-                "group": "Configuration",
-                "pages": [
-                  "self-hosting/configuration",
-                  "self-hosting/production"
-                ]
-              }
+            "group": "Community",
+            "pages": [
+              "contributing",
+              "discord"
             ]
           }
         ]
@@ -247,6 +157,90 @@
               "ai/openclaw",
               "ai/codex",
               "ai/antigravity"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Knowledge Base",
+        "icon": "book",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "knowledge-base/introduction"
+            ]
+          },
+          {
+            "group": "Content",
+            "pages": [
+              "knowledge-base/posts",
+              "knowledge-base/media",
+              "knowledge-base/assets",
+              "knowledge-base/signatures",
+              "knowledge-base/labels",
+              "knowledge-base/templates"
+            ]
+          },
+          {
+            "group": "AI",
+            "pages": [
+              "knowledge-base/ai-features",
+              "knowledge-base/brand-profile",
+              "knowledge-base/analytics"
+            ]
+          },
+          {
+            "group": "Automations",
+            "pages": [
+              "knowledge-base/automations/introduction",
+              "knowledge-base/automations/triggers-and-nodes",
+              "knowledge-base/automations/variables",
+              "knowledge-base/automations/monitoring"
+            ]
+          },
+          {
+            "group": "Accounts",
+            "pages": [
+              "knowledge-base/social-accounts",
+              "knowledge-base/workspaces",
+              "knowledge-base/team"
+            ]
+          },
+          {
+            "group": "Account & billing",
+            "pages": [
+              "knowledge-base/account-and-security",
+              "knowledge-base/plans-and-billing",
+              "knowledge-base/api-keys",
+              "knowledge-base/notifications"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Self-Hosting",
+        "icon": "server",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "self-hosting/overview",
+              "self-hosting/requirements"
+            ]
+          },
+          {
+            "group": "Installation",
+            "pages": [
+              "self-hosting/installation",
+              "self-hosting/docker"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "self-hosting/configuration",
+              "self-hosting/production"
             ]
           }
         ]
