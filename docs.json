@@ -34,7 +34,6 @@
           {
             "group": "Platforms",
             "pages": [
-              "platforms/overview",
               "platforms/linkedin",
               "platforms/x-twitter",
               "platforms/facebook",
