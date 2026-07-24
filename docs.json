@@ -254,6 +254,16 @@
           "icon": "github"
         },
         {
+          "anchor": "Discord",
+          "href": "https://trypost.it/discord",
+          "icon": "discord"
+        },
+        {
+          "anchor": "YouTube",
+          "href": "https://www.youtube.com/@trypostit",
+          "icon": "youtube"
+        },
+        {
           "anchor": "Discussions",
           "href": "https://github.com/trypostit/trypost/discussions",
           "icon": "comments"
