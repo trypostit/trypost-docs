@@ -1,0 +1,139 @@
+---
+title: "OpenClaw"
+description: "Connect TryPost to OpenClaw for AI-powered social media management"
+icon: "/images/ai/openclaw.svg"
+---
+
+[OpenClaw](https://openclaw.ai) is an open-source personal AI assistant that runs on your machine and talks across chat channels. You can connect it to TryPost's MCP server so the agent can manage your social media scheduling with natural language.
+
+## Prerequisites
+
+- OpenClaw installed ([getting started](https://docs.openclaw.ai/start/getting-started))
+- A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
+
+## Setup
+
+<Steps>
+  <Step title="Add the TryPost MCP server">
+    Register the remote server with OAuth (Streamable HTTP):
+
+    ```bash
+    openclaw mcp add trypost \
+      --url https://app.trypost.it/mcp/trypost \
+      --transport streamable-http \
+      --auth oauth \
+      --oauth-scope mcp:use
+    ```
+
+    This saves the definition under `mcp.servers` in `~/.openclaw/openclaw.json`. It does not connect or log in yet.
+  </Step>
+  <Step title="Sign in with OAuth">
+    Start the login flow:
+
+    ```bash
+    openclaw mcp login trypost
+    ```
+
+    OpenClaw prints an authorization URL and stores a temporary PKCE verifier. Open the URL in a browser, sign in to TryPost, and click **Allow**. After approval, pass the returned code back:
+
+    ```bash
+    openclaw mcp login trypost --code YOUR_CODE
+    ```
+  </Step>
+  <Step title="Reload and verify">
+    Active agent or Gateway processes may still hold a stale tool list. Reload MCP clients in this CLI process (or restart the Gateway / **Save & Publish** from the Control UI), then probe:
+
+    ```bash
+    openclaw mcp reload
+    openclaw mcp doctor trypost --probe
+    ```
+
+    Or:
+
+    ```bash
+    openclaw mcp probe trypost
+    ```
+
+    Then ask your OpenClaw agent (Control UI, Telegram, Discord, etc.):
+
+    ```
+    List all my scheduled posts
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  Manage servers in the Control UI at **Settings → MCP** (`openclaw dashboard`, path `/settings/mcp`). Use `openclaw mcp logout trypost` to clear stored OAuth credentials without removing the server definition. If `openclaw mcp status --verbose` reports `authorization-required`, run `openclaw mcp login trypost` again.
+</Tip>
+
+## Manual configuration
+
+Equivalent config written by `openclaw mcp add`:
+
+```json5
+{
+  mcp: {
+    servers: {
+      trypost: {
+        url: "https://app.trypost.it/mcp/trypost",
+        transport: "streamable-http",
+        auth: "oauth",
+        oauth: {
+          scope: "mcp:use",
+        },
+      },
+    },
+  },
+}
+```
+
+Save in `~/.openclaw/openclaw.json`, then run `openclaw mcp login trypost` and complete the `--code` step.
+
+<Accordion title="Bearer token fallback (CI, headless, no browser)">
+  When you cannot complete OAuth, use a Personal Access Token and **do not** set `auth: "oauth"` — while OAuth auth is enabled, static `Authorization` headers are ignored.
+
+  ```bash
+  openclaw mcp add trypost \
+    --url https://app.trypost.it/mcp/trypost \
+    --transport streamable-http \
+    --header "Authorization: Bearer YOUR_API_KEY"
+  ```
+
+  Or in config:
+
+  ```json5
+  {
+    mcp: {
+      servers: {
+        trypost: {
+          url: "https://app.trypost.it/mcp/trypost",
+          transport: "streamable-http",
+          headers: {
+            Authorization: "Bearer ${TRYPOST_API_KEY}",
+          },
+        },
+      },
+    },
+  }
+  ```
+
+  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). Prefer an env var over committing the token.
+</Accordion>
+
+## Example prompts
+
+```
+Show me all my connected social media accounts
+```
+
+```
+Create a draft LinkedIn post for tomorrow at 9am
+```
+
+```
+What posts do I have scheduled for this week?
+```
+
+```
+Create a label called "Campaign" with color #f59e0b
+```

@@ -1,0 +1,78 @@
+---
+title: "Perplexity"
+description: "Connect TryPost to Perplexity for AI-powered social media management"
+icon: "/images/ai/perplexity.svg"
+---
+
+[Perplexity](https://www.perplexity.ai) supports custom remote MCP connectors on paid plans, so you can connect TryPost and manage social media scheduling from Perplexity chat and [Computer](https://www.perplexity.ai/changelog/what-we-shipped---march-13-2026) workflows.
+
+<Note>
+  This guide connects **TryPost into Perplexity** as a custom remote connector. Perplexity also ships its own search MCP for use *inside* other clients (Claude, Cursor, etc.) — that is a different product: [Perplexity MCP Server](https://docs.perplexity.ai/docs/getting-started/integrations/mcp-server).
+</Note>
+
+## Prerequisites
+
+- A Perplexity **Pro, Max, or Enterprise** account ([custom remote connectors](https://www.perplexity.ai/help-center/en/articles/13915507-adding-custom-remote-connectors) are not available on Free)
+- A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
+
+## Setup
+
+<Steps>
+  <Step title="Open Connectors">
+    In Perplexity, open **Account Settings → Connectors**. From **Computer**, you can also open **Connectors** in the left sidebar. Click **+ Custom connector**.
+  </Step>
+  <Step title="Add a remote connector">
+    Choose **Remote** and fill in:
+
+    | Field | Value |
+    |-------|-------|
+    | **Name** | `TryPost` |
+    | **MCP Server URL** | `https://app.trypost.it/mcp/trypost` |
+    | **Authentication** | **OAuth 2.0** (leave Client ID / Secret empty — TryPost uses Dynamic Client Registration) |
+    | **Transport** | Streamable HTTP if offered (prefer over SSE; often auto-detected) |
+
+    Acknowledge the risk notice for custom connectors, then click **Add**.
+  </Step>
+  <Step title="Authorize TryPost">
+    Open the new connector card and complete OAuth. Sign in to TryPost and click **Allow**. The connector should show as connected with TryPost tools available.
+  </Step>
+  <Step title="Use TryPost in a thread">
+    Start a new conversation or Computer task, enable the **TryPost** connector for that thread if it is not already on, and ask:
+
+    ```
+    List all my scheduled posts
+    ```
+
+    Perplexity will call the TryPost tools to fetch your posts.
+  </Step>
+</Steps>
+
+<Note>
+  Perplexity reaches the MCP server from its cloud over HTTPS. The hosted endpoint `https://app.trypost.it/mcp/trypost` works out of the box. Self-hosted instances must be publicly reachable over HTTPS (or use a tunnel).
+</Note>
+
+<Accordion title="API key authentication instead of OAuth">
+  Perplexity also supports **API Key** (and open/no auth) for custom connectors. Paste a TryPost Personal Access Token from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). Prefer OAuth when both options work.
+</Accordion>
+
+<Accordion title="Enterprise / organization connectors">
+  On Enterprise, admins can share connectors organization-wide and control whether members may add their own. Members still authenticate individually for OAuth connectors unless your admin configures organization-wide auth.
+</Accordion>
+
+## Example prompts
+
+```
+Show me all my connected social media accounts
+```
+
+```
+Create a draft LinkedIn post for tomorrow at 9am
+```
+
+```
+What posts do I have scheduled for this week?
+```
+
+```
+Create a label called "Campaign" with color #f59e0b
+```

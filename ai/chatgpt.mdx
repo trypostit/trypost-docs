@@ -1,0 +1,77 @@
+---
+title: "ChatGPT"
+description: "Connect TryPost to ChatGPT for AI-powered social media management"
+icon: "/images/ai/chatgpt.svg"
+---
+
+[ChatGPT](https://chatgpt.com) can connect to TryPost's MCP server as a developer-mode app, so you can manage social media scheduling with natural language in chat.
+
+## Prerequisites
+
+- A ChatGPT **Pro, Plus, Business, Enterprise, or Education** account on the **web** ([Developer mode](https://developers.openai.com/api/docs/guides/developer-mode) — not available on Free; not guaranteed on mobile)
+- A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
+
+## Setup
+
+<Steps>
+  <Step title="Enable Developer mode">
+    In ChatGPT on the web, open **Settings → Security and login** and turn on **Developer mode**.
+
+    If that toggle is missing, try **Settings → Apps → Advanced settings**. On Business / Enterprise / Education workspaces, an admin may need to allow Developer mode first.
+  </Step>
+  <Step title="Create a developer-mode app">
+    With Developer mode on, open **Settings → Plugins** or **Settings → Apps** (OpenAI has been renaming this surface; [chatgpt.com/plugins](https://chatgpt.com/plugins) also works) and click **+** to create a developer-mode app.
+
+    Fill in:
+
+    | Field | Value |
+    |-------|-------|
+    | **Name** | `TryPost` |
+    | **Description** | `Schedule and publish social posts with TryPost` |
+    | **MCP server URL** | `https://app.trypost.it/mcp/trypost` |
+
+    For authentication, use **OAuth**. Leave Client ID / Secret blank if shown — TryPost supports Dynamic Client Registration and discovers OAuth from the URL.
+  </Step>
+  <Step title="Authorize and review tools">
+    Create the connection. Complete the TryPost OAuth sign-in if prompted (**Allow**). Open the app details page to review discovered tools; you can toggle tools on or off and **Refresh** later when the MCP server changes.
+  </Step>
+  <Step title="Use TryPost in a conversation">
+    Start a new chat. From the composer **+** / Plus menu, choose **Developer mode**, enable the **TryPost** app for that conversation, and ask:
+
+    ```
+    List all my scheduled posts
+    ```
+
+    ChatGPT will call the TryPost tools to fetch your posts.
+  </Step>
+</Steps>
+
+<Note>
+  ChatGPT only connects to remote HTTPS MCP servers (from OpenAI's infrastructure). The hosted endpoint `https://app.trypost.it/mcp/trypost` works out of the box. Self-hosted instances must be publicly reachable over HTTPS — local `stdio` MCP servers are not supported.
+</Note>
+
+<Note>
+  Write actions (create, update, publish, delete) require confirmation by default in Developer mode. Review each tool payload before approving. Tools annotated as read-only skip that confirmation.
+</Note>
+
+<Tip>
+  After MCP server changes, open the app under **Settings → Plugins** (or **Apps**), click **Refresh**, and start a new conversation so ChatGPT picks up updated tools and descriptions.
+</Tip>
+
+## Example prompts
+
+```
+Show me all my connected social media accounts
+```
+
+```
+Create a draft LinkedIn post for tomorrow at 9am
+```
+
+```
+What posts do I have scheduled for this week?
+```
+
+```
+Create a label called "Campaign" with color #f59e0b
+```
