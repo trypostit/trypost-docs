@@ -38,7 +38,7 @@ Same paths, user configures `APP_URL` in `.env`:
 |--------|------|---------|
 | **Documentation** | `book-open` | Product docs: quickstart, platforms, features, contributing |
 | **API Reference** | `code` | REST API endpoint docs with curl examples |
-| **Build with AI** | `microchip-ai` | MCP server intro, tools reference, 10 setup guides |
+| **Build with AI** | `microchip-ai` | MCP server intro, tools reference, 13 setup guides |
 | **Knowledge Base** | `book` | Conceptual guides: posts, media, signatures, labels, accounts, team, notifications |
 | **Self-Hosting** | `server` | Installation, configuration, production, Docker — isolated from the rest |
 

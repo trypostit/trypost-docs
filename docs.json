@@ -139,14 +139,17 @@
           {
             "group": "Setup Guides",
             "pages": [
+              "ai/claude",
               "ai/claude-code",
               "ai/claude-desktop",
+              "ai/chatgpt",
               "ai/cursor",
               "ai/windsurf",
               "ai/vs-code",
               "ai/github-copilot",
               "ai/gemini-cli",
               "ai/opencode",
+              "ai/openclaw",
               "ai/codex",
               "ai/antigravity"
             ]
