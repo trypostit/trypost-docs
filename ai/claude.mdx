@@ -1,10 +1,10 @@
 ---
 title: "Claude"
 description: "Connect TryPost to Claude on the web for AI-powered social media management"
-icon: "globe"
+icon: "/images/ai/claude.svg"
 ---
 
-[Claude](https://claude.ai) is Anthropic's web app for chatting with Claude. You can connect it to TryPost's MCP server to manage your social media scheduling through conversation — no desktop install required.
+[Claude](https://claude.ai) is Anthropic's web app for chatting with Claude. You can connect it to TryPost's MCP server to manage your social media scheduling through conversation — no desktop install required. The same connector also works in **Claude Cowork** and syncs with your Claude account on Desktop.
 
 ## Prerequisites
 
@@ -46,6 +46,10 @@ icon: "globe"
 
 <Accordion title="Team and Enterprise plans">
   On Team and Enterprise, only an Owner can add a custom connector. They do it from **[Organization settings → Connectors](https://claude.ai/admin-settings/connectors)** → **Add** → **Custom** → **Web**, then paste the TryPost URL. After that, each member opens **[Customize → Connectors](https://claude.ai/customize/connectors)**, finds the connector labeled **Custom**, and clicks **Connect** to authorize their own TryPost account.
+</Accordion>
+
+<Accordion title="Bearer token via request headers (beta)">
+  If you prefer a Personal Access Token instead of OAuth (for example on a self-hosted instance), Claude's **Request headers** option (rolling out in beta) can send `Authorization: Bearer YOUR_API_KEY` on every request. Enter the full value including the `Bearer ` prefix. Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). Prefer OAuth for personal TryPost Cloud accounts.
 </Accordion>
 
 ## Example prompts

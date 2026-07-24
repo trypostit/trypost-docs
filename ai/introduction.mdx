@@ -49,7 +49,7 @@ https://app.trypost.it/mcp/trypost
 
 ## Authentication
 
-TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
+TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Perplexity, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
 
 <Accordion title="Bearer token fallback (CI, scripts, or clients without OAuth)">
   If your environment can't open a browser — for example a CI pipeline, the GitHub Copilot cloud coding agent, or a client that doesn't speak OAuth yet — you can authenticate with a Personal Access Token instead. Create one in **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it) and send it as `Authorization: Bearer YOUR_API_KEY`. The same token works for both the REST API and the MCP endpoint.
@@ -77,19 +77,22 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
 ## Next steps
 
 <Columns cols={3}>
-  <Card title="Claude" icon="globe" href="/ai/claude">
+  <Card title="Claude" icon="/images/ai/claude.svg" href="/ai/claude">
     Claude on the web (claude.ai).
   </Card>
-  <Card title="Claude Code" icon="terminal" href="/ai/claude-code">
+  <Card title="Claude Code" icon="/images/ai/claude.svg" href="/ai/claude-code">
     CLI assistant by Anthropic.
   </Card>
-  <Card title="Claude Desktop" icon="message-bot" href="/ai/claude-desktop">
+  <Card title="Claude Desktop" icon="/images/ai/claude.svg" href="/ai/claude-desktop">
     Desktop app by Anthropic.
   </Card>
-  <Card title="ChatGPT" icon="messages" href="/ai/chatgpt">
+  <Card title="ChatGPT" icon="/images/ai/chatgpt.svg" href="/ai/chatgpt">
     OpenAI ChatGPT with MCP apps.
   </Card>
-  <Card title="Cursor" icon="arrow-pointer" href="/ai/cursor">
+  <Card title="Perplexity" icon="/images/ai/perplexity.svg" href="/ai/perplexity">
+    Perplexity chat and Computer.
+  </Card>
+  <Card title="Cursor" icon="/images/ai/cursor.svg" href="/ai/cursor">
     AI-powered code editor.
   </Card>
   <Card title="Windsurf" icon="water" href="/ai/windsurf">
@@ -101,16 +104,16 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
   <Card title="GitHub Copilot" icon="github" href="/ai/github-copilot">
     Copilot agent mode.
   </Card>
-  <Card title="Gemini CLI" icon="terminal" href="/ai/gemini-cli">
+  <Card title="Gemini CLI" icon="/images/ai/gemini.svg" href="/ai/gemini-cli">
     CLI assistant by Google.
   </Card>
   <Card title="OpenCode" icon="terminal" href="/ai/opencode">
     Open-source CLI assistant.
   </Card>
-  <Card title="OpenClaw" icon="terminal" href="/ai/openclaw">
+  <Card title="OpenClaw" icon="/images/ai/openclaw.svg" href="/ai/openclaw">
     Personal AI assistant gateway.
   </Card>
-  <Card title="Codex" icon="terminal" href="/ai/codex">
+  <Card title="Codex" icon="/images/ai/codex.svg" href="/ai/codex">
     CLI agent by OpenAI.
   </Card>
   <Card title="Antigravity" icon="terminal" href="/ai/antigravity">

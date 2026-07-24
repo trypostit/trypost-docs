@@ -1,7 +1,7 @@
 ---
 title: "OpenClaw"
 description: "Connect TryPost to OpenClaw for AI-powered social media management"
-icon: "terminal"
+icon: "/images/ai/openclaw.svg"
 ---
 
 [OpenClaw](https://openclaw.ai) is an open-source personal AI assistant that runs on your machine and talks across chat channels. You can connect it to TryPost's MCP server so the agent can manage your social media scheduling with natural language.
@@ -40,10 +40,11 @@ icon: "terminal"
     openclaw mcp login trypost --code YOUR_CODE
     ```
   </Step>
-  <Step title="Verify the connection">
-    Confirm the server connects and exposes tools:
+  <Step title="Reload and verify">
+    Active agent or Gateway processes may still hold the old tool list. Reload MCP clients in this CLI process, or restart the Gateway / publish config from the Control UI:
 
     ```bash
+    openclaw mcp reload
     openclaw mcp doctor trypost --probe
     ```
 
@@ -62,7 +63,7 @@ icon: "terminal"
 </Steps>
 
 <Tip>
-  You can also manage MCP servers from the Control UI at **Settings → MCP** (`openclaw dashboard`, then `/settings/mcp`). Use `openclaw mcp logout trypost` if you need to switch TryPost accounts. If status reports `authorization-required`, run `openclaw mcp login trypost` again.
+  You can also manage MCP servers from the Control UI at **Settings → MCP** (`openclaw dashboard`, then `/settings/mcp`). Use **Save & Publish** when editing there so the Gateway picks up changes. Use `openclaw mcp logout trypost` if you need to switch TryPost accounts. If status reports `authorization-required`, run `openclaw mcp login trypost` again.
 </Tip>
 
 ## Manual configuration
