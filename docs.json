@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "aspen",
   "name": "TryPost Docs",
   "colors": {
     "primary": "#7c3aed",
@@ -19,9 +19,9 @@
   },
   "favicon": "/favicon.png",
   "navigation": {
-    "anchors": [
+    "tabs": [
       {
-        "anchor": "Documentation",
+        "tab": "Documentation",
         "icon": "book-open",
         "groups": [
           {
@@ -34,7 +34,6 @@
           {
             "group": "Platforms",
             "pages": [
-              "platforms/overview",
               "platforms/linkedin",
               "platforms/x-twitter",
               "platforms/facebook",
@@ -49,16 +48,18 @@
               "platforms/discord"
             ]
           },
-          {
-            "group": "Community",
-            "pages": [
-              "contributing"
-            ]
-          }
+              {
+                "group": "Community",
+                "pages": [
+                  "contributing",
+                  "discussions",
+                  "support"
+                ]
+              }
         ]
       },
       {
-        "anchor": "API Reference",
+        "tab": "API Reference",
         "icon": "code",
         "groups": [
           {
@@ -130,7 +131,7 @@
         ]
       },
       {
-        "anchor": "Build with AI",
+        "tab": "Build with AI",
         "icon": "microchip-ai",
         "groups": [
           {
@@ -162,7 +163,7 @@
         ]
       },
       {
-        "anchor": "Knowledge Base",
+        "tab": "Knowledge Base",
         "icon": "book",
         "groups": [
           {
@@ -219,7 +220,7 @@
         ]
       },
       {
-        "anchor": "Self-Hosting",
+        "tab": "Self-Hosting",
         "icon": "server",
         "groups": [
           {
@@ -254,9 +255,14 @@
           "icon": "github"
         },
         {
-          "anchor": "Discussions",
-          "href": "https://github.com/trypostit/trypost/discussions",
-          "icon": "comments"
+          "anchor": "Discord",
+          "href": "https://trypost.it/discord",
+          "icon": "discord"
+        },
+        {
+          "anchor": "YouTube",
+          "href": "https://www.youtube.com/@trypostit",
+          "icon": "youtube"
         }
       ]
     }
