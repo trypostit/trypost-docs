@@ -19,9 +19,9 @@
   },
   "favicon": "/favicon.png",
   "navigation": {
-    "anchors": [
+    "tabs": [
       {
-        "anchor": "Documentation",
+        "tab": "Documentation",
         "icon": "book-open",
         "groups": [
           {
@@ -58,7 +58,7 @@
         ]
       },
       {
-        "anchor": "API Reference",
+        "tab": "API Reference",
         "icon": "code",
         "groups": [
           {
@@ -130,7 +130,7 @@
         ]
       },
       {
-        "anchor": "Build with AI",
+        "tab": "Build with AI",
         "icon": "microchip-ai",
         "groups": [
           {
@@ -162,7 +162,7 @@
         ]
       },
       {
-        "anchor": "Knowledge Base",
+        "tab": "Knowledge Base",
         "icon": "book",
         "groups": [
           {
@@ -219,7 +219,7 @@
         ]
       },
       {
-        "anchor": "Self-Hosting",
+        "tab": "Self-Hosting",
         "icon": "server",
         "groups": [
           {
