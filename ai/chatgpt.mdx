@@ -8,19 +8,19 @@ icon: "/images/ai/chatgpt.svg"
 
 ## Prerequisites
 
-- A ChatGPT **Pro, Plus, Business, Enterprise, or Education** account on the **web** app ([Developer mode](https://developers.openai.com/api/docs/guides/developer-mode) is not available on Free or guaranteed on mobile)
+- A ChatGPT **Pro, Plus, Business, Enterprise, or Education** account on the **web** ([Developer mode](https://developers.openai.com/api/docs/guides/developer-mode) — not available on Free; not guaranteed on mobile)
 - A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
 
 ## Setup
 
 <Steps>
   <Step title="Enable Developer mode">
-    In ChatGPT on the web, open **Settings** → **Security and login** and turn on **Developer mode**.
+    In ChatGPT on the web, open **Settings → Security and login** and turn on **Developer mode**.
 
-    If you don't see that toggle, try **Settings → Apps → Advanced settings** (OpenAI has been renaming **Plugins** / **Connectors** to **Apps**). On Business / Enterprise / Education workspaces, an admin may need to allow Developer mode first. If the toggle is still missing, ask your workspace admin.
+    If that toggle is missing, try **Settings → Apps → Advanced settings**. On Business / Enterprise / Education workspaces, an admin may need to allow Developer mode first.
   </Step>
   <Step title="Create a developer-mode app">
-    Open **Settings → Plugins** or **Settings → Apps** (or go to [chatgpt.com/plugins](https://chatgpt.com/plugins)) and click the **+** button to create a developer-mode app. The **+** button only creates developer-mode apps after Developer mode is on.
+    With Developer mode on, open **Settings → Plugins** or **Settings → Apps** (OpenAI has been renaming this surface; [chatgpt.com/plugins](https://chatgpt.com/plugins) also works) and click **+** to create a developer-mode app.
 
     Fill in:
 
@@ -30,13 +30,13 @@ icon: "/images/ai/chatgpt.svg"
     | **Description** | `Schedule and publish social posts with TryPost` |
     | **MCP server URL** | `https://app.trypost.it/mcp/trypost` |
 
-    Leave client ID / secret blank if ChatGPT offers them — TryPost supports Dynamic Client Registration and discovers OAuth from the URL.
+    For authentication, use **OAuth**. Leave Client ID / Secret blank if shown — TryPost supports Dynamic Client Registration and discovers OAuth from the URL.
   </Step>
-  <Step title="Sign in and review tools">
-    Create the connection. If ChatGPT prompts for authorization, sign in to TryPost and click **Allow**. Wait for ChatGPT to discover the TryPost tools, then review the tool list on the app details page.
+  <Step title="Authorize and review tools">
+    Create the connection. Complete the TryPost OAuth sign-in if prompted (**Allow**). Open the app details page to review discovered tools; you can toggle tools on or off and **Refresh** later when the MCP server changes.
   </Step>
   <Step title="Use TryPost in a conversation">
-    Start a new chat, open the **+** / tools menu, choose **Developer mode**, and enable the **TryPost** app for that conversation. Then ask:
+    Start a new chat. From the composer **+** / Plus menu, choose **Developer mode**, enable the **TryPost** app for that conversation, and ask:
 
     ```
     List all my scheduled posts
@@ -47,15 +47,15 @@ icon: "/images/ai/chatgpt.svg"
 </Steps>
 
 <Note>
-  ChatGPT only connects to remote HTTPS MCP servers from OpenAI's infrastructure. The hosted endpoint `https://app.trypost.it/mcp/trypost` works out of the box. Self-hosted instances must be publicly reachable over HTTPS (or use a tunnel) — local `stdio` MCP servers are not supported.
+  ChatGPT only connects to remote HTTPS MCP servers (from OpenAI's infrastructure). The hosted endpoint `https://app.trypost.it/mcp/trypost` works out of the box. Self-hosted instances must be publicly reachable over HTTPS — local `stdio` MCP servers are not supported.
 </Note>
 
 <Note>
-  Write actions (create/update/publish posts, and similar) usually require confirmation in the chat. OpenAI's docs currently differ on whether every personal plan gets full write MCP — if create/publish tools are blocked or missing on your account, try a Business / Enterprise / Education workspace where full MCP is explicitly supported.
+  Write actions (create, update, publish, delete) require confirmation by default in Developer mode. Review each tool payload before approving. Tools annotated as read-only skip that confirmation.
 </Note>
 
 <Tip>
-  After you change anything on the MCP server side, open the app under **Settings → Plugins** (or **Apps**), click **Refresh**, and start a new conversation so ChatGPT picks up updated tools and descriptions.
+  After MCP server changes, open the app under **Settings → Plugins** (or **Apps**), click **Refresh**, and start a new conversation so ChatGPT picks up updated tools and descriptions.
 </Tip>
 
 ## Example prompts

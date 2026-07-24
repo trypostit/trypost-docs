@@ -8,14 +8,14 @@ icon: "/images/ai/openclaw.svg"
 
 ## Prerequisites
 
-- OpenClaw installed ([install guide](https://docs.openclaw.ai/start/getting-started))
+- OpenClaw installed ([getting started](https://docs.openclaw.ai/start/getting-started))
 - A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
 
 ## Setup
 
 <Steps>
   <Step title="Add the TryPost MCP server">
-    Register the remote server with OAuth:
+    Register the remote server with OAuth (Streamable HTTP):
 
     ```bash
     openclaw mcp add trypost \
@@ -25,7 +25,7 @@ icon: "/images/ai/openclaw.svg"
       --oauth-scope mcp:use
     ```
 
-    This writes the server under `mcp.servers` in `~/.openclaw/openclaw.json`.
+    This saves the definition under `mcp.servers` in `~/.openclaw/openclaw.json`. It does not connect or log in yet.
   </Step>
   <Step title="Sign in with OAuth">
     Start the login flow:
@@ -34,21 +34,21 @@ icon: "/images/ai/openclaw.svg"
     openclaw mcp login trypost
     ```
 
-    OpenClaw prints an authorization URL and stores a temporary PKCE verifier. Open that URL in a browser, sign in to TryPost, and click **Allow**. After approval, pass the returned code back:
+    OpenClaw prints an authorization URL and stores a temporary PKCE verifier. Open the URL in a browser, sign in to TryPost, and click **Allow**. After approval, pass the returned code back:
 
     ```bash
     openclaw mcp login trypost --code YOUR_CODE
     ```
   </Step>
   <Step title="Reload and verify">
-    Active agent or Gateway processes may still hold the old tool list. Reload MCP clients in this CLI process, or restart the Gateway / publish config from the Control UI:
+    Active agent or Gateway processes may still hold a stale tool list. Reload MCP clients in this CLI process (or restart the Gateway / **Save & Publish** from the Control UI), then probe:
 
     ```bash
     openclaw mcp reload
     openclaw mcp doctor trypost --probe
     ```
 
-    Or probe for a live tool list:
+    Or:
 
     ```bash
     openclaw mcp probe trypost
@@ -63,12 +63,12 @@ icon: "/images/ai/openclaw.svg"
 </Steps>
 
 <Tip>
-  You can also manage MCP servers from the Control UI at **Settings → MCP** (`openclaw dashboard`, then `/settings/mcp`). Use **Save & Publish** when editing there so the Gateway picks up changes. Use `openclaw mcp logout trypost` if you need to switch TryPost accounts. If status reports `authorization-required`, run `openclaw mcp login trypost` again.
+  Manage servers in the Control UI at **Settings → MCP** (`openclaw dashboard`, path `/settings/mcp`). Use `openclaw mcp logout trypost` to clear stored OAuth credentials without removing the server definition. If `openclaw mcp status --verbose` reports `authorization-required`, run `openclaw mcp login trypost` again.
 </Tip>
 
 ## Manual configuration
 
-If you prefer to edit the config file directly, this is the shape `openclaw mcp add` writes:
+Equivalent config written by `openclaw mcp add`:
 
 ```json5
 {
@@ -87,10 +87,10 @@ If you prefer to edit the config file directly, this is the shape `openclaw mcp 
 }
 ```
 
-Save it in `~/.openclaw/openclaw.json`, then run `openclaw mcp login trypost` and complete the `--code` step above.
+Save in `~/.openclaw/openclaw.json`, then run `openclaw mcp login trypost` and complete the `--code` step.
 
 <Accordion title="Bearer token fallback (CI, headless, no browser)">
-  When you can't complete OAuth — CI runners, remote boxes without a browser — use a Personal Access Token instead. Skip `--auth oauth` (static `Authorization` headers are ignored while OAuth auth is enabled) and set a header:
+  When you cannot complete OAuth, use a Personal Access Token and **do not** set `auth: "oauth"` — while OAuth auth is enabled, static `Authorization` headers are ignored.
 
   ```bash
   openclaw mcp add trypost \

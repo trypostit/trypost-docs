@@ -5,33 +5,35 @@ description: "Connect TryPost to Claude on the web for AI-powered social media m
 icon: "/images/ai/claude.svg"
 ---
 
-[Claude](https://claude.ai) is Anthropic's web app for chatting with Claude. You can connect it to TryPost's MCP server to manage your social media scheduling through conversation — no desktop install required. The same connector also works in **Claude Cowork** and syncs with your Claude account on Desktop.
+[Claude](https://claude.ai) is Anthropic's web app for chatting with Claude. You can connect it to TryPost's MCP server to manage your social media scheduling through conversation — no desktop install required. The same custom connector also works in **Claude Cowork** and on **Claude Desktop** when you use remote connectors (they connect from Anthropic's cloud via your Claude account).
 
 ## Prerequisites
 
-- A [Claude](https://claude.ai) account (custom connectors work on Free, Pro, Max, Team, and Enterprise — Free is limited to one custom connector)
+- A [Claude](https://claude.ai) account on Free, Pro, Max, Team, or Enterprise (custom connectors are available on all of these; Free is limited to one custom connector)
 - A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
 
 ## Setup
 
 <Steps>
   <Step title="Open the Connectors settings">
-    In Claude, go to **[Customize → Connectors](https://claude.ai/customize/connectors)** (some UIs label this **Settings → Connectors**) and click **+** → **Add custom connector**.
+    Go to **[Customize → Connectors](https://claude.ai/customize/connectors)** (some Claude UIs still say **Settings → Connectors**) and click **+** → **Add custom connector**.
+
+    Free, Pro, and Max use this path. Team and Enterprise Owners add connectors at the org level first — see the accordion below.
   </Step>
   <Step title="Add the TryPost connector">
-    Enter a name (for example `TryPost`) and paste the server URL:
+    Enter a **name** (for example `TryPost`) and the MCP server URL:
 
     ```
     https://app.trypost.it/mcp/trypost
     ```
 
-    Leave **Advanced settings** (Client ID / Client Secret) empty — TryPost supports Dynamic Client Registration, so Claude registers itself automatically. Click **Add**.
+    Leave **Advanced settings** (OAuth Client ID / Client Secret) empty — TryPost supports Dynamic Client Registration, so Claude registers itself automatically. Click **Add**.
   </Step>
-  <Step title="Sign in through your browser">
-    Claude opens a browser window to TryPost asking you to sign in and authorize. Click **Allow** and return to Claude — the connector flips to **Connected**.
+  <Step title="Authorize TryPost">
+    Complete the OAuth sign-in in the browser. Sign in to TryPost, review the permissions, and click **Allow**. Return to Claude — the connector should show as connected.
   </Step>
   <Step title="Enable the connector in a chat">
-    Start a new conversation, click **+** → **Connectors**, and toggle **TryPost** on for that chat. Then ask Claude to interact with your TryPost account:
+    Start a new conversation, click **+** (lower left) → **Connectors**, and toggle **TryPost** on for that chat. Then ask:
 
     ```
     List all my scheduled posts
@@ -42,15 +44,22 @@ icon: "/images/ai/claude.svg"
 </Steps>
 
 <Note>
-  Claude connects to the MCP server from Anthropic's cloud, not from your browser, so the endpoint must be reachable over the public internet. The hosted URL `https://app.trypost.it/mcp/trypost` is. Self-hosted instances must be exposed publicly (or use a tunnel) for Claude to reach them.
+  Claude reaches remote MCP servers from Anthropic's cloud, not from your browser or laptop. The hosted URL `https://app.trypost.it/mcp/trypost` is publicly reachable. Self-hosted instances must be exposed on the public internet (or tunneled) for Claude to connect.
 </Note>
 
 <Accordion title="Team and Enterprise plans">
-  On Team and Enterprise, only an Owner can add a custom connector. They do it from **[Organization settings → Connectors](https://claude.ai/admin-settings/connectors)** → **Add** → **Custom** → **Web**, then paste the TryPost URL. After that, each member opens **[Customize → Connectors](https://claude.ai/customize/connectors)**, finds the connector labeled **Custom**, and clicks **Connect** to authorize their own TryPost account.
+  Only an Owner (or Primary Owner) can add a custom connector to the organization:
+
+  1. Open **[Organization settings → Connectors](https://claude.ai/admin-settings/connectors)**
+  2. Click **Add** → **Custom** → **Web**
+  3. Paste `https://app.trypost.it/mcp/trypost` (Client ID / Secret optional — leave empty for DCR)
+  4. Click **Add**
+
+  Each member then opens **[Customize → Connectors](https://claude.ai/customize/connectors)**, finds the connector labeled **Custom**, and clicks **Connect** to authorize their own TryPost account.
 </Accordion>
 
 <Accordion title="Bearer token via request headers (beta)">
-  If you prefer a Personal Access Token instead of OAuth (for example on a self-hosted instance), Claude's **Request headers** option (rolling out in beta) can send `Authorization: Bearer YOUR_API_KEY` on every request. Enter the full value including the `Bearer ` prefix. Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). Prefer OAuth for personal TryPost Cloud accounts.
+  Claude is rolling out **Request headers** for custom connectors (beta). You can send a Personal Access Token as `Authorization` with the full value `Bearer YOUR_API_KEY` (include the `Bearer ` prefix). Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). Prefer OAuth for TryPost Cloud when both options work.
 </Accordion>
 
 ## Example prompts
