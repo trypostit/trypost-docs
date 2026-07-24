@@ -1,0 +1,4 @@
+/* Give sidebar labels room (e.g. Discussions + external-link icon). */
+#content-side-layout {
+  width: 20rem !important;
+}
