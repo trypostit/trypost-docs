@@ -48,13 +48,12 @@
               "platforms/discord"
             ]
           },
-          {
-            "group": "Community",
-            "pages": [
-              "contributing",
-              "discord"
-            ]
-          }
+              {
+                "group": "Community",
+                "pages": [
+                  "contributing"
+                ]
+              }
         ]
       },
       {
