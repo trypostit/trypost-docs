@@ -28,29 +28,29 @@ icon: "terminal"
     This writes the server under `mcp.servers` in `~/.openclaw/openclaw.json`.
   </Step>
   <Step title="Sign in with OAuth">
-    Run the login flow so OpenClaw stores the token:
+    Start the login flow:
 
     ```bash
     openclaw mcp login trypost
     ```
 
-    OpenClaw prints an authorization URL (and may open your browser). Sign in to TryPost, click **Allow**, then return to the terminal. If the CLI asks for a code after approval, pass it with:
+    OpenClaw prints an authorization URL and stores a temporary PKCE verifier. Open that URL in a browser, sign in to TryPost, and click **Allow**. After approval, pass the returned code back:
 
     ```bash
     openclaw mcp login trypost --code YOUR_CODE
     ```
   </Step>
   <Step title="Verify the connection">
-    Probe the server and list its tools:
+    Confirm the server connects and exposes tools:
+
+    ```bash
+    openclaw mcp doctor trypost --probe
+    ```
+
+    Or probe for a live tool list:
 
     ```bash
     openclaw mcp probe trypost
-    ```
-
-    Or check status:
-
-    ```bash
-    openclaw mcp status --verbose
     ```
 
     Then ask your OpenClaw agent (Control UI, Telegram, Discord, etc.):
@@ -62,7 +62,7 @@ icon: "terminal"
 </Steps>
 
 <Tip>
-  You can also manage MCP servers from the Control UI at **Settings → MCP** (`openclaw dashboard`, then `/settings/mcp`). Use `openclaw mcp logout trypost` if you need to switch TryPost accounts.
+  You can also manage MCP servers from the Control UI at **Settings → MCP** (`openclaw dashboard`, then `/settings/mcp`). Use `openclaw mcp logout trypost` if you need to switch TryPost accounts. If status reports `authorization-required`, run `openclaw mcp login trypost` again.
 </Tip>
 
 ## Manual configuration
@@ -86,10 +86,10 @@ If you prefer to edit the config file directly, this is the shape `openclaw mcp 
 }
 ```
 
-Save it in `~/.openclaw/openclaw.json`, then run `openclaw mcp login trypost`.
+Save it in `~/.openclaw/openclaw.json`, then run `openclaw mcp login trypost` and complete the `--code` step above.
 
 <Accordion title="Bearer token fallback (CI, headless, no browser)">
-  When you can't complete OAuth — CI runners, remote boxes without a browser — use a Personal Access Token instead. Skip `--auth oauth` and set a header:
+  When you can't complete OAuth — CI runners, remote boxes without a browser — use a Personal Access Token instead. Skip `--auth oauth` (static `Authorization` headers are ignored while OAuth auth is enabled) and set a header:
 
   ```bash
   openclaw mcp add trypost \

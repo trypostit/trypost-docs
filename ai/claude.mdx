@@ -15,22 +15,22 @@ icon: "globe"
 
 <Steps>
   <Step title="Open the Connectors settings">
-    In Claude, go to **[Customize → Connectors](https://claude.ai/customize/connectors)** and click **+** → **Add custom connector**.
+    In Claude, go to **[Customize → Connectors](https://claude.ai/customize/connectors)** (some UIs label this **Settings → Connectors**) and click **+** → **Add custom connector**.
   </Step>
-  <Step title="Add the TryPost server URL">
-    Paste the server URL:
+  <Step title="Add the TryPost connector">
+    Enter a name (for example `TryPost`) and paste the server URL:
 
     ```
     https://app.trypost.it/mcp/trypost
     ```
 
-    Leave **Advanced settings** (Client ID / Client Secret) empty — TryPost supports Dynamic Client Registration, so Claude registers itself automatically.
+    Leave **Advanced settings** (Client ID / Client Secret) empty — TryPost supports Dynamic Client Registration, so Claude registers itself automatically. Click **Add**.
   </Step>
   <Step title="Sign in through your browser">
     Claude opens a browser window to TryPost asking you to sign in and authorize. Click **Allow** and return to Claude — the connector flips to **Connected**.
   </Step>
   <Step title="Enable the connector in a chat">
-    Start a new conversation, click **+** → **Connectors**, and toggle **trypost** on for that chat. Then ask Claude to interact with your TryPost account:
+    Start a new conversation, click **+** → **Connectors**, and toggle **TryPost** on for that chat. Then ask Claude to interact with your TryPost account:
 
     ```
     List all my scheduled posts
