@@ -22,17 +22,19 @@ This guide covers the requirements for self-hosting TryPost.
 
 - **PHP 8.2+** with extensions:
   - BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
+  - **pcntl** (required by Horizon)
+  - **intl**, **zip**, **exif**, **sockets**
   - GD or Imagick (for image processing)
-  - Redis extension
+  - Redis extension (or use Predis via Composer — the Redis **service** is still required)
 - **Composer** 2.x
-- **Node.js** 20+ and npm (Vite 7 + Vue 3 require Node 20 or newer)
+- **Node.js** 20+ and npm (Vite 7 + Vue 3 require Node 20 or newer) — not needed if you only run the published Docker image
 - **PostgreSQL** 14+ or **MySQL** 8+
 - **Redis** 6+
 
 ### Optional
 
-- **Nginx** or **Apache** (for production)
-- **Supervisor** (for queue workers)
+- **Nginx** or **Apache** (for production bare-metal)
+- **Supervisor** (for Horizon, Reverb, and related workers)
 - **SSL certificate** (Let's Encrypt recommended)
 
 ## PHP Configuration
@@ -40,11 +42,13 @@ This guide covers the requirements for self-hosting TryPost.
 Recommended `php.ini` settings:
 
 ```ini
-upload_max_filesize = 2G
-post_max_size = 2G
+upload_max_filesize = 1G
+post_max_size = 1G
 memory_limit = 512M
 max_execution_time = 600
 ```
+
+Match these to your reverse-proxy body-size limit (`client_max_body_size` in Nginx, etc.). The published Docker image uses a 1G cap.
 
 ## Supported Operating Systems
 
@@ -74,16 +78,18 @@ Other supported providers:
 
 ## Storage Considerations
 
-Media files (images, videos) can be stored:
+Media files (images, videos, documents) can be stored:
 
-- **Locally** - On the server's disk
-- **S3** - Amazon S3
-- **R2** - Cloudflare R2
-- **Any S3-compatible** - MinIO, DigitalOcean Spaces, etc.
+- **Locally** — `FILESYSTEM_DISK=public` + `php artisan storage:link`
+- **S3** — Amazon S3
+- **R2** — Cloudflare R2
+- **Spaces** — DigitalOcean Spaces
+- **Any S3-compatible** — MinIO, etc.
 
-For production with heavy media usage, cloud storage is recommended.
+For production with heavy media usage, object storage is recommended. See [Configuration → File Storage](/self-hosting/configuration#file-storage).
 
 ## Next Steps
 
-- [Production Setup](/self-hosting/production)
+- [Installation](/self-hosting/installation)
 - [Docker Deployment](/self-hosting/docker)
+- [Production Setup](/self-hosting/production)

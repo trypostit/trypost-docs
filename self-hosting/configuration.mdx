@@ -15,6 +15,7 @@ APP_NAME="TryPost"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost
+WEBHOOK_URL=
 ```
 
 | Variable | Description |
@@ -23,6 +24,7 @@ APP_URL=http://localhost
 | `APP_ENV` | Environment: `local`, `staging`, `production` |
 | `APP_DEBUG` | Enable debug mode (set to `false` in production) |
 | `APP_URL` | Your application URL |
+| `WEBHOOK_URL` | Optional public base URL for inbound webhooks (e.g. Telegram) when `APP_URL` is not reachable from the internet. Defaults to `APP_URL`. |
 
 ## Self-Hosted Mode
 
@@ -32,7 +34,7 @@ SELF_HOSTED=true
 
 `SELF_HOSTED=true` is the default. It bypasses everything billing-related so you never have to touch Stripe or Cashier, and it locks down public sign-ups:
 
-- **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Create the admin user](/self-hosting/installation#3-create-the-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
+- **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Seed default data and create the admin user](/self-hosting/installation#4-seed-default-data-and-create-the-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
 - No Stripe, Cashier, or `CASHIER_TRIAL_DAYS` configuration required
 - The `LoadWorkspaceFromToken` middleware skips the `402 Payment Required` gate
 - Subscription gating is not enforced, so workspaces, social accounts, members, and AI credits are unlimited per account
@@ -76,29 +78,49 @@ REDIS_PASSWORD=null
 REDIS_PORT=6379
 ```
 
+## Runtime drivers
+
+For a working production-like stack, point the Laravel drivers at Redis / Reverb / the database:
+
+```env
+QUEUE_CONNECTION=redis
+CACHE_STORE=redis
+SESSION_DRIVER=database
+BROADCAST_CONNECTION=reverb
+```
+
+| Variable | Recommended | Why |
+|----------|-------------|-----|
+| `QUEUE_CONNECTION` | `redis` | Horizon processes Redis queues (publishing, notifications, automations) |
+| `CACHE_STORE` | `redis` | Cache + `onOneServer()` schedule locks across instances |
+| `SESSION_DRIVER` | `database` | Durable sessions behind multiple app workers |
+| `BROADCAST_CONNECTION` | `reverb` | Real-time dashboard updates |
+
+Without Redis queues, Horizon has nothing useful to process. Without Redis cache on multi-instance deploys, scheduled jobs can double-fire.
+
 ## Media size limits
 
 ```env
 MEDIA_IMAGE_MAX_SIZE_MB=10
 MEDIA_VIDEO_MAX_SIZE_MB=1024
-MCP_UPLOAD_MAX_SIZE_MB=50
-MCP_UPLOAD_URL_TTL_MINUTES=15
+MEDIA_DOCUMENT_MAX_SIZE_MB=100
+MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES=15
 ```
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MEDIA_IMAGE_MAX_SIZE_MB` | `10` | Max image upload size, in MB. Applied to direct uploads and URL fetches. |
 | `MEDIA_VIDEO_MAX_SIZE_MB` | `1024` | Max video upload size, in MB. Applied to direct uploads and URL fetches. |
-| `MCP_UPLOAD_MAX_SIZE_MB` | `50` | Hard cap (in MB) for files uploaded through the MCP `request-media-upload-tool` signed-URL flow. Intentionally smaller than the per-type caps because uploads stream through the app server. Raise it if your operators / nginx are sized for larger payloads. |
-| `MCP_UPLOAD_URL_TTL_MINUTES` | `15` | Lifetime of the signed upload URL returned by `request-media-upload-tool`. |
+| `MEDIA_DOCUMENT_MAX_SIZE_MB` | `100` | Max document (PDF) upload size, in MB. |
+| `MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES` | `15` | Lifetime of the signed upload URL returned by MCP / API media upload flows. (`MCP_UPLOAD_URL_TTL_MINUTES` remains as a legacy fallback.) |
 
-If you raise the video limit, also bump PHP's `upload_max_filesize` and `post_max_size` and any reverse-proxy body-size cap to match. The MCP upload endpoint is additionally rate-limited at **10 requests / minute / IP** — this is a hard-coded defense; tune the surrounding nginx/Cloudflare limits if you need a different floor.
+Signed uploads are rate-limited per workspace and per IP (`MEDIA_SIGNED_UPLOAD_PER_WORKSPACE_PER_MINUTE`, `MEDIA_SIGNED_UPLOAD_PER_IP_PER_MINUTE`). If you raise the video limit, also bump PHP's `upload_max_filesize` / `post_max_size` and any reverse-proxy body-size cap to match.
 
 ## File Storage
 
 TryPost supports local public storage and S3-compatible cloud storage.
 
-The default disk is **Cloudflare R2** (`FILESYSTEM_DISK=r2`). For self-hosted installs without object storage configured, switch to `public`.
+The application default is **`public`** (`FILESYSTEM_DISK=public`). Use object storage (S3 / R2 / Spaces) when you outgrow local disk or run multiple app instances.
 
 ### Public Disk
 
@@ -108,7 +130,7 @@ Stores files in `storage/app/public` and serves them directly from `${APP_URL}/s
 FILESYSTEM_DISK=public
 ```
 
-After switching, create the symlink from `public/storage` to `storage/app/public`:
+Create the symlink from `public/storage` to `storage/app/public` (once per install):
 
 ```bash
 php artisan storage:link
@@ -442,6 +464,16 @@ HORIZON_ALLOWED_EMAILS=admin@example.com,dev@example.com
 | `HORIZON_ALLOWED_EMAILS` | Comma-separated list of emails allowed to access Horizon in production |
 
 If not set, Horizon dashboard will be inaccessible in non-local environments.
+
+## Advanced
+
+```env
+TRYPOST_ALLOW_PRIVATE_NETWORK=false
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TRYPOST_ALLOW_PRIVATE_NETWORK` | `false` | When `true`, allows HTTP requests from TryPost (RSS, webhooks, URL media fetches, etc.) to private/internal network addresses. Keep `false` unless you intentionally need that for a private network install. |
 
 ## Next Steps
 

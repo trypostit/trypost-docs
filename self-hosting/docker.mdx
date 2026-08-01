@@ -1,19 +1,28 @@
 ---
 title: Docker
-description: Run TryPost in Docker with Laravel Sail
+description: Run TryPost with Docker Compose
 icon: "docker"
 ---
 
 # Docker
 
-TryPost ships with a working `compose.yaml` that uses [Laravel Sail](https://laravel.com/docs/sail) for a containerized dev environment. The compose file includes PostgreSQL 18, Redis, Mailpit (local SMTP UI), and Selenium for browser tests — no `sail:install` step needed.
+TryPost ships two Compose files:
+
+| File | Purpose |
+|------|---------|
+| `compose.yaml` | Local development — builds from `docker/Dockerfile`, bind-mounts the repo, Postgres 16, Redis, Mailpit |
+| `compose.prod.yaml` | Production — pulls `ghcr.io/trypostit/trypost:latest`, runs Horizon / Reverb / scheduler inside the app container, optional Caddy TLS |
 
 ## Requirements
 
 - Docker Desktop (Mac, Windows) or Docker Engine (Linux)
 - Docker Compose v2
 
-## Quick start
+---
+
+## Production (recommended for self-hosting)
+
+The production stack pulls the published image — no local PHP/Node install required.
 
 ### 1. Clone the repository
 
@@ -22,74 +31,132 @@ git clone https://github.com/trypostit/trypost.git
 cd trypost
 ```
 
-### 2. Install Composer dependencies
+You only need the repo for `compose.prod.yaml` (and optionally `Caddyfile`). The app image comes from GHCR.
 
-If you have PHP 8.2+ on your host:
-
-```bash
-composer install
-```
-
-Otherwise use a throwaway container — no PHP install required:
+### 2. Generate an app key and edit the compose file
 
 ```bash
-docker run --rm \
-    -u "$(id -u):$(id -g)" \
-    -v "$(pwd):/var/www/html" \
-    -w /var/www/html \
-    laravelsail/php85-composer:latest \
-    composer install --ignore-platform-reqs
+docker compose -f compose.prod.yaml run --rm app php artisan key:generate --show
 ```
 
-### 3. Configure environment
+Paste the value into `APP_KEY` in `compose.prod.yaml`. Also set:
+
+- `APP_URL` — your public URL (e.g. `https://post.yourdomain.com`)
+- Database / Redis passwords marked `change me`
+- `REVERB_APP_SECRET`
+
+### 3. Start the stack
 
 ```bash
-cp .env.example .env
+docker compose -f compose.prod.yaml up -d
 ```
 
-Update the database and Redis hosts so they point at the Sail containers:
+On first boot the entrypoint automatically:
 
-```env
-APP_URL=http://localhost
+- waits for Postgres
+- runs migrations
+- creates `storage:link` if missing
+- generates Passport keys if missing (`passport:keys`)
+- caches config / routes / views / events
+- starts nginx, php-fpm, Horizon, Reverb, and `schedule:work`
 
-DB_CONNECTION=pgsql
-DB_HOST=pgsql
-DB_PORT=5432
-DB_DATABASE=trypost
-DB_USERNAME=sail
-DB_PASSWORD=password
+It does **not** seed the database. Do that once in the next step.
 
-REDIS_HOST=redis
-```
-
-### 4. Start the containers
+### 4. Seed Passport + admin user (one-time)
 
 ```bash
-./vendor/bin/sail up -d
+docker compose -f compose.prod.yaml exec app php artisan db:seed
+docker compose -f compose.prod.yaml exec app php artisan db:seed --class=UserSeeder
 ```
 
-That brings up `laravel.test`, `pgsql`, `redis`, `mailpit`, and `selenium`.
+| Seeder | Purpose |
+|--------|---------|
+| `DatabaseSeeder` | Passport Personal Access Client + plan rows |
+| `UserSeeder` | Admin account (`admin@trypost.it` / `password`) |
 
-### 5. Generate the app key
+Change the admin password immediately on first login. Additional accounts come from workspace invites (Settings → Members).
+
+<Tip>
+  Passport **keys** are created by the entrypoint. The Personal Access **Client** comes from `db:seed`. API keys and MCP need both — see [Installation](/self-hosting/installation#3-passport-keys-and-public-storage).
+</Tip>
+
+### 5. Optional HTTPS with Caddy
+
+1. Point your domain's DNS at the host
+2. Set `APP_URL` to `https://your-domain` and `APP_DOMAIN` on the `caddy` service
+3. Start with the proxy profile:
 
 ```bash
-./vendor/bin/sail artisan key:generate
+docker compose -f compose.prod.yaml --profile proxy up -d
 ```
 
-Migrations run as part of the seed step below.
+Without the profile, the app is served on `http://localhost:8000`.
 
-### 6. Seed default data and create the admin user
+### Access
 
-Self-hosted installs default to `SELF_HOSTED=true`, which closes `/register`. On a fresh database, run this once:
+| Service | URL |
+|---------|-----|
+| TryPost | `http://localhost:8000` (or your `APP_URL`) |
+| Reverb (WebSocket) | port `8080` (proxied under `/app/` and `/apps/` by the in-container nginx) |
+
+### Reverb host note
+
+The published image bakes `VITE_REVERB_*` at build time (defaults to `localhost:8080`). For a custom domain over HTTPS, rebuild the image with:
 
 ```bash
-./vendor/bin/sail artisan migrate:fresh --seed && ./vendor/bin/sail artisan db:seed --class=UserSeeder
+docker build \
+  --build-arg VITE_REVERB_HOST=post.yourdomain.com \
+  --build-arg VITE_REVERB_PORT=443 \
+  --build-arg VITE_REVERB_SCHEME=https \
+  -t trypost-app:custom \
+  -f docker/Dockerfile \
+  --target production \
+  .
 ```
 
-This rebuilds the schema, runs the default `DatabaseSeeder` (Passport personal access client + plan rows), and creates the admin user.
+…and point `compose.prod.yaml` at that image. Changing only runtime `REVERB_*` env vars does not update the browser client.
+
+### Common production commands
+
+```bash
+docker compose -f compose.prod.yaml logs -f app
+docker compose -f compose.prod.yaml exec app php artisan horizon:status
+docker compose -f compose.prod.yaml exec app php artisan migrate --force
+docker compose -f compose.prod.yaml down
+```
+
+---
+
+## Local development
+
+Use `compose.yaml` when you want a full stack with a bind-mounted source tree.
+
+### 1. Clone and start
+
+```bash
+git clone https://github.com/trypostit/trypost.git
+cd trypost
+docker compose up -d
+```
+
+On first boot the entrypoint can seed `.env` from `docker/.env.docker.example`, install Composer/npm deps if missing, generate `APP_KEY`, migrate, `storage:link`, and `passport:keys`.
+
+### 2. Seed default data and create the admin user
+
+```bash
+docker compose exec app php artisan db:seed
+docker compose exec app php artisan db:seed --class=UserSeeder
+```
+
+Or wipe-and-rebuild on a brand-new database:
+
+```bash
+docker compose exec app php artisan migrate:fresh --seed
+docker compose exec app php artisan db:seed --class=UserSeeder
+```
 
 <Warning>
-  `migrate:fresh` **drops every table**. Only run it on a brand-new database. If you already have data, run `sail artisan db:seed && sail artisan db:seed --class=UserSeeder` instead.
+  `migrate:fresh` **drops every table**. Only run it on a brand-new database.
 </Warning>
 
 Default credentials — **change the password on first login**:
@@ -99,99 +166,39 @@ Default credentials — **change the password on first login**:
 | Email | `admin@trypost.it` |
 | Password | `password` |
 
-Additional accounts come from workspace invites (Settings → Members).
-
-### 7. Install npm packages and build the front-end
-
-```bash
-./vendor/bin/sail npm install
-./vendor/bin/sail npm run build
-```
-
-For active development with hot reload, use `sail npm run dev` instead.
-
-## Accessing TryPost
+### Access (dev)
 
 | Service | URL |
 |---------|-----|
-| TryPost dashboard | `http://localhost` |
+| TryPost dashboard | `http://localhost:8000` (or `APP_PORT`) |
 | Mailpit (captured emails) | `http://localhost:8025` |
+| Vite HMR | `http://localhost:5173` |
 | Postgres | `localhost:5432` |
 | Redis | `localhost:6379` |
+| Reverb | `localhost:8080` |
 
-## Common Commands
-
-```bash
-# Start containers
-./vendor/bin/sail up -d
-
-# Stop containers
-./vendor/bin/sail down
-
-# View logs
-./vendor/bin/sail logs
-
-# Run Artisan commands
-./vendor/bin/sail artisan <command>
-
-# Run npm commands
-./vendor/bin/sail npm <command>
-
-# Access PostgreSQL
-./vendor/bin/sail psql
-
-# Access Redis CLI
-./vendor/bin/sail redis
-```
-
-## Running the Queue Worker
-
-For background job processing (publishing, notifications, token refresh):
+### Common development commands
 
 ```bash
-./vendor/bin/sail artisan horizon
+docker compose up -d
+docker compose down
+docker compose logs -f app
+docker compose exec app php artisan <command>
+docker compose exec app npm run dev
 ```
 
-Or run it detached alongside the rest of the stack:
-
-```bash
-./vendor/bin/sail up -d
-./vendor/bin/sail artisan horizon
-```
-
-## Shell alias
-
-Add this alias to your shell profile (`~/.bashrc`, `~/.zshrc`) so you can drop the `./vendor/bin/` prefix:
-
-```bash
-alias sail='./vendor/bin/sail'
-```
-
-Then:
-
-```bash
-sail up -d
-sail artisan migrate
-sail npm run dev
-```
-
-## Production with Docker
-
-The shipped `compose.yaml` is tuned for development (debug mode, Mailpit, Selenium). For production:
-
-1. Use a slimmer compose file without Selenium/Mailpit and with persistent named volumes for `storage/app` and Postgres data
-2. Set `APP_ENV=production`, `APP_DEBUG=false`
-3. Terminate SSL at a reverse proxy (Nginx, Traefik, Caddy)
-4. Configure long-running supervisors for Horizon, Reverb, and the Laravel scheduler — see [Production setup](/self-hosting/production)
+Horizon, Reverb, and the scheduler already run inside the app container via Supervisor — you usually don't start them separately in Docker.
 
 ## Troubleshooting
 
 ### Port conflicts
 
-If port 80 is already in use, change `APP_PORT` in `.env`:
+Change the host ports in `.env` (dev) or the `ports:` mappings in `compose.prod.yaml`:
 
 ```env
 APP_PORT=8080
+FORWARD_DB_PORT=5433
+FORWARD_MAILPIT_UI_PORT=8026
 ```
 
 ### Permission issues
@@ -204,10 +211,23 @@ sudo chown -R $USER: .
 
 ### Database connection refused
 
-Make sure the database container is healthy:
+Wait until Postgres is healthy:
 
 ```bash
-./vendor/bin/sail ps
+docker compose ps
+# or
+docker compose -f compose.prod.yaml ps
 ```
 
-Give Postgres a few seconds to initialize on first boot.
+### API key creation fails with "Personal access client not found"
+
+The container has Passport keys but you haven't seeded yet:
+
+```bash
+docker compose -f compose.prod.yaml exec app php artisan db:seed
+```
+
+## Next steps
+
+- [Configuration](/self-hosting/configuration) — mail, storage, social OAuth, AI
+- [Production setup](/self-hosting/production) — bare-metal Nginx / Supervisor if you're not using `compose.prod.yaml`

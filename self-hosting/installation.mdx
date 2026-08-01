@@ -16,6 +16,8 @@ This guide walks through installing TryPost on a server (bare-metal or VM). For 
 - Redis 6+
 - Composer 2.x
 
+See [Requirements](/self-hosting/requirements) for the full list (PHP extensions, hardware, storage).
+
 ## Install
 
 ### 1. Clone the repository
@@ -25,13 +27,19 @@ git clone https://github.com/trypostit/trypost.git
 cd trypost
 ```
 
-### 2. First-time setup (one command)
+### 2. First-time setup
 
 ```bash
 composer setup
 ```
 
-This runs `composer install`, copies `.env.example` to `.env`, generates `APP_KEY`, runs `php artisan migrate --force`, installs npm packages, and runs `npm run build`. After it finishes, edit `.env` to point at your real database, Redis, and any social platform credentials — see [Configuration](/self-hosting/configuration).
+This runs `composer install`, copies `.env.example` to `.env`, generates `APP_KEY`, runs `php artisan migrate --force`, installs npm packages, and runs `npm run build`.
+
+<Note>
+  `composer setup` does **not** seed the database, generate Passport keys, or create the public storage symlink. Those are one-time steps below.
+</Note>
+
+After it finishes, edit `.env` to point at your real database, Redis, queue/cache drivers, and any social platform credentials — see [Configuration](/self-hosting/configuration).
 
 If you prefer doing each step yourself:
 
@@ -45,21 +53,52 @@ npm install
 npm run build
 ```
 
-### 3. Seed default data and create the admin user
+### 3. Passport keys and public storage
+
+Passport needs an RSA key pair on disk to **sign and verify** API / MCP tokens. This is separate from the Personal Access Client row created by the seeder in the next step.
+
+```bash
+php artisan passport:keys
+php artisan storage:link
+```
+
+| Command | What it creates |
+|---------|-----------------|
+| `passport:keys` | `storage/oauth-private.key` and `storage/oauth-public.key` |
+| `storage:link` | Symlink `public/storage` → `storage/app/public` (required when `FILESYSTEM_DISK=public`) |
+
+Run both once on a fresh install. Do **not** regenerate Passport keys later unless you intend to invalidate every existing API token.
+
+### 4. Seed default data and create the admin user
 
 Self-hosted installs default to `SELF_HOSTED=true`, which closes `/register` to the public — your instance only exists for you and the people you invite.
 
 On a fresh database, run this once:
 
 ```bash
+php artisan db:seed && php artisan db:seed --class=UserSeeder
+```
+
+This runs the default `DatabaseSeeder` (which provisions the **Laravel Passport Personal Access Client** required to issue API tokens, plus the plan rows), and then creates the admin user.
+
+If you prefer a wipe-and-rebuild on a brand-new empty database:
+
+```bash
 php artisan migrate:fresh --seed && php artisan db:seed --class=UserSeeder
 ```
 
-This rebuilds the schema, runs the default `DatabaseSeeder` (which provisions the **Laravel Passport Personal Access Client** required to issue API tokens, plus the plan rows), and then creates the admin user.
-
 <Warning>
-  `migrate:fresh` **drops every table**. Only run it on a brand-new database during initial install. If you already have data, run `php artisan db:seed && php artisan db:seed --class=UserSeeder` instead — both seeders are idempotent.
+  `migrate:fresh` **drops every table**. Only run it on a brand-new database during initial install. If you already have data, stick to `php artisan db:seed && php artisan db:seed --class=UserSeeder` — both seeders are idempotent.
 </Warning>
+
+<Tip>
+  Passport setup is two independent pieces:
+
+  1. **Keys** (`passport:keys`) — cryptography material on disk
+  2. **Personal Access Client** (`PassportSeeder` via `db:seed`) — database row used by `createToken()`
+
+  API keys in Settings and MCP Bearer auth need **both**.
+</Tip>
 
 The admin account ships with fixed credentials — **change the password immediately on first login**:
 
@@ -70,7 +109,7 @@ The admin account ships with fixed credentials — **change the password immedia
 
 After this, every other account on the instance comes from a workspace invite (Settings → Members) — invitees get a link that lets them sign up even though open registration stays off.
 
-### 4. Run all dev processes in one terminal
+### 5. Run all dev processes in one terminal
 
 ```bash
 composer dev
@@ -85,13 +124,18 @@ This concurrently starts:
 
 For Inertia SSR development, use `composer dev:ssr` instead.
 
-### 5. Production process supervisors
+### 6. Production process supervisors
 
 For production you don't use `composer dev`. Configure separate supervisor entries for the web server (PHP-FPM / Octane), Horizon (queues), Reverb (WebSockets), and the cron job for `php artisan schedule:run` — see [Production setup](/self-hosting/production).
 
 ## Verify the install
 
-Visit `http://localhost:8000` (or your configured `APP_URL`) and sign in with the admin credentials you set in step 3. You'll land in the dashboard.
+Visit `http://localhost:8000` (or your configured `APP_URL`) and sign in with the admin credentials from step 4. You'll land in the dashboard.
+
+Optional smoke checks:
+
+- Create an API key under workspace Settings → API — if Passport keys or the Personal Access Client are missing, this fails with a 500
+- Upload a media file — if `storage:link` is missing and you use the `public` disk, URLs 404
 
 ## Next Steps
 
