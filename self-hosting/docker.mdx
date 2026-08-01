@@ -55,7 +55,7 @@ On first boot the entrypoint automatically:
 
 - waits for Postgres
 - runs migrations
-- creates `storage:link` if missing
+- creates `storage:link` if missing (harmless no-op if you later switch to S3 / R2 / Spaces)
 - generates Passport keys if missing (`passport:keys`)
 - caches config / routes / views / events
 - starts nginx, php-fpm, Horizon, Reverb, and `schedule:work`
@@ -77,7 +77,7 @@ docker compose -f compose.prod.yaml exec app php artisan db:seed --class=UserSee
 Change the admin password immediately on first login. Additional accounts come from workspace invites (Settings → Members).
 
 <Tip>
-  Passport **keys** are created by the entrypoint. The Personal Access **Client** comes from `db:seed`. API keys and MCP need both — see [Installation](/self-hosting/installation#3-passport-keys-and-public-storage).
+  Passport **keys** are created by the entrypoint. The Personal Access **Client** comes from `db:seed`. API keys and MCP need both — see [Installation](/self-hosting/installation#3-passport-keys-and-local-storage-if-needed).
 </Tip>
 
 ### 5. Optional HTTPS with Caddy

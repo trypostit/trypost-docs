@@ -53,21 +53,23 @@ npm install
 npm run build
 ```
 
-### 3. Passport keys and public storage
+### 3. Passport keys (and local storage, if needed)
 
 Passport needs an RSA key pair on disk to **sign and verify** API / MCP tokens. This is separate from the Personal Access Client row created by the seeder in the next step.
 
 ```bash
 php artisan passport:keys
+```
+
+Run once on a fresh install. Do **not** regenerate Passport keys later unless you intend to invalidate every existing API token.
+
+If you store media on the local **`public`** disk (`FILESYSTEM_DISK=public`, the app default), also create the public symlink once:
+
+```bash
 php artisan storage:link
 ```
 
-| Command | What it creates |
-|---------|-----------------|
-| `passport:keys` | `storage/oauth-private.key` and `storage/oauth-public.key` |
-| `storage:link` | Symlink `public/storage` → `storage/app/public` (required when `FILESYSTEM_DISK=public`) |
-
-Run both once on a fresh install. Do **not** regenerate Passport keys later unless you intend to invalidate every existing API token.
+Skip `storage:link` when using object storage (`s3`, `r2`, `spaces`, etc.) — those disks serve files from the bucket URL, not from `public/storage`.
 
 ### 4. Seed default data and create the admin user
 
@@ -135,7 +137,7 @@ Visit `http://localhost:8000` (or your configured `APP_URL`) and sign in with th
 Optional smoke checks:
 
 - Create an API key under workspace Settings → API — if Passport keys or the Personal Access Client are missing, this fails with a 500
-- Upload a media file — if `storage:link` is missing and you use the `public` disk, URLs 404
+- Upload a media file — if you use `FILESYSTEM_DISK=public` and skipped `storage:link`, media URLs 404
 
 ## Next Steps
 

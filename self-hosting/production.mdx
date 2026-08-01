@@ -34,17 +34,24 @@ After migrations, run these once on a fresh server (see [Installation](/self-hos
 
 ```bash
 php artisan passport:keys
-php artisan storage:link
 php artisan db:seed
 php artisan db:seed --class=UserSeeder
 ```
 
+Only if you use local media storage (`FILESYSTEM_DISK=public`):
+
+```bash
+php artisan storage:link
+```
+
+Skip that command when media lives on S3, R2, Spaces, or another object store.
+
 | Step | Why |
 |------|-----|
 | `passport:keys` | RSA key pair to sign/verify API and MCP tokens |
-| `storage:link` | Public media URLs when using the `public` disk |
 | `db:seed` | Passport Personal Access Client + plan rows |
 | `UserSeeder` | First admin account |
+| `storage:link` | Only for `FILESYSTEM_DISK=public` — not needed for S3 / R2 / Spaces |
 
 ## Optimizations
 
@@ -276,7 +283,7 @@ Make sure all of these are in place in production:
 | **Passport keys** | `php artisan passport:keys` (once) | Sign/verify API & MCP tokens |
 | **Passport client** | `php artisan db:seed` (once) | Issue personal access tokens |
 | **Admin user** | `php artisan db:seed --class=UserSeeder` (once) | First login |
-| **Storage link** | `php artisan storage:link` (once) | Public media URLs |
+| **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
 | **Redis** | `QUEUE_CONNECTION` / `CACHE_STORE` | Queues, cache, schedule locks |
 | **Mail** | SMTP or SendKit | Invites, password reset, alerts |
 | **Horizon** | `php artisan horizon` | Processes queues |

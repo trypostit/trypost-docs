@@ -136,6 +136,8 @@ Create the symlink from `public/storage` to `storage/app/public` (once per insta
 php artisan storage:link
 ```
 
+Only needed for the `public` disk. Object storage (`s3`, `r2`, `spaces`) does not use this symlink.
+
 See Laravel's [public disk documentation](https://laravel.com/docs/13.x/filesystem#the-public-disk) for more details.
 
 ### AWS S3
