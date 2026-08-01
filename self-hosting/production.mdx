@@ -6,11 +6,23 @@ icon: "rocket"
 
 # Production Setup
 
-This guide covers deploying TryPost to a production environment on bare metal / a VM. If you prefer containers, use [`compose.prod.yaml`](/self-hosting/docker#production-recommended-for-self-hosting) instead — it already runs Horizon, Reverb, and the scheduler for you.
+This guide is for **bare metal / a VM** after you have completed [Installation](/self-hosting/installation) (app key, `.env`, migrations, Passport keys, seed, frontend build).
 
-## Environment Configuration
+Prefer containers? Use [`compose.prod.yaml`](/self-hosting/docker#production-recommended-for-self-hosting) — it already runs Horizon, Reverb, and the scheduler for you.
 
-Set these values in your `.env` for production:
+## Before you continue
+
+Confirm the install checklist is done:
+
+- [ ] `APP_KEY` set
+- [ ] Database migrated
+- [ ] `QUEUE_CONNECTION=redis` and Redis reachable
+- [ ] `php artisan passport:keys` ran
+- [ ] `php artisan db:seed` + `UserSeeder` ran
+- [ ] `storage:link` ran **if** `FILESYSTEM_DISK=public`
+- [ ] `npm run build` completed
+
+## Environment (production values)
 
 ```env
 APP_ENV=production
@@ -26,32 +38,7 @@ BROADCAST_CONNECTION=reverb
 FILESYSTEM_DISK=public
 ```
 
-See [Configuration](/self-hosting/configuration) for the full variable list.
-
-## One-time bootstrap
-
-After migrations, run these once on a fresh server (see [Installation](/self-hosting/installation)):
-
-```bash
-php artisan passport:keys
-php artisan db:seed
-php artisan db:seed --class=UserSeeder
-```
-
-Only if you use local media storage (`FILESYSTEM_DISK=public`):
-
-```bash
-php artisan storage:link
-```
-
-Skip that command when media lives on S3, R2, Spaces, or another object store.
-
-| Step | Why |
-|------|-----|
-| `passport:keys` | RSA key pair to sign/verify API and MCP tokens |
-| `db:seed` | Passport Personal Access Client + plan rows |
-| `UserSeeder` | First admin account |
-| `storage:link` | Only for `FILESYSTEM_DISK=public` — not needed for S3 / R2 / Spaces |
+See [Configuration](/self-hosting/configuration) for mail, object storage, and social OAuth.
 
 ## Optimizations
 
@@ -280,15 +267,16 @@ Make sure all of these are in place in production:
 
 | Item | How | Purpose |
 |------|-----|---------|
+| **App key** | `php artisan key:generate` | Encrypts sessions / cookies |
 | **Passport keys** | `php artisan passport:keys` (once) | Sign/verify API & MCP tokens |
 | **Passport client** | `php artisan db:seed` (once) | Issue personal access tokens |
 | **Admin user** | `php artisan db:seed --class=UserSeeder` (once) | First login |
 | **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
-| **Redis** | `QUEUE_CONNECTION` / `CACHE_STORE` | Queues, cache, schedule locks |
+| **Redis** | `QUEUE_CONNECTION=redis` + Redis up | Queues, cache, schedule locks |
 | **Mail** | SMTP or SendKit | Invites, password reset, alerts |
-| **Horizon** | `php artisan horizon` | Processes queues |
-| **Reverb** | `php artisan reverb:start` | Real-time WebSocket updates |
-| **Scheduler** | `php artisan schedule:run` (cron) | Posts, automations, token refresh |
+| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, automations |
+| **Reverb** | `php artisan reverb:start` (Supervisor) | Real-time WebSocket updates |
+| **Scheduler** | cron → `schedule:run` every minute | Due posts, token refresh, automations |
 
 <Warning>
   If Horizon, Reverb, or the scheduler are not running, TryPost will not function correctly. Scheduled posts won't publish, notifications won't send, and the dashboard won't update in real time.

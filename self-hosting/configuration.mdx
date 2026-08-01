@@ -34,7 +34,7 @@ SELF_HOSTED=true
 
 `SELF_HOSTED=true` is the default. It bypasses everything billing-related so you never have to touch Stripe or Cashier, and it locks down public sign-ups:
 
-- **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Seed default data and create the admin user](/self-hosting/installation#4-seed-default-data-and-create-the-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
+- **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Seed default data and create the admin user](/self-hosting/installation#6-seed-passport-client-and-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
 - No Stripe, Cashier, or `CASHIER_TRIAL_DAYS` configuration required
 - The `LoadWorkspaceFromToken` middleware skips the `402 Payment Required` gate
 - Subscription gating is not enforced, so workspaces, social accounts, members, and AI credits are unlimited per account
@@ -97,6 +97,20 @@ BROADCAST_CONNECTION=reverb
 | `BROADCAST_CONNECTION` | `reverb` | Real-time dashboard updates |
 
 Without Redis queues, Horizon has nothing useful to process. Without Redis cache on multi-instance deploys, scheduled jobs can double-fire.
+
+## Passport (API & MCP tokens)
+
+Self-hosted API keys and MCP Bearer auth need both:
+
+```bash
+php artisan passport:keys          # once — RSA files in storage/
+php artisan db:seed                # once — Personal Access Client in the DB
+```
+
+Alternatively, set `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in `.env` (PEM contents) instead of key files — useful for secret managers. Do not regenerate keys after users have issued tokens.
+
+Full install order: [Installation](/self-hosting/installation).
+
 
 ## Media size limits
 

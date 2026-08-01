@@ -6,17 +6,15 @@ icon: "download"
 
 # Installation
 
-This guide walks through installing TryPost on a server (bare-metal or VM). For Docker-first setups, see [Docker](/self-hosting/docker).
+Step-by-step install on a bare-metal server or VM. Prefer containers? Use [Docker production](/self-hosting/docker#production-recommended-for-self-hosting) instead.
 
 ## Requirements
 
-- PHP 8.2 or higher
-- Node.js 20 or higher
+- PHP 8.2+ (with the extensions listed in [Requirements](/self-hosting/requirements))
+- Node.js 20+
 - PostgreSQL 14+ or MySQL 8+
 - Redis 6+
 - Composer 2.x
-
-See [Requirements](/self-hosting/requirements) for the full list (PHP extensions, hardware, storage).
 
 ## Install
 
@@ -27,120 +25,174 @@ git clone https://github.com/trypostit/trypost.git
 cd trypost
 ```
 
-### 2. First-time setup
-
-```bash
-composer setup
-```
-
-This runs `composer install`, copies `.env.example` to `.env`, generates `APP_KEY`, runs `php artisan migrate --force`, installs npm packages, and runs `npm run build`.
-
-<Note>
-  `composer setup` does **not** seed the database or generate Passport keys. Those are one-time steps below. It also does not run `storage:link` (only needed if you keep `FILESYSTEM_DISK=public`).
-</Note>
-
-After it finishes, edit `.env` to point at your real database, Redis, queue/cache drivers, and any social platform credentials — see [Configuration](/self-hosting/configuration).
-
-If you prefer doing each step yourself:
+### 2. Install PHP and Node dependencies
 
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
-# edit .env now
-php artisan migrate
 npm install
-npm run build
 ```
 
-### 3. Passport keys (and local storage, if needed)
+`php artisan key:generate` writes `APP_KEY` into `.env`. Without it the app will not boot.
 
-Passport needs an RSA key pair on disk to **sign and verify** API / MCP tokens. This is separate from the Personal Access Client row created by the seeder in the next step.
+### 3. Configure the environment
+
+Edit `.env` **before** migrating. Minimum for a working self-hosted instance:
+
+```env
+APP_URL=https://your-domain.com
+APP_ENV=production
+APP_DEBUG=false
+
+SELF_HOSTED=true
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=trypost
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+QUEUE_CONNECTION=redis
+CACHE_STORE=redis
+SESSION_DRIVER=database
+BROADCAST_CONNECTION=reverb
+
+FILESYSTEM_DISK=public
+```
+
+| Block | Why |
+|-------|-----|
+| `APP_KEY` | Already set by `key:generate` — encrypts sessions, cookies, encrypted data |
+| Database | Where posts, users, and Passport clients live |
+| Redis + queue/cache drivers | Horizon publishes posts and runs automations from Redis queues |
+| `BROADCAST_CONNECTION=reverb` | Live dashboard updates |
+| `FILESYSTEM_DISK=public` | Local media on disk (use `s3` / `r2` / `spaces` for object storage) |
+| `SELF_HOSTED=true` | Disables Stripe billing and public `/register` |
+
+Also configure **mail** (invites / password reset) and optional social OAuth / AI keys — see [Configuration](/self-hosting/configuration).
+
+<Tip>
+  Prefer a one-liner for deps? `composer setup` runs install + `key:generate` + migrate + npm build, but it migrates **before** you edit `.env`. Safer path for a real server: follow the steps above (configure `.env`, then migrate yourself).
+</Tip>
+
+### 4. Run migrations
+
+```bash
+php artisan migrate --force
+```
+
+### 5. Passport keys (and local storage symlink)
+
+Passport needs an RSA key pair on disk to **sign and verify** API / MCP tokens:
 
 ```bash
 php artisan passport:keys
 ```
 
-Run once on a fresh install. Do **not** regenerate Passport keys later unless you intend to invalidate every existing API token.
+Run once. Do **not** regenerate later unless you intend to invalidate every existing API token.
 
-If you store media on the local **`public`** disk (`FILESYSTEM_DISK=public`, the app default), also create the public symlink once:
+If you keep `FILESYSTEM_DISK=public`, also create the public media symlink:
 
 ```bash
 php artisan storage:link
 ```
 
-Skip `storage:link` when using object storage (`s3`, `r2`, `spaces`, etc.) — those disks serve files from the bucket URL, not from `public/storage`.
+Skip `storage:link` when using object storage (`s3`, `r2`, `spaces`) — those disks serve from the bucket URL.
 
-### 4. Seed default data and create the admin user
+### 6. Seed Passport client and admin user
 
-Self-hosted installs default to `SELF_HOSTED=true`, which closes `/register` to the public — your instance only exists for you and the people you invite.
-
-On a fresh database, run this once:
+Self-hosted installs close `/register`. Bootstrap the database once:
 
 ```bash
-php artisan db:seed && php artisan db:seed --class=UserSeeder
+php artisan db:seed
+php artisan db:seed --class=UserSeeder
 ```
 
-This runs the default `DatabaseSeeder` (which provisions the **Laravel Passport Personal Access Client** required to issue API tokens, plus the plan rows), and then creates the admin user.
-
-If you prefer a wipe-and-rebuild on a brand-new empty database:
-
-```bash
-php artisan migrate:fresh --seed && php artisan db:seed --class=UserSeeder
-```
-
-<Warning>
-  `migrate:fresh` **drops every table**. Only run it on a brand-new database during initial install. If you already have data, stick to `php artisan db:seed && php artisan db:seed --class=UserSeeder` — both seeders are idempotent.
-</Warning>
+| Seeder | What it creates |
+|--------|-----------------|
+| `DatabaseSeeder` (`db:seed`) | **Passport Personal Access Client** (required to issue API tokens) + plan rows |
+| `UserSeeder` | Admin account |
 
 <Tip>
-  Passport setup is two independent pieces:
+  Passport is two independent pieces:
 
-  1. **Keys** (`passport:keys`) — cryptography material on disk
-  2. **Personal Access Client** (`PassportSeeder` via `db:seed`) — database row used by `createToken()`
+  1. **Keys** (`passport:keys`) — files on disk
+  2. **Personal Access Client** (`db:seed`) — row in `oauth_clients`
 
   API keys in Settings and MCP Bearer auth need **both**.
 </Tip>
 
-The admin account ships with fixed credentials — **change the password immediately on first login**:
+Admin credentials — **change the password immediately on first login**:
 
 | Field | Value |
 |---|---|
 | Email | `admin@trypost.it` |
 | Password | `password` |
 
-After this, every other account on the instance comes from a workspace invite (Settings → Members) — invitees get a link that lets them sign up even though open registration stays off.
+Further accounts come from workspace invites (Settings → Members).
 
-### 5. Run all dev processes in one terminal
+<Warning>
+  Only on a brand-new empty database you may use `php artisan migrate:fresh --seed && php artisan db:seed --class=UserSeeder`. `migrate:fresh` **drops every table**.
+</Warning>
+
+### 7. Build the frontend
+
+```bash
+npm run build
+```
+
+### 8. Run the app
+
+**Local / smoke test** (one terminal):
 
 ```bash
 composer dev
 ```
 
-This concurrently starts:
+This starts `php artisan serve`, a queue listener, log tail, and Vite. Open `http://localhost:8000` and sign in with the admin user.
 
-- `php artisan serve` — HTTP server on `http://localhost:8000`
-- `php artisan queue:listen` — queue worker
-- `php artisan pail` — live log tail
-- `npm run dev` — Vite with hot reload
+**Production** — do **not** use `composer dev`. You need long-running processes:
 
-For Inertia SSR development, use `composer dev:ssr` instead.
+| Process | Command | Purpose |
+|---------|---------|---------|
+| Web (PHP-FPM + Nginx) | see [Production](/self-hosting/production#nginx-configuration) | Serve HTTP |
+| **Horizon** | `php artisan horizon` | Queues — publish posts, notifications, automations |
+| **Reverb** | `php artisan reverb:start` | WebSockets |
+| **Scheduler** | cron → `php artisan schedule:run` | Due posts, token refresh, automations |
 
-### 6. Production process supervisors
+Full Supervisor configs, Nginx (including Reverb `/app/` + `/apps/`), SSL, and caches: [Production setup](/self-hosting/production).
 
-For production you don't use `composer dev`. Configure separate supervisor entries for the web server (PHP-FPM / Octane), Horizon (queues), Reverb (WebSockets), and the cron job for `php artisan schedule:run` — see [Production setup](/self-hosting/production).
+## End-to-end checklist
 
-## Verify the install
+| Step | Done when |
+|------|-----------|
+| `APP_KEY` set | `key:generate` ran |
+| Database reachable | `.env` `DB_*` correct |
+| Queues on Redis | `QUEUE_CONNECTION=redis` + Redis up |
+| Migrations applied | `php artisan migrate` |
+| Passport keys | `storage/oauth-private.key` exists |
+| Passport client | `php artisan db:seed` ran |
+| Admin user | `UserSeeder` ran; you can log in |
+| Media (local) | `storage:link` if `FILESYSTEM_DISK=public` |
+| Frontend built | `npm run build` |
+| Horizon running | posts actually publish |
+| Reverb + scheduler | live UI + cron jobs |
+| Mail configured | invites / password reset work |
 
-Visit `http://localhost:8000` (or your configured `APP_URL`) and sign in with the admin credentials from step 4. You'll land in the dashboard.
+## Verify
 
-Optional smoke checks:
+1. Sign in at `APP_URL` with the admin credentials
+2. Create an API key under workspace Settings → API (fails with 500 if Passport keys or client are missing)
+3. Upload a media file (404s if you use `public` disk without `storage:link`)
+4. Schedule a test post and confirm Horizon processes it
 
-- Create an API key under workspace Settings → API — if Passport keys or the Personal Access Client are missing, this fails with a 500
-- Upload a media file — if you use `FILESYSTEM_DISK=public` and skipped `storage:link`, media URLs 404
+## Next steps
 
-## Next Steps
-
-- [Configure your environment](/self-hosting/configuration)
-- [Connect your first social account](/)
-- [Production deployment](/self-hosting/production)
+- [Configuration](/self-hosting/configuration) — mail, storage, social OAuth, AI
+- [Production setup](/self-hosting/production) — Nginx, SSL, Horizon, Reverb, cron
+- [Docker](/self-hosting/docker) — same stack via Compose

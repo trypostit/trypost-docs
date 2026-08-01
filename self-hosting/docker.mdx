@@ -10,8 +10,8 @@ TryPost ships two Compose files:
 
 | File | Purpose |
 |------|---------|
-| `compose.yaml` | Local development — builds from `docker/Dockerfile`, bind-mounts the repo, Postgres 16, Redis, Mailpit |
-| `compose.prod.yaml` | Production — pulls `ghcr.io/trypostit/trypost:latest`, runs Horizon / Reverb / scheduler inside the app container, optional Caddy TLS |
+| `compose.prod.yaml` | **Self-hosting in production** — pulls `ghcr.io/trypostit/trypost:latest`, Postgres, Redis, Horizon, Reverb, scheduler, optional Caddy TLS |
+| `compose.yaml` | Local development — builds from source, bind-mounts the repo, Mailpit, Vite |
 
 ## Requirements
 
@@ -20,9 +20,18 @@ TryPost ships two Compose files:
 
 ---
 
-## Production (recommended for self-hosting)
+## Production self-hosting
 
-The production stack pulls the published image — no local PHP/Node install required.
+No local PHP/Node install required. The published image includes the built frontend.
+
+### What you do vs what the container does
+
+| You (once) | Entrypoint / Supervisor (automatic) |
+|------------|-------------------------------------|
+| Set `APP_KEY`, `APP_URL`, DB passwords, `REVERB_APP_SECRET` | Wait for Postgres, run migrations |
+| `docker compose … up -d` | `passport:keys` if missing, `storage:link` if missing |
+| `db:seed` + `UserSeeder` | Cache config/routes/views/events |
+| Optional: Caddy TLS profile | Start nginx, php-fpm, **Horizon**, **Reverb**, **schedule:work** |
 
 ### 1. Clone the repository
 
@@ -47,24 +56,26 @@ Paste the value into `APP_KEY` in `compose.prod.yaml`. Also set:
 
 Leave `REVERB_APP_KEY` as `trypost-reverb-key` unless you rebuild the image — it must match the key baked into the published frontend bundle.
 
+Queues, cache, session, and broadcast are already set to Redis / Reverb / database in `compose.prod.yaml`. Configure **mail** (defaults to `log`) and optional social/AI credentials in the same file — see [Configuration](/self-hosting/configuration).
+
 ### 3. Start the stack
 
 ```bash
 docker compose -f compose.prod.yaml up -d
 ```
 
-On first boot the entrypoint automatically:
+On first boot the entrypoint:
 
 - waits for Postgres
 - runs migrations
-- creates `storage:link` if missing (harmless no-op if you later switch to S3 / R2 / Spaces)
+- creates `storage:link` if missing (unused if you later switch to S3 / R2 / Spaces)
 - generates Passport keys if missing (`passport:keys`)
 - caches config / routes / views / events
 - starts nginx, php-fpm, Horizon, Reverb, and `schedule:work`
 
-It does **not** seed the database. Do that once in the next step.
+It does **not** seed the database — next step.
 
-### 4. Seed Passport + admin user (one-time)
+### 4. Seed Passport client and admin user (one-time)
 
 ```bash
 docker compose -f compose.prod.yaml exec app php artisan db:seed
@@ -74,17 +85,17 @@ docker compose -f compose.prod.yaml exec app php artisan db:seed --class=UserSee
 | Seeder | Purpose |
 |--------|---------|
 | `DatabaseSeeder` | Passport Personal Access Client + plan rows |
-| `UserSeeder` | Admin account (`admin@trypost.it` / `password`) |
+| `UserSeeder` | Admin (`admin@trypost.it` / `password`) |
 
-Change the admin password immediately on first login. Additional accounts come from workspace invites (Settings → Members).
+Change the admin password on first login. Extra accounts come from workspace invites (Settings → Members).
 
 <Tip>
-  Passport **keys** are created by the entrypoint. The Personal Access **Client** comes from `db:seed`. API keys and MCP need both — see [Installation](/self-hosting/installation#3-passport-keys-and-local-storage-if-needed).
+  Passport **keys** = entrypoint. Passport **Personal Access Client** = `db:seed`. API keys and MCP need both.
 </Tip>
 
 ### 5. Optional HTTPS with Caddy
 
-1. Point your domain's DNS at the host
+1. Point DNS at the host
 2. Set `APP_URL` to `https://your-domain` and `APP_DOMAIN` on the `caddy` service
 3. Start with the proxy profile:
 
@@ -92,31 +103,43 @@ Change the admin password immediately on first login. Additional accounts come f
 docker compose -f compose.prod.yaml --profile proxy up -d
 ```
 
-Without the profile, the app is served on `http://localhost:8000`.
+Without the profile, the app listens on `http://localhost:8000`.
+
+### 6. Verify
+
+```bash
+docker compose -f compose.prod.yaml exec app php artisan horizon:status
+docker compose -f compose.prod.yaml logs -f app
+```
+
+1. Open `APP_URL` and sign in as admin
+2. Create an API key (Settings → API) — proves Passport keys + client exist
+3. Schedule a post — Horizon must show as running
 
 ### Access
 
 | Service | URL |
 |---------|-----|
 | TryPost | `http://localhost:8000` (or your `APP_URL`) |
-| Reverb (WebSocket) | port `8080` (proxied under `/app/` and `/apps/` by the in-container nginx) |
+| Reverb | port `8080`, proxied under `/app/` and `/apps/` by in-container nginx |
 
-### Reverb host note
+### Reverb on a custom domain
 
-The published image bakes `VITE_REVERB_*` at build time (defaults to `localhost:8080`). For a custom domain over HTTPS, rebuild the image with:
+The published image bakes `VITE_REVERB_*` at build time (`localhost:8080`). For HTTPS on your domain, rebuild:
 
 ```bash
 docker build \
   --build-arg VITE_REVERB_HOST=post.yourdomain.com \
   --build-arg VITE_REVERB_PORT=443 \
   --build-arg VITE_REVERB_SCHEME=https \
+  --build-arg VITE_REVERB_APP_KEY=trypost-reverb-key \
   -t trypost-app:custom \
   -f docker/Dockerfile \
   --target production \
   .
 ```
 
-…and point `compose.prod.yaml` at that image. Changing only runtime `REVERB_*` env vars does not update the browser client.
+Point `compose.prod.yaml` at that image. Changing only runtime `REVERB_HOST` / `PORT` / `SCHEME` does not update the browser client.
 
 ### Common production commands
 
@@ -131,7 +154,7 @@ docker compose -f compose.prod.yaml down
 
 ## Local development
 
-Use `compose.yaml` when you want a full stack with a bind-mounted source tree.
+Use `compose.yaml` when you want a bind-mounted source tree.
 
 ### 1. Clone and start
 
@@ -141,9 +164,11 @@ cd trypost
 docker compose up -d
 ```
 
-On first boot the entrypoint can seed `.env` from `docker/.env.docker.example`, install Composer/npm deps if missing, generate `APP_KEY`, migrate, `storage:link`, and `passport:keys`.
+On first boot the entrypoint can seed `.env` from `docker/.env.docker.example`, install Composer/npm deps if missing, generate `APP_KEY`, migrate, `storage:link`, and `passport:keys`. Horizon, Reverb, the scheduler, and Vite start via Supervisor.
 
-### 2. Seed default data and create the admin user
+For local media URLs, set `FILESYSTEM_DISK=public` in `.env` (the Docker example ships with `local`) and ensure `storage:link` ran.
+
+### 2. Seed admin + Passport client
 
 ```bash
 docker compose exec app php artisan db:seed
@@ -158,10 +183,8 @@ docker compose exec app php artisan db:seed --class=UserSeeder
 ```
 
 <Warning>
-  `migrate:fresh` **drops every table**. Only run it on a brand-new database.
+  `migrate:fresh` **drops every table**.
 </Warning>
-
-Default credentials — **change the password on first login**:
 
 | Field | Value |
 |---|---|
@@ -172,8 +195,8 @@ Default credentials — **change the password on first login**:
 
 | Service | URL |
 |---------|-----|
-| TryPost dashboard | `http://localhost:8000` (or `APP_PORT`) |
-| Mailpit (captured emails) | `http://localhost:8025` |
+| TryPost | `http://localhost:8000` (or `APP_PORT`) |
+| Mailpit | `http://localhost:8025` |
 | Vite HMR | `http://localhost:5173` |
 | Postgres | `localhost:5432` |
 | Redis | `localhost:6379` |
@@ -188,13 +211,9 @@ docker compose logs -f app
 docker compose exec app php artisan <command>
 ```
 
-Horizon, Reverb, the scheduler, and Vite already run inside the app container via Supervisor — you usually don't start them separately.
-
 ## Troubleshooting
 
 ### Port conflicts
-
-Change the host ports in `.env` (dev) or the `ports:` mappings in `compose.prod.yaml`:
 
 ```env
 APP_PORT=8080
@@ -202,17 +221,13 @@ FORWARD_DB_PORT=5433
 FORWARD_MAILPIT_UI_PORT=8026
 ```
 
-### Permission issues
-
-On Linux you may need:
+### Permission issues (Linux)
 
 ```bash
 sudo chown -R $USER: .
 ```
 
 ### Database connection refused
-
-Wait until Postgres is healthy:
 
 ```bash
 docker compose ps
@@ -222,13 +237,21 @@ docker compose -f compose.prod.yaml ps
 
 ### API key creation fails with "Personal access client not found"
 
-The container has Passport keys but you haven't seeded yet:
+Seed the Passport client:
 
 ```bash
 docker compose -f compose.prod.yaml exec app php artisan db:seed
 ```
 
+### Horizon not processing jobs
+
+```bash
+docker compose -f compose.prod.yaml exec app php artisan horizon:status
+docker compose -f compose.prod.yaml logs app | grep -i horizon
+```
+
 ## Next steps
 
 - [Configuration](/self-hosting/configuration) — mail, storage, social OAuth, AI
-- [Production setup](/self-hosting/production) — bare-metal Nginx / Supervisor if you're not using `compose.prod.yaml`
+- [Production setup](/self-hosting/production) — bare-metal Nginx / Supervisor if you are not using `compose.prod.yaml`
+- [Installation](/self-hosting/installation) — clone-and-install without Docker
