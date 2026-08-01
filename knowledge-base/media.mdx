@@ -126,9 +126,10 @@ Media files are stored on the disk configured by `FILESYSTEM_DISK`. Out of the b
 
 | Driver | Use case |
 |--------|----------|
-| `public` | Self-hosted setups serving files directly from `${APP_URL}/storage` — requires `php artisan storage:link` |
+| `public` | Default — serve files from `${APP_URL}/storage` (requires `php artisan storage:link`) |
 | `s3` | AWS S3 |
-| `r2` | Cloudflare R2 (S3-compatible — the default in shipped config) |
+| `r2` | Cloudflare R2 (S3-compatible) |
+| `spaces` | DigitalOcean Spaces |
 
 Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under the `s3` driver with the right endpoint.
 
