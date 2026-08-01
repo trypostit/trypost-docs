@@ -42,8 +42,10 @@ docker compose -f compose.prod.yaml run --rm app php artisan key:generate --show
 Paste the value into `APP_KEY` in `compose.prod.yaml`. Also set:
 
 - `APP_URL` — your public URL (e.g. `https://post.yourdomain.com`)
-- Database / Redis passwords marked `change me`
+- `DB_PASSWORD` / `POSTGRES_PASSWORD` (must match)
 - `REVERB_APP_SECRET`
+
+Leave `REVERB_APP_KEY` as `trypost-reverb-key` unless you rebuild the image — it must match the key baked into the published frontend bundle.
 
 ### 3. Start the stack
 
@@ -184,10 +186,9 @@ docker compose up -d
 docker compose down
 docker compose logs -f app
 docker compose exec app php artisan <command>
-docker compose exec app npm run dev
 ```
 
-Horizon, Reverb, and the scheduler already run inside the app container via Supervisor — you usually don't start them separately in Docker.
+Horizon, Reverb, the scheduler, and Vite already run inside the app container via Supervisor — you usually don't start them separately.
 
 ## Troubleshooting
 

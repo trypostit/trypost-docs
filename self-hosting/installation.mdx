@@ -36,7 +36,7 @@ composer setup
 This runs `composer install`, copies `.env.example` to `.env`, generates `APP_KEY`, runs `php artisan migrate --force`, installs npm packages, and runs `npm run build`.
 
 <Note>
-  `composer setup` does **not** seed the database, generate Passport keys, or create the public storage symlink. Those are one-time steps below.
+  `composer setup` does **not** seed the database or generate Passport keys. Those are one-time steps below. It also does not run `storage:link` (only needed if you keep `FILESYSTEM_DISK=public`).
 </Note>
 
 After it finishes, edit `.env` to point at your real database, Redis, queue/cache drivers, and any social platform credentials — see [Configuration](/self-hosting/configuration).
