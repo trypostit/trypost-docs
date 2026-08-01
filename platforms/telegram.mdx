@@ -54,5 +54,5 @@ php artisan telegram:set-webhook
 ```
 
 <Note>
-  The webhook URL is `{APP_URL}/telegram/webhook`, so `APP_URL` must be a **public HTTPS URL** Telegram can reach. Re-run `telegram:set-webhook` whenever it changes. See the [Self-Hosting configuration guide](/self-hosting/configuration).
+  The webhook URL is `{WEBHOOK_URL or APP_URL}/telegram/webhook`. That base URL must be a **public HTTPS** address Telegram can reach. If `APP_URL` is private (or you use a tunnel in development), set `WEBHOOK_URL` instead — see [Configuration](/self-hosting/configuration#basic-configuration). Re-run `telegram:set-webhook` whenever it changes.
 </Note>

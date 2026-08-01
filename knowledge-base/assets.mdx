@@ -54,4 +54,4 @@ There's no public API for the asset library yet. The closest equivalents are pos
 ## Self-hosted
 
 - Stock-photo and GIF tabs require valid `UNSPLASH_ACCESS_KEY` and `GIPHY_API_KEY` in your `.env`. Without them, those tabs stay disabled — the Library tab works regardless.
-- Files are stored on the disk configured by `FILESYSTEM_DISK` (defaults to `r2` in shipped config). For production, point this at S3, R2, or any S3-compatible service. See the [Configuration guide](/self-hosting/configuration).
+- Files are stored on the disk configured by `FILESYSTEM_DISK` (defaults to `public`). For production with multiple instances or heavy media, point this at S3, R2, Spaces, or any S3-compatible service. See the [Configuration guide](/self-hosting/configuration).

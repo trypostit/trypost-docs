@@ -6,11 +6,23 @@ icon: "rocket"
 
 # Production Setup
 
-This guide covers deploying TryPost to a production environment.
+This guide is for **bare metal / a VM** after you have completed [Installation](/self-hosting/installation) (app key, `.env`, migrations, Passport keys, seed, frontend build).
 
-## Environment Configuration
+Prefer containers? Use [`compose.prod.yaml`](/self-hosting/docker#production-recommended-for-self-hosting) — it already runs Horizon, Reverb, and the scheduler for you.
 
-Set these values in your `.env` for production:
+## Before you continue
+
+Confirm the install checklist is done:
+
+- [ ] `APP_KEY` set
+- [ ] Database migrated
+- [ ] `QUEUE_CONNECTION=redis` and Redis reachable
+- [ ] `php artisan passport:keys` ran
+- [ ] `php artisan db:seed` + `UserSeeder` ran
+- [ ] `storage:link` ran **if** `FILESYSTEM_DISK=public`
+- [ ] `npm run build` completed
+
+## Environment (production values)
 
 ```env
 APP_ENV=production
@@ -18,24 +30,27 @@ APP_DEBUG=false
 APP_URL=https://your-domain.com
 
 SELF_HOSTED=true
+
+QUEUE_CONNECTION=redis
+CACHE_STORE=redis
+SESSION_DRIVER=database
+BROADCAST_CONNECTION=reverb
+FILESYSTEM_DISK=public
 ```
+
+See [Configuration](/self-hosting/configuration) for mail, object storage, and social OAuth.
 
 ## Optimizations
 
 Run these commands after deployment:
 
 ```bash
-# Cache configuration
-php artisan config:cache
-
-# Cache routes
-php artisan route:cache
-
-# Cache views
-php artisan view:cache
-
-# Optimize autoloader
 composer install --optimize-autoloader --no-dev
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
 ```
 
 ## Queue Worker
@@ -46,8 +61,9 @@ TryPost uses queues for critical background processing:
 - **Sending notifications** (email and in-app)
 - **Verifying social account connections**
 - **Processing analytics events**
+- **Running automations**
 
-Without a running queue worker, scheduled posts will not be published. Use Supervisor to keep the queue worker running.
+Without a running queue worker, scheduled posts will not be published. Use Supervisor to keep Horizon running.
 
 ### Install Supervisor
 
@@ -112,6 +128,30 @@ server {
     add_header X-Content-Type-Options "nosniff";
 
     charset utf-8;
+    client_max_body_size 1G;
+
+    # Reverb WebSocket (Pusher protocol) + HTTP API
+    location /app/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+
+    location /apps/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
@@ -132,10 +172,12 @@ server {
     location ~ /\.(?!well-known).* {
         deny all;
     }
-
-    client_max_body_size 2G;
 }
 ```
+
+<Note>
+  Both `/app/` (browser WebSocket) and `/apps/` (Pusher HTTP API) must be proxied to Reverb. Omitting `/apps/` causes flaky real-time updates.
+</Note>
 
 ## SSL Certificate
 
@@ -148,14 +190,18 @@ sudo certbot --nginx -d your-domain.com
 
 ## Scheduled Tasks (Cron)
 
-TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler **must** run every minute or scheduled posts won't publish, expiring tokens won't refresh, and stuck posts won't recover.
+TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler **must** run every minute or scheduled posts won't publish, automations won't fire, expiring tokens won't refresh, and stuck posts won't recover.
 
 | Command | Schedule | Purpose |
 |---------|----------|---------|
 | `posts:process-scheduled` | every minute | Dispatches `PublishPost` jobs for posts that are due |
+| `automation:fire-schedule` | every minute | Fires time-based automation triggers |
+| `automation:process-delays` | every minute | Advances automation runs waiting on delay nodes |
+| `automation:recover-stuck-runs` | every 5 minutes | Recovers automation runs stuck mid-flight |
+| `automation:prune-dry-runs` | every 10 minutes | Prunes dry-run automation history |
+| `social:refresh-expiring-tokens` | every 15 minutes | Refreshes OAuth tokens that are about to expire |
+| `social:recover-stuck-posts` | every 30 minutes | Detects posts stuck in `publishing` and retries or fails them |
 | `social:check-connections` | daily | Verifies every connected social account still has a valid token |
-| `social:refresh-expiring-tokens` | hourly | Refreshes OAuth tokens that are about to expire (proactive refresh) |
-| `social:recover-stuck-posts` | every 30 minutes | Detects posts stuck in `publishing` and either retries or marks them failed |
 
 Add the Laravel scheduler to cron:
 
@@ -170,7 +216,7 @@ Add this line:
 ```
 
 <Warning>
-  This is required. Without the cron job, scheduled posts will not be published automatically, and social tokens will expire silently.
+  This is required. Without the cron job, scheduled posts will not be published automatically, automations will stall, and social tokens will expire silently.
 </Warning>
 
 ## WebSocket Server (Reverb)
@@ -200,19 +246,7 @@ sudo supervisorctl update
 sudo supervisorctl start trypost-reverb
 ```
 
-<Note>
-  In production, proxy WebSocket connections through Nginx with SSL. Add this to your Nginx config:
-
-  ```nginx
-  location /app {
-      proxy_pass http://127.0.0.1:8080;
-      proxy_http_version 1.1;
-      proxy_set_header Upgrade $http_upgrade;
-      proxy_set_header Connection "upgrade";
-      proxy_set_header Host $host;
-  }
-  ```
-</Note>
+Proxy `/app/` and `/apps/` through Nginx as shown above.
 
 ## File Permissions
 
@@ -225,18 +259,27 @@ sudo chmod -R 775 /var/www/trypost/storage
 sudo chmod -R 775 /var/www/trypost/bootstrap/cache
 ```
 
+Keep `storage/oauth-private.key` readable only by the app user (typically mode `600`).
+
 ## Checklist
 
-Make sure all of these are running in production:
+Make sure all of these are in place in production:
 
-| Service | Command | Purpose |
-|---------|---------|---------|
-| **Horizon** | `php artisan horizon` | Processes queues (post publishing, notifications) |
-| **Reverb** | `php artisan reverb:start` | Real-time WebSocket updates |
-| **Scheduler** | `php artisan schedule:run` (cron) | Dispatches scheduled posts |
+| Item | How | Purpose |
+|------|-----|---------|
+| **App key** | `php artisan key:generate` | Encrypts sessions / cookies |
+| **Passport keys** | `php artisan passport:keys` (once) | Sign/verify API & MCP tokens |
+| **Passport client** | `php artisan db:seed` (once) | Issue personal access tokens |
+| **Admin user** | `php artisan db:seed --class=UserSeeder` (once) | First login |
+| **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
+| **Redis** | `QUEUE_CONNECTION=redis` + Redis up | Queues, cache, schedule locks |
+| **Mail** | SMTP or SendKit | Invites, password reset, alerts |
+| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, automations |
+| **Reverb** | `php artisan reverb:start` (Supervisor) | Real-time WebSocket updates |
+| **Scheduler** | cron → `schedule:run` every minute | Due posts, token refresh, automations |
 
 <Warning>
-  If any of these services are not running, TryPost will not function correctly. Scheduled posts won't publish, notifications won't send, and the dashboard won't update in real time.
+  If Horizon, Reverb, or the scheduler are not running, TryPost will not function correctly. Scheduled posts won't publish, notifications won't send, and the dashboard won't update in real time.
 </Warning>
 
 ## Monitoring
@@ -254,4 +297,5 @@ Regularly backup:
 
 - Database
 - `.env` file
+- Passport keys (`storage/oauth-*.key`) — losing them invalidates all API tokens
 - Uploaded media (if using local storage)
