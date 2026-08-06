@@ -66,9 +66,9 @@ To create and publish a post end-to-end:
 | Tool | Description |
 |------|-------------|
 | **list-social-accounts-tool** | List all connected social accounts for the current workspace (LinkedIn, X, Instagram, etc.). Returns id, platform, display_name, username, is_active, status. |
-| **list-pinterest-boards-tool** | List boards for a Pinterest account (`account_id`). Returns `{ boards: [{ id, name }], truncated }`. Use a board `id` as `platforms[].meta.board_id` (**required to publish** Pinterest). |
-| **list-discord-channels-tool** | List text/announcement channels the bot can post to for a Discord account (`account_id`). Returns `{ channels: [{ id, name }] }`. Use a channel `id` as `platforms[].meta.channel_id` (**required to publish** Discord). |
-| **toggle-social-account-tool** | Toggle a social account active/inactive. When inactive, the account is skipped during publishing. |
+| **list-pinterest-boards-tool** | List boards for a Pinterest account (`account_id`). Returns `{ boards: [{ id, name }], truncated }`. Use a board `id` as `platforms[].meta.board_id` (**required to publish** Pinterest). Requires **create-post** permission (Owner / Admin / Member) — **Viewers** get `Not authorized to manage posts.` |
+| **list-discord-channels-tool** | List text/announcement channels the bot can post to for a Discord account (`account_id`). Returns `{ channels: [{ id, name }] }`. Use a channel `id` as `platforms[].meta.channel_id` (**required to publish** Discord). Same permission as boards: create-post only — **Viewers** cannot call it. |
+| **toggle-social-account-tool** | Toggle a social account active/inactive. When inactive, the account is skipped during publishing. Requires manage-accounts (Owner / Admin). |
 
 ## Workspace
 
@@ -105,6 +105,7 @@ Quick checklist for agents:
 ## Notes
 
 - **Workspace scoping** — every tool operates on the user's currently-selected workspace. To act on a different workspace, switch it in the TryPost UI (or, for personal API tokens, create a new key in that workspace).
+- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, and they also cannot call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. See [Team](/knowledge-base/team).
 - **Cross validation** — `create-post-tool` and `update-post-tool` reject mismatched combos (e.g. `content_type=x_post` on a LinkedIn account). Inactive social accounts are also rejected at validation time.
 - **Destructive tools** — operations that delete data or publish to the world (`publish-post-tool`, `delete-*`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
 - **Local-file uploads** — `request-media-upload-tool` returns a single-use signed URL valid for 15 minutes, capped at 50 MB. The underlying endpoint is documented at [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload). After upload, call `attach-media-from-upload-tool` with the same `upload_token` to attach the resulting Media to a post.

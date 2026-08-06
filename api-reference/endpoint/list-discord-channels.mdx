@@ -46,4 +46,4 @@ curl -X GET https://app.trypost.it/api/social-accounts/b2c3d4e5-f6a7-8b9c-0d1e-2
 
 - `channel_id` is **required to publish** a Discord message (`scheduled` / `publishing`). Draft create can omit it.
 - You may also store `channel_name` in `platforms[].meta` for display; publishing uses `channel_id` only.
-- MCP equivalent: `list-discord-channels-tool` with `account_id`.
+- MCP equivalent: `list-discord-channels-tool` with `account_id`. That MCP tool requires **create-post** permission (Owner / Admin / Member) — Viewers cannot call it.

@@ -50,5 +50,5 @@ curl -X GET https://app.trypost.it/api/social-accounts/b2c3d4e5-f6a7-8b9c-0d1e-2
 ## Tips
 
 - `board_id` is **required to publish** a Pinterest pin (`scheduled` / `publishing`). Draft create can omit it.
-- MCP equivalent: `list-pinterest-boards-tool` with `account_id`.
+- MCP equivalent: `list-pinterest-boards-tool` with `account_id`. That MCP tool requires **create-post** permission (Owner / Admin / Member) — Viewers cannot call it.
 - Do **not** call Pinterest's public API directly for this — use this endpoint so auth and scoping stay with TryPost.
