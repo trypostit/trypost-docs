@@ -76,10 +76,28 @@ Same paths, user configures `APP_URL` in `.env`:
 | Workspace | `GET /workspace` |
 | Signatures | `GET /signatures`, `POST /signatures`, `PUT /signatures/{id}`, `DELETE /signatures/{id}` |
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
-| Social Accounts | `GET /social-accounts`, `PUT /social-accounts/{account}/toggle` |
+| Social Accounts | `GET /social-accounts`, `PUT /social-accounts/{account}/toggle`, `GET /social-accounts/{account}/boards` (Pinterest), `GET /social-accounts/{account}/channels` (Discord) |
 | API Keys | `GET /api-keys`, `POST /api-keys`, `DELETE /api-keys/{apiToken}` |
 
 `PUT /posts/{post}` accepts a `status` of `publishing` to publish immediately (no separate publish endpoint at the REST level).
+
+### `platforms[].meta` (PostPlatform)
+
+Single validation contract in the app (`PostPlatformMetaRules`). Documented for humans/LLMs at `api-reference/endpoint/update-post.mdx` → **Per-platform meta**. Unknown keys are dropped. Merge on update; `null` clears a key.
+
+| Platform | Keys | Required to publish |
+|----------|------|---------------------|
+| Instagram / Facebook | `aspect_ratio` | — |
+| LinkedIn / LinkedIn Page | `document_title` | — |
+| TikTok | `privacy_level`, `allow_comments`, `allow_duet`, `allow_stitch`, `auto_add_music`, `is_aigc`, `disclose`, `brand_content_toggle`, `brand_organic_toggle` | `privacy_level` |
+| Pinterest | `board_id`, `title`, `link` | `board_id` |
+| Discord | `channel_id`, `channel_name`, `mentions`, `embeds` | `channel_id` |
+
+Enum-like values are **JSON strings** (exact literals):
+- `aspect_ratio`: `"1:1"`, `"4:5"`, `"16:9"`, `"original"`
+- `privacy_level`: `"PUBLIC_TO_EVERYONE"`, `"MUTUAL_FOLLOW_FRIENDS"`, `"FOLLOWER_OF_CREATOR"`, `"SELF_ONLY"`
+
+Do not confuse with `media[].meta.alt_text` (media accessibility, max 2000). Pin description = post `content`, not meta.
 
 ### Response shape
 - Resources are returned **unwrapped** (`JsonResource::withoutWrapping()` is set globally). A single resource looks like `{ "id": ..., ... }` — no `data:` envelope.
@@ -95,8 +113,9 @@ Only `GET /posts` paginates (15 per page). All other list endpoints return full 
 
 - Tool names are auto-derived from class basenames as kebab-case + `-tool` suffix (Laravel MCP convention — no `#[Name]` overrides in `TryPostServer`).
 - Post tools: `list-posts-tool`, `get-post-tool`, `create-post-tool`, `update-post-tool`, `publish-post-tool`, `preview-post-tool`, `delete-post-tool`, `attach-media-from-url-tool`, `request-media-upload-tool`, `attach-media-from-upload-tool`, `get-post-metrics-tool`.
-- Plus: `list-content-types-tool` (Platforms), `list-signatures-tool` / `create-signature-tool` / `update-signature-tool` / `delete-signature-tool`, `list-labels-tool` / `create-label-tool` / `update-label-tool` / `delete-label-tool`, `list-social-accounts-tool` / `toggle-social-account-tool`, `get-workspace-tool`, `list-api-keys-tool` / `create-api-key-tool` / `delete-api-key-tool`.
-- `create-post-tool` accepts `platforms[]` (each with `social_account_id` and `content_type`), `scheduled_at`, `label_ids`, etc. — same shape as REST `POST /posts`.
+- Plus: `list-content-types-tool` (Platforms), `list-signatures-tool` / `create-signature-tool` / `update-signature-tool` / `delete-signature-tool`, `list-labels-tool` / `create-label-tool` / `update-label-tool` / `delete-label-tool`, `list-social-accounts-tool` / `list-pinterest-boards-tool` / `list-discord-channels-tool` / `toggle-social-account-tool`, `get-workspace-tool`, `list-api-keys-tool` / `create-api-key-tool` / `delete-api-key-tool`.
+- `create-post-tool` accepts `platforms[]` (each with `social_account_id`, `content_type`, optional `meta`), `scheduled_at`, `label_ids`, etc. — same shape as REST `POST /posts`.
+- Before publishing Pinterest/Discord, resolve IDs via `list-pinterest-boards-tool` / `list-discord-channels-tool` (REST: `GET /social-accounts/{account}/boards|channels`).
 - `publish-post-tool` is a separate, destructive tool (annotated `IsDestructive`); REST clients use `PUT /posts/{id}` with `status=publishing` instead.
 - Server route: `Mcp::web('/mcp/trypost', TryPostServer::class)->middleware(['auth:api', 'workspace.token:mcp'])`. The `workspace.token:mcp` middleware (`LoadWorkspaceFromToken`) requires an OAuth grant with `mcp:use` (not a Personal Access Token) and returns `402 Active subscription required` on Cloud accounts without app access.
 
@@ -140,6 +159,14 @@ These are the exact string values used in API responses. Never use alternatives.
 Instagram content types work for both `instagram` and `instagram-facebook` accounts.
 
 **Never use generic values like `text`, `image`, `video`.**
+
+### `platforms[].meta` string enums (exact JSON string literals)
+
+**`aspect_ratio`:** `"1:1"`, `"4:5"`, `"16:9"`, `"original"`
+
+**TikTok `privacy_level`:** `"PUBLIC_TO_EVERYONE"`, `"MUTUAL_FOLLOW_FRIENDS"`, `"FOLLOWER_OF_CREATOR"`, `"SELF_ONLY"`
+
+Send these as strings in JSON — never as integers or renamed labels.
 
 ### API token state
 There is no `status` enum on tokens. `AccessToken` exposes `revoked` (boolean) and `expires_at` (nullable timestamp). The `ApiKeyResource` derives `is_active` from `! revoked && (expires_at is null || expires_at > now)`.

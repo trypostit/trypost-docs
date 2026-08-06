@@ -12,7 +12,7 @@ description: "Get a specific post by ID with all its platform entries, media, an
 
 ## Response
 
-Returns the full post. Response shape is identical to one entry in [`GET /posts`](/api-reference/endpoint/list-posts) — see that endpoint for full field documentation.
+Returns the full post. Response shape is identical to one entry in [`GET /posts`](/api-reference/endpoint/list-posts) — see that endpoint for full field documentation (including `platforms[].meta`).
 
 <RequestExample>
 ```bash
@@ -44,6 +44,7 @@ curl -X GET https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5
       "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
       "platform": "linkedin",
       "content_type": "linkedin_post",
+      "meta": {},
       "status": "pending",
       "enabled": true,
       "platform_url": null,
