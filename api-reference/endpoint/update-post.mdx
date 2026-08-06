@@ -21,11 +21,13 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
 </ParamField>
 
 <ParamField body="content" type="string">
-  The post caption/text body.
+  The post caption/text body (max **10 000** characters at the API level; per-platform hard caps still apply via [`GET /content-types`](/api-reference/endpoint/list-content-types)). For Pinterest pins, this becomes the pin **description** (not `meta.title`).
 </ParamField>
 
 <ParamField body="media" type="array">
-  Media items to associate with the post. Most callers upload first via [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) (URL) and let those endpoints append to `media[]` directly.
+  Replace the post's media set. Each item must include a public `url` — the API downloads and hosts it (same shape as [`POST /posts`](/api-reference/endpoint/create-post)). Nested `meta.alt_text` (string, max **2000**) is allowed for accessibility — that is **media** meta, not `platforms[].meta`.
+
+  Prefer dedicated endpoints when practical: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (multipart file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
 </ParamField>
 
 <ParamField body="platforms" type="array">
@@ -35,17 +37,14 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
       The post_platform entry ID (from `GET /posts/{id}` or `GET /posts`).
     </ParamField>
     <ParamField body="content_type" type="string">
-      Override the content_type for this platform (e.g. `linkedin_carousel` instead of the default `linkedin_post`). Use [`GET /content-types`](/api-reference/endpoint/list-content-types) to discover valid values. Cross-validated against the platform of the underlying social account.
+      Override the content_type for this platform. Cross-validated against the social account's platform. Discover the live catalog with [`GET /content-types`](/api-reference/endpoint/list-content-types).
+
+      Allowed values: `linkedin_post`, `linkedin_page_post`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_reel`, `instagram_story`, `tiktok_video`, `tiktok_photo`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`, `telegram_post`, `discord_message`.
+
+      There is **no** `linkedin_carousel` / `instagram_carousel` — use `linkedin_post` + PDF (and optional `meta.document_title`) for LinkedIn documents, and `instagram_feed` with multiple images for Instagram carousels.
     </ParamField>
     <ParamField body="meta" type="object">
-      Per-platform settings, **merged** into the platform's existing `meta` (unset a key by sending `null`). Only the keys below are accepted — unknown keys are dropped:
-
-      - **Instagram / Facebook** — `aspect_ratio` (`1:1`, `4:5`, `16:9`, `original`).
-      - **Pinterest** — `board_id` (**required to publish**). Fetch board IDs from Pinterest's `/v5/boards` endpoint or pick one in the dashboard's Accounts page.
-      - **TikTok** — `privacy_level` (**required to publish**; `PUBLIC_TO_EVERYONE`, `MUTUAL_FOLLOW_FRIENDS`, `FOLLOWER_OF_CREATOR`, `SELF_ONLY`) plus the booleans `allow_comments`, `allow_duet`, `allow_stitch`, `auto_add_music`, `is_aigc`, `disclose`, `brand_content_toggle`, `brand_organic_toggle`.
-      - **Discord** — `channel_id` (**required to publish** — the target channel in the server), `channel_name` (display only), `mentions` (array of `{ token, label }`), `embeds` (up to 10 of `{ title, description, url, image, color }`; `color` is a `#RRGGBB` hex).
-
-      Required-to-publish keys are enforced by this endpoint when `status` is `scheduled` or `publishing`: a missing one returns `422` with an error on `platforms.{i}.meta.{field}` (e.g. `platforms.0.meta.channel_id`). Drafts are not checked.
+      Per-platform settings. See [Per-platform `meta`](#per-platform-meta) below for the full contract.
     </ParamField>
   </Expandable>
 </ParamField>
@@ -58,9 +57,125 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
   An array of label UUIDs to assign to the post. Replaces existing labels.
 </ParamField>
 
+## Per-platform `meta`
+
+`platforms[].meta` holds settings that only apply to one social account on the post. The same keys are accepted on [`POST /posts`](/api-reference/endpoint/create-post) and by the MCP create/update tools.
+
+### Behaviour
+
+- **Only the keys listed below are accepted.** Unknown keys are dropped (they never persist).
+- On update, `meta` is **merged** into the platform's existing object. Send a key as `null` to remove it (e.g. `"title": null`).
+- Required-to-publish keys are enforced on this request when `status` is `scheduled` or `publishing` **and** you include a `platforms[]` array in the body (each submitted row is checked). Drafts are not checked. A missing key returns `422` on `platforms.{i}.meta.{field}` (e.g. `platforms.0.meta.channel_id`).
+- If you publish with only `{ "status": "publishing" }` (no `platforms[]`), this endpoint does **not** re-validate stored meta — ensure `board_id` / `privacy_level` / `channel_id` were saved earlier. The MCP `publish-post-tool` always validates stored meta before publishing.
+- Enum-like fields are **JSON strings** — send the exact literal (e.g. `"privacy_level": "PUBLIC_TO_EVERYONE"`), not an integer or a different casing.
+- Platforms with **no** `meta` keys: X, YouTube, Threads, Bluesky, Mastodon, Telegram.
+
+### Instagram / Facebook
+
+| Key | Type | Required to publish? | Description |
+|-----|------|----------------------|-------------|
+| `aspect_ratio` | string | No | Crop ratio for feed-style posts. Exact values: `"1:1"`, `"4:5"`, `"16:9"`, `"original"`. |
+
+### LinkedIn / LinkedIn Page
+
+| Key | Type | Required to publish? | Description |
+|-----|------|----------------------|-------------|
+| `document_title` | string (max 300) | No | Title shown on a **PDF document** post. If omitted, TryPost falls back to the PDF filename, then `"Document"`. Only used when the post has a PDF attached. |
+
+### TikTok
+
+| Key | Type | Required to publish? | Applies to | Description |
+|-----|------|----------------------|------------|-------------|
+| `privacy_level` | string | **Yes** | Video + photo | Exact values: `"PUBLIC_TO_EVERYONE"`, `"MUTUAL_FOLLOW_FRIENDS"`, `"FOLLOWER_OF_CREATOR"`, `"SELF_ONLY"`. |
+| `allow_comments` | boolean | No | Video + photo | When `true`, comments are allowed. TryPost sends the inverted TikTok flag (`disable_comment`). |
+| `allow_duet` | boolean | No | **Video only** | Ignored for `tiktok_photo`. |
+| `allow_stitch` | boolean | No | **Video only** | Ignored for `tiktok_photo`. |
+| `auto_add_music` | boolean | No | **Photo only** | Ignored for `tiktok_video`. |
+| `is_aigc` | boolean | No | **Video only** | Marks the post as AI-generated content. Ignored for `tiktok_photo`. |
+| `disclose` | boolean | No | Video + photo | Stored for branded-content UI. **Not** sent to TikTok's API — use the `brand_*` toggles below for the actual disclosure. |
+| `brand_content_toggle` | boolean | No | Video + photo | Paid partnership / branded content disclosure. |
+| `brand_organic_toggle` | boolean | No | Video + photo | Your brand / organic promotional disclosure. |
+
+Example TikTok meta:
+
+```json
+{
+  "privacy_level": "PUBLIC_TO_EVERYONE",
+  "allow_comments": true,
+  "allow_duet": true,
+  "allow_stitch": false,
+  "is_aigc": false,
+  "brand_content_toggle": false,
+  "brand_organic_toggle": false
+}
+```
+
+### Pinterest
+
+| Key | Type | Required to publish? | Description |
+|-----|------|----------------------|-------------|
+| `board_id` | string | **Yes** | Target board. Resolve IDs with [`GET /social-accounts/{account}/boards`](/api-reference/endpoint/list-pinterest-boards) (or MCP `list-pinterest-boards-tool`). At publish time, if `board_id` is missing, TryPost may fall back to the account's dashboard default board — API/MCP callers should still set `board_id` explicitly. |
+| `title` | string (max 100) | No | Pin title. |
+| `link` | string (max 2048) | No | Destination URL. Must be `http` or `https`. |
+
+The pin **description** is the post `content`, not a meta field.
+
+Example Pinterest meta:
+
+```json
+{
+  "board_id": "1234567890123456789",
+  "title": "Summer lookbook",
+  "link": "https://example.com/shop/summer"
+}
+```
+
+### Discord
+
+| Key | Type | Required to publish? | Description |
+|-----|------|----------------------|-------------|
+| `channel_id` | string | **Yes** | Target text/announcement channel. Resolve IDs with [`GET /social-accounts/{account}/channels`](/api-reference/endpoint/list-discord-channels) (or MCP `list-discord-channels-tool`). |
+| `channel_name` | string | No | Display label only — not used when publishing. |
+| `mentions` | array | No | Mention chips. Each item: `{ "token": string, "label"?: string }`. `token` is required. |
+| `embeds` | array (max 10) | No | Rich embeds. Each item may include `title` (max 256), `description` (max 4096), `url`, `image` (image URL), `color` (`#RRGGBB` or `RRGGBB`). |
+
+**Mention `token` formats** (send these exact Discord markup strings):
+
+| Target | `token` example |
+|--------|-----------------|
+| Everyone | `"@everyone"` |
+| Here | `"@here"` |
+| User | `"<@123456789012345678>"` |
+| Role | `"<@&987654321098765432>"` |
+
+There is no public REST endpoint to search Discord members/roles — construct tokens yourself (or use the dashboard mention picker).
+
+Example Discord meta:
+
+```json
+{
+  "channel_id": "444555666777888999",
+  "channel_name": "announcements",
+  "mentions": [
+    { "token": "@everyone", "label": "@everyone" }
+  ],
+  "embeds": [
+    {
+      "title": "Launch day",
+      "description": "We're live.",
+      "url": "https://example.com",
+      "image": "https://example.com/hero.png",
+      "color": "#7c3aed"
+    }
+  ]
+}
+```
+
 ## Response
 
-Returns the updated post. Returns `422` with `{ "message": "Cannot edit a published post." }` if the post has already been published.
+Returns the updated post (including `platforms[].meta`).
+
+Returns `422` with a `message` when the post is already finalized and cannot be edited (`published`, `publishing`, `partially_published`, or `failed`). English copy: *"This post has already been processed and cannot be re-published. Duplicate it to try again."*
 
 <RequestExample>
 ```bash
@@ -69,11 +184,18 @@ curl -X PUT https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5
   -H "Content-Type: application/json" \
   -d '{
     "status": "publishing",
-    "content": "Launching now!",
+    "content": "New pin from the TryPost API",
     "platforms": [
-      { "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d", "content_type": "linkedin_post" }
-    ],
-    "label_ids": ["c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f"]
+      {
+        "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+        "content_type": "pinterest_pin",
+        "meta": {
+          "board_id": "1234567890123456789",
+          "title": "Summer lookbook",
+          "link": "https://example.com/shop/summer"
+        }
+      }
+    ]
   }'
 ```
 </RequestExample>
@@ -82,7 +204,7 @@ curl -X PUT https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5
 ```json
 {
   "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
-  "content": "Launching now!",
+  "content": "New pin from the TryPost API",
   "media": [],
   "status": "publishing",
   "scheduled_at": "2025-01-15 10:30:00",
@@ -90,35 +212,32 @@ curl -X PUT https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5
   "platforms": [
     {
       "id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-      "platform": "linkedin",
-      "content_type": "linkedin_post",
+      "platform": "pinterest",
+      "content_type": "pinterest_pin",
+      "meta": {
+        "board_id": "1234567890123456789",
+        "title": "Summer lookbook",
+        "link": "https://example.com/shop/summer"
+      },
       "status": "publishing",
       "enabled": true,
       "platform_url": null,
       "published_at": null,
       "error_message": null,
-      "display_name": "John Doe",
-      "display_username": "johndoe",
-      "display_avatar": "https://media.licdn.com/.../avatar.jpg",
+      "display_name": "Acme Brand",
+      "display_username": "acme",
+      "display_avatar": "https://i.pinimg.com/.../avatar.jpg",
       "social_account": {
         "id": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
-        "platform": "linkedin",
-        "display_name": "John Doe",
-        "username": "johndoe",
+        "platform": "pinterest",
+        "display_name": "Acme Brand",
+        "username": "acme",
         "is_active": true,
         "status": "connected"
       }
     }
   ],
-  "labels": [
-    {
-      "id": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
-      "name": "Product Launch",
-      "color": "#4f46e5",
-      "created_at": "2025-01-10 08:00:00",
-      "updated_at": "2025-01-10 08:00:00"
-    }
-  ],
+  "labels": [],
   "created_at": "2025-01-14 09:00:00",
   "updated_at": "2025-01-14 09:30:00"
 }
@@ -127,6 +246,7 @@ curl -X PUT https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5
 
 ## Tips
 
-- To publish an existing draft, send only `{ "status": "publishing" }` — content/platforms already saved are kept.
+- To publish an existing draft, send `{ "status": "publishing" }` — content/platforms already saved are kept. Required meta (`board_id`, `privacy_level`, `channel_id`) must already be stored; include `platforms[]` on this request if you want the API to 422 when a key is missing.
 - To schedule, send `{ "status": "scheduled", "scheduled_at": "2025-12-31T15:30:00Z" }`.
 - To toggle which platforms are active without changing content, send only the `platforms[]` array.
+- Clear a meta field with `null`: `{ "meta": { "title": null, "link": null } }`.

@@ -11,7 +11,7 @@ TryPost supports two Instagram connection flavors, each backed by a different OA
 | Connection | Identifier | Best for |
 |------------|------------|----------|
 | **Instagram (Standalone)** | `instagram` | Personal Instagram accounts that aren't linked to a Facebook page. Uses Instagram's own OAuth. |
-| **Instagram (Facebook Business)** | `instagram-facebook` | Business or Creator accounts linked to a Facebook page. Required for first-party publishing of feed, reels, stories, and carousels at full quality. |
+| **Instagram (Facebook Business)** | `instagram-facebook` | Business or Creator accounts linked to a Facebook page. Required for first-party publishing of feed, reels, and stories at full quality. |
 
 Connect either (or both) from **Accounts** in the dashboard.
 
@@ -35,12 +35,13 @@ Connect either (or both) from **Accounts** in the dashboard.
 
 | Type | `content_type` | Aspect | Media | Description |
 |------|----------------|--------|-------|-------------|
-| **Feed** | `instagram_feed` | 4:5 | 1 image or 1 video (required) | Single-asset feed post — Instagram's API rejects empty posts |
-| **Carousel** | `instagram_carousel` | 4:5 | Up to 10 images (required) | Swipeable feed carousel — images only |
+| **Feed** | `instagram_feed` | 4:5 | Up to 10 images, or 1 video (required) | Feed post — single image/video **or** multi-image carousel (all use `instagram_feed`) |
 | **Reel** | `instagram_reel` | 9:16 | 1 video (required) | Short-form vertical video |
 | **Story** | `instagram_story` | 9:16 | 1 image or video (required) | Temporary content (24 hours) |
 
-All four content types are available on both connection flavors.
+There is **no** separate `instagram_carousel` content type on posts. The AI Create wizard may still accept `instagram_carousel` as a generation format; the resulting draft is stored as `instagram_feed`.
+
+All three content types are available on both connection flavors.
 
 ## OAuth scopes
 

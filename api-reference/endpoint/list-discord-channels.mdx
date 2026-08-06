@@ -1,0 +1,49 @@
+---
+title: "List Discord channels"
+api: "GET /social-accounts/{account}/channels"
+description: "List text and announcement channels the bot can post to for a connected Discord server. Use a returned channel id as platforms[].meta.channel_id."
+---
+
+Returns Discord channels available for publishing for this connected server (guild).
+
+## Request
+
+<ParamField path="account" type="string" required>
+  UUID of a connected Discord social account in the current workspace. Non-Discord accounts return `422`.
+</ParamField>
+
+## Response
+
+<ResponseField name="channels" type="array">
+  Channels the TryPost bot can post in (text and announcement channels with View Channel + Send Messages). Each item:
+  <Expandable>
+    <ResponseField name="id" type="string">Channel ID — send this as `platforms[].meta.channel_id` (JSON string).</ResponseField>
+    <ResponseField name="name" type="string">Channel name (without the `#`).</ResponseField>
+  </Expandable>
+</ResponseField>
+
+Returns `502` if Discord is unavailable upstream, and `422` if the account is not Discord.
+
+<RequestExample>
+```bash
+curl -X GET https://app.trypost.it/api/social-accounts/b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e/channels \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "channels": [
+    { "id": "444555666777888999", "name": "announcements" },
+    { "id": "111222333444555666", "name": "general" }
+  ]
+}
+```
+</ResponseExample>
+
+## Tips
+
+- `channel_id` is **required to publish** a Discord message (`scheduled` / `publishing`). Draft create can omit it.
+- You may also store `channel_name` in `platforms[].meta` for display; publishing uses `channel_id` only.
+- MCP equivalent: `list-discord-channels-tool` with `account_id`. That MCP tool requires **create-post** permission (Owner / Admin / Member) — Viewers cannot call it.

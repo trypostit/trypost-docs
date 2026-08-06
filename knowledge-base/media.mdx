@@ -1,6 +1,6 @@
 ---
 title: "Media"
-description: "Attach images and videos to your social media posts."
+description: "Attach images, videos, and PDFs to your social media posts."
 icon: "image"
 ---
 
@@ -10,12 +10,13 @@ icon: "image"
 |------|----------------|-------------------------------|
 | **Image** | JPG, PNG, GIF, WebP | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
 | **Video** | MP4, MOV | `video/mp4`, `video/quicktime` |
+| **Document** | PDF | `application/pdf` |
 
 Three upload paths share the same MIME set:
 
 - [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — direct upload with a Bearer token, attaches straight to a post.
 - [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) — server-side fetch of a public URL.
-- [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload) — one-shot **signed URL** issued by the MCP [`request-media-upload-tool`](/ai/tools-reference#posts) flow. Used by AI agents to upload local files without provisioning an API key.
+- [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload) — one-shot **signed URL** (MCP [`request-media-upload-tool`](/ai/tools-reference#posts) or REST). Used by AI agents to upload local files without provisioning an API key.
 
 WebM is intentionally excluded — every major social platform rejects it, so accepting it would just produce platform-specific publish failures.
 
@@ -25,43 +26,45 @@ WebM is intentionally excluded — every major social platform rejects it, so ac
 |------|-------------|-----------------------|
 | Image | 10 MB per file | `MEDIA_IMAGE_MAX_SIZE_MB` |
 | Video | 1 GB per file | `MEDIA_VIDEO_MAX_SIZE_MB` |
-| MCP signed-URL upload | 50 MB per file (any type) | `MCP_UPLOAD_MAX_SIZE_MB` |
+| Document (PDF) | 100 MB per file | `MEDIA_DOCUMENT_MAX_SIZE_MB` |
+
+All upload paths (dashboard, REST, MCP signed URL) use the **same** per-type caps. There is no separate MCP-only size limit.
 
 Files over 1 MB are sent in chunks (the dashboard streams them via `Content-Range` to the chunked upload endpoint) so big videos transfer reliably even on flaky connections. On self-hosted instances, raising the video cap also requires bumping PHP's `upload_max_filesize` / `post_max_size` and any reverse-proxy body-size cap to match.
 
-The MCP upload path uses a tighter cap on purpose — files route through the app server before being written to the configured storage disk, so a smaller ceiling keeps a single worker from being tied up by huge transfers. Each signed URL is single-use and expires after 15 minutes (configurable via `MCP_UPLOAD_URL_TTL_MINUTES`).
+Signed upload URLs are single-use and expire after **15 minutes** by default (`MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES`; legacy fallback `MCP_UPLOAD_URL_TTL_MINUTES`).
 
 ## Platform content types and media requirements
 
-Each platform supports different content formats with specific media requirements. Use [`GET /content-types`](/api-reference/endpoint/list-content-types) for the live, machine-readable version.
+Each platform supports different content formats with specific media requirements. Use [`GET /content-types`](/api-reference/endpoint/list-content-types) for the live, machine-readable version — that catalog is the source of truth.
+
+There is **no** `linkedin_carousel`, `linkedin_page_carousel`, or `instagram_carousel` content type on posts. Multi-image Instagram posts use `instagram_feed`. LinkedIn multi-image / PDF posts use `linkedin_post` / `linkedin_page_post` (format is inferred from the attached media; optional `meta.document_title` for PDFs).
 
 ### LinkedIn / LinkedIn Page
 
 | Content type | Media | Max files | Notes |
 |-------------|-------|-----------|-------|
-| `linkedin_post` / `linkedin_page_post` | Optional | 1 image or 1 video | Standard text post with optional media |
-| `linkedin_carousel` / `linkedin_page_carousel` | Required | Up to 20 images | Multi-image swipeable post |
+| `linkedin_post` / `linkedin_page_post` | Optional | Up to 10 images, or 1 video, or 1 PDF | Images/videos/documents cannot be mixed. PDF posts can set `meta.document_title`. |
 
 ### X (Twitter)
 
 | Content type | Media | Max files | Notes |
 |-------------|-------|-----------|-------|
-| `x_post` | Optional | 4 images or 1 video | X's API doesn't accept images + video mixed in the same post |
+| `x_post` | Optional | 4 images or 1 video | Images and video cannot be mixed |
 
 ### Facebook
 
 | Content type | Media | Max files | Aspect | Notes |
 |-------------|-------|-----------|--------|-------|
-| `facebook_post` | Optional | 10 images or 1 video | — | Standard page post |
+| `facebook_post` | Optional | Up to 10 images or 1 video | — | Standard page post |
 | `facebook_reel` | Required | 1 video | 9:16 | Short-form vertical video |
-| `facebook_story` | Required | 1 image or 1 video | 9:16 | Disappears after 24 hours |
+| `facebook_story` | Required | 1 video | 9:16 | Vertical video story (up to 60s) |
 
 ### Instagram (and Instagram via Facebook)
 
 | Content type | Media | Max files | Aspect | Notes |
 |-------------|-------|-----------|--------|-------|
-| `instagram_feed` | Required | 1 image or 1 video | 4:5 | Single-asset feed post — Instagram rejects empty posts at publish time |
-| `instagram_carousel` | Required | Up to 10 images | 4:5 | Swipeable feed carousel (images only) |
+| `instagram_feed` | Required | Up to 10 images, or 1 video | 4:5 | Single- or multi-image feed post (carousel = multiple images here) |
 | `instagram_reel` | Required | 1 video | 9:16 | Short-form vertical video |
 | `instagram_story` | Required | 1 image or 1 video | 9:16 | Disappears after 24 hours |
 
@@ -90,7 +93,7 @@ Each platform supports different content formats with specific media requirement
 |-------------|-------|-----------|--------|-------|
 | `pinterest_pin` | Required | 1 image | 2:3 | Standard image pin |
 | `pinterest_video_pin` | Required | 1 video | 9:16 | Video pin |
-| `pinterest_carousel` | Required | Up to 5 images | 2:3 | Multi-image swipeable pin |
+| `pinterest_carousel` | Required | 2–5 images | 2:3 | Multi-image swipeable pin |
 
 ### Bluesky
 
@@ -141,7 +144,7 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
 
 <AccordionGroup>
   <Accordion title="What's the maximum file size?">
-    10 MB per image and 1 GB per video by default. Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers. Self-hosters can raise the caps with `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB`.
+    Defaults: **10 MB** per image, **1 GB** per video, **100 MB** per PDF. Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers. Self-hosters can raise the caps with `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB` / `MEDIA_DOCUMENT_MAX_SIZE_MB`.
   </Accordion>
   <Accordion title="Can I use the same media in multiple posts?">
     Each post stores its own media records. To reuse the same image, upload it again or copy from the asset library.

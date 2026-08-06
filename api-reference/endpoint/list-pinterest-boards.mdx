@@ -1,0 +1,54 @@
+---
+title: "List Pinterest boards"
+api: "GET /social-accounts/{account}/boards"
+description: "List boards for a connected Pinterest account. Use a returned board id as platforms[].meta.board_id when creating or updating a Pinterest post."
+---
+
+Returns the boards TryPost can publish pins to for this Pinterest account.
+
+## Request
+
+<ParamField path="account" type="string" required>
+  UUID of a connected Pinterest social account in the current workspace. Non-Pinterest accounts return `422`.
+</ParamField>
+
+## Response
+
+<ResponseField name="boards" type="array">
+  Board list. Each item:
+  <Expandable>
+    <ResponseField name="id" type="string">Board ID — send this as `platforms[].meta.board_id` (JSON string).</ResponseField>
+    <ResponseField name="name" type="string">Human-readable board name.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="truncated" type="boolean">
+  `true` when Pinterest returned more boards than TryPost fetched in this call. Prefer picking from the returned list, or reconnect/retry if the board you need is missing.
+</ResponseField>
+
+Returns `401` if the Pinterest token is expired, `403`/`429`/`502` on upstream Pinterest errors, and `422` if the account is not Pinterest.
+
+<RequestExample>
+```bash
+curl -X GET https://app.trypost.it/api/social-accounts/b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e/boards \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "boards": [
+    { "id": "1234567890123456789", "name": "Product shots" },
+    { "id": "9876543210987654321", "name": "Inspiration" }
+  ],
+  "truncated": false
+}
+```
+</ResponseExample>
+
+## Tips
+
+- `board_id` is **required to publish** a Pinterest pin (`scheduled` / `publishing`). Draft create can omit it.
+- MCP equivalent: `list-pinterest-boards-tool` with `account_id`. That MCP tool requires **create-post** permission (Owner / Admin / Member) — Viewers cannot call it.
+- Do **not** call Pinterest's public API directly for this — use this endpoint so auth and scoping stay with TryPost.

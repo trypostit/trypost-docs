@@ -117,7 +117,9 @@
             "group": "Social Accounts",
             "pages": [
               "api-reference/endpoint/list-social-accounts",
-              "api-reference/endpoint/toggle-social-account"
+              "api-reference/endpoint/toggle-social-account",
+              "api-reference/endpoint/list-pinterest-boards",
+              "api-reference/endpoint/list-discord-channels"
             ]
           },
           {

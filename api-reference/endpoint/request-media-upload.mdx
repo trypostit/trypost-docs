@@ -8,9 +8,9 @@ This endpoint is the **destination** of a signed POST URL issued by the MCP [`re
 
 You normally don't call this endpoint directly. The flow is:
 
-1. AI agent calls `request-media-upload-tool` → receives `upload_url` + `upload_token`
-2. The agent (or the user) POSTs the file to `upload_url`
-3. AI agent calls [`attach-media-from-upload-tool`](/ai/tools-reference#posts) with the same `upload_token` to attach the resulting Media to a post
+1. AI agent calls `request-media-upload-tool` → receives `upload_url` + `upload_token` (+ size caps)
+2. The agent (or the user) POSTs the file to `upload_url` as multipart field `media`
+3. AI agent calls [`attach-media-from-upload-tool`](/ai/tools-reference#posts) with the same `upload_token` (and optional `alt` for images) to attach the resulting Media to a post
 
 If you already have a Personal Access Token, the simpler endpoint is [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — direct upload to a specific post, no signed URL.
 
@@ -28,7 +28,7 @@ These are added to the URL by Laravel's `URL::temporarySignedRoute` and are cove
   The workspace this upload belongs to. Tampering with this value invalidates the signature and the endpoint returns `403`.
 </ParamField>
 <ParamField query="expires" type="integer" required>
-  Unix timestamp when the URL expires. Default TTL is **15 minutes** from issuance (configurable via `MCP_UPLOAD_URL_TTL_MINUTES`).
+  Unix timestamp when the URL expires. Default TTL is **15 minutes** from issuance (configurable via `MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES`, legacy fallback `MCP_UPLOAD_URL_TTL_MINUTES`).
 </ParamField>
 <ParamField query="signature" type="string" required>
   HMAC-SHA256 of the URL + query parameters, signed with the app's `APP_KEY`. Verified by Laravel's `signed` middleware before the controller runs.
@@ -39,12 +39,17 @@ These are added to the URL by Laravel's `URL::temporarySignedRoute` and are cove
 Send as `multipart/form-data` with a single `media` field.
 
 <ParamField body="media" type="file" required>
-  The file to upload. Subject to the **50 MB hard cap** for the MCP upload flow (configurable via `MCP_UPLOAD_MAX_SIZE_MB`), plus the standard per-type MIME whitelist:
+  The file to upload. Per-type size caps match the rest of TryPost (from `trypost.media.max_size_mb` / env):
 
-  - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp`
-  - **Videos**: `video/mp4`, `video/quicktime` (MOV)
+  | Type | Default max | MIME allow-list |
+  |------|-------------|-----------------|
+  | **image** | **10 MB** (`MEDIA_IMAGE_MAX_SIZE_MB`) | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
+  | **video** | **1 GB** (`MEDIA_VIDEO_MAX_SIZE_MB`) | `video/mp4`, `video/quicktime` (MOV) |
+  | **document** | **100 MB** (`MEDIA_DOCUMENT_MAX_SIZE_MB`) | `application/pdf` |
 
-  The MIME type is detected from the file's magic bytes (not the extension or `Content-Type` header), so renaming `evil.exe` to `photo.png` doesn't bypass the whitelist.
+  The FormRequest upper bound is the video ceiling; the per-type cap is enforced after MIME detection. MIME is detected from the file's magic bytes (not the extension or `Content-Type` header).
+
+  `request-media-upload-tool` also returns these limits as `max_bytes` (video ceiling) and `max_bytes_by_type`.
 </ParamField>
 
 ## Authentication
@@ -53,12 +58,12 @@ Send as `multipart/form-data` with a single `media` field.
 
 - The `signed` middleware verifies the HMAC against `APP_KEY` and rejects expired URLs with `403`.
 - An atomic `Cache::add` plus a `UNIQUE` constraint on `media.upload_token` ensure the URL is **single-use**: the second POST with the same `token` returns `409`.
-- The endpoint is rate-limited to **10 requests per minute per IP** as defense in depth against floods of leaked URLs.
+- Rate-limited per workspace and per IP (`MEDIA_SIGNED_UPLOAD_PER_WORKSPACE_PER_MINUTE` / `MEDIA_SIGNED_UPLOAD_PER_IP_PER_MINUTE`).
 
 ## Behaviour
 
-- The file is stored on the workspace's configured filesystem disk (`local`, `s3`, `r2`, etc.) at `medias/{uuid}.{ext}`. The path is generated server-side — client filenames are never used in the path.
-- PNG and WebP still images are normalized to **JPEG (q100)** for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram / Discord). Videos are stored as-is.
+- The file is streamed to the workspace's configured filesystem disk (`local`, `s3`, `r2`, etc.) at `medias/{uuid}.{ext}` — not loaded fully into memory (videos can be up to 1 GB). The path is generated server-side — client filenames are never used in the path.
+- PNG and WebP still images are normalized to **JPEG (q100)** for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram / Discord). Videos and PDFs are stored as-is.
 - The resulting `Media` row is tagged with the `upload_token` so the AI agent can reference it later via `attach-media-from-upload-tool`. The Media is created as a **workspace asset** — not yet attached to any post.
 - This endpoint is **not** triggered by the [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) flow. It only handles MCP-issued signed URLs.
 
@@ -68,10 +73,10 @@ Send as `multipart/form-data` with a single `media` field.
   Echo of the `{token}` path parameter, for client convenience.
 </ResponseField>
 <ResponseField name="media_id" type="string">
-  The UUID of the created `Media` record. Pass this (or the `upload_token`) to `attach-media-from-upload-tool` to attach to a post.
+  The UUID of the created `Media` record. Pass the `upload_token` to `attach-media-from-upload-tool` to attach to a post.
 </ResponseField>
 <ResponseField name="type" type="string">
-  `image` or `video`.
+  `image`, `video`, or `document`.
 </ResponseField>
 <ResponseField name="mime_type" type="string">
   The detected MIME type. Note that PNG/WebP inputs are reported as `image/jpeg` due to the normalization step.
@@ -87,8 +92,8 @@ Send as `multipart/form-data` with a single `media` field.
 | `201` | Upload stored, Media created. |
 | `403` | Signature invalid, expired, or any query parameter was tampered with. |
 | `409` | Token already used (single-use enforcement). |
-| `422` | File missing, too large (> `MCP_UPLOAD_MAX_SIZE_MB`), or disallowed MIME type. |
-| `429` | Rate limit exceeded (more than 10 POSTs per minute from this IP). |
+| `422` | File missing, too large for its type, or disallowed MIME type. |
+| `429` | Rate limit exceeded. |
 
 <RequestExample>
 ```bash
@@ -101,8 +106,8 @@ curl -X POST "{upload_url}" \
 <ResponseExample>
 ```json
 {
-  "upload_token": "9f2c5b4e-1a3d-4e5f-8a7b-2c1d3e4f5a6b",
-  "media_id": "2681a1bf-131f-41b1-9866-755c1cb51f97",
+  "upload_token": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "media_id": "01HX1A2B3C4D5E6F7G8H9I0J1K",
   "type": "image",
   "mime_type": "image/jpeg",
   "original_filename": "photo.jpg"

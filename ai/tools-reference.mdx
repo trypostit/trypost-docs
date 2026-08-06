@@ -12,59 +12,63 @@ To create and publish a post end-to-end:
 
 1. **`list-social-accounts-tool`** — discover connected accounts
 2. **`list-content-types-tool`** — discover valid `content_type` per platform with limits
-3. **`create-post-tool`** — create the draft with content + chosen platforms
-4. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
-5. **`request-media-upload-tool`** + **`attach-media-from-upload-tool`** *(optional)* — upload a **local** file when no public URL exists
-6. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
-7. **`publish-post-tool`** — publish immediately or schedule for a future time
-8. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
+3. **`list-pinterest-boards-tool`** *(if targeting Pinterest)* — resolve `platforms[].meta.board_id`
+4. **`list-discord-channels-tool`** *(if targeting Discord)* — resolve `platforms[].meta.channel_id`
+5. **`create-post-tool`** — create the draft with content + chosen platforms + `meta`
+6. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
+7. **`request-media-upload-tool`** + **`attach-media-from-upload-tool`** *(optional)* — upload a **local** file when no public URL exists
+8. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
+9. **`publish-post-tool`** — publish immediately or schedule for a future time
+10. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
 
 ## Posts
 
 | Tool | Description |
 |------|-------------|
 | **list-posts-tool** | List posts for the current workspace, ordered by scheduled date (newest first). Supports filters: `status` (draft \| scheduled \| published \| failed), `search` (case-insensitive substring on content), `limit` (1–100, default 50). |
-| **get-post-tool** | Get a specific post by ID with all its platform entries, media, and labels. |
-| **create-post-tool** | Create a draft post. Accepts `content`, `scheduled_at` (ISO 8601), `label_ids[]`, and `platforms[]` — each entry has `social_account_id` + `content_type` and an optional per-platform `meta` (Instagram/Facebook `aspect_ratio`, TikTok `privacy_level` + flags, Pinterest `board_id`, Discord `channel_id`/`mentions`/`embeds`). Cross-validates that the content_type matches the account's platform. |
-| **update-post-tool** | Update a draft: content, scheduled_at, status (draft \| scheduled), labels, per-platform `meta` (merged), and which platforms are enabled. Cannot edit a published post. |
-| **publish-post-tool** | Publish a draft — immediately or scheduled for a future time. Requires at least one enabled platform, and that each enabled platform has the meta it needs to publish (Pinterest `board_id`, TikTok `privacy_level`, Discord `channel_id`) — otherwise it fails with a clear validation error. Marked `IsDestructive` so the AI confirms with you first. |
+| **get-post-tool** | Get a specific post by ID with all its platform entries (including `meta`), media, and labels. |
+| **create-post-tool** | Create a draft post. Accepts `content` (max 10 000), `scheduled_at` (ISO 8601; stored on the draft but **does not** schedule by itself — still `status=draft`), `label_ids[]`, and `platforms[]` — each entry has `social_account_id` + `content_type` and optional `meta`. **No `media[]` on this tool** — attach media with `attach-media-from-url-tool` or `request-media-upload-tool` + `attach-media-from-upload-tool`. Same `meta` contract as the REST API ([full reference](/api-reference/endpoint/update-post#per-platform-meta)). Cross-validates that the content_type matches the account's platform. |
+| **update-post-tool** | Update a draft: `post_id`, `content`, `scheduled_at`, `status` (`draft` \| `scheduled` only — immediate publish is `publish-post-tool`), `label_ids[]`, and `platforms[]`. Each platform entry uses **`id`** (the `post_platform` UUID from `get-post-tool` / `list-posts-tool`), optional `content_type`, optional `meta` (merged; send `null` to clear a key). Platforms **not listed are disabled**. **No `media[]`** — use the attach tools. Cannot edit a finalized post. |
+| **publish-post-tool** | Publish a draft. Input: `post_id` (required) + optional `scheduled_at` (ISO 8601 future). **Omit `scheduled_at` → publish immediately**; provide it → schedule. Requires at least one enabled platform; validates **stored** required meta (Pinterest `board_id`, TikTok `privacy_level`, Discord `channel_id`) and that media matches each platform's content_type. Marked `IsDestructive` so the AI confirms with you first. |
 | **preview-post-tool** | Preview how the post will render on each enabled platform — applies platform-specific sanitization (length truncation, etc.) without publishing. |
-| **attach-media-from-url-tool** | Download images or videos from public URLs and attach them to a post. Up to 10 URLs per call. Per-file size caps: 10 MB for images, 1 GB for videos. Allowed types are intersected with the enabled platforms (e.g. video rejected if no enabled platform supports it). |
-| **request-media-upload-tool** | Issue a one-shot signed POST URL so the user can upload a **local** file to their workspace. No input — workspace is resolved from the MCP session. Returns `upload_url`, `upload_token`, `expires_at` (ISO 8601, 15-minute TTL by default), `max_bytes` (50 MB default), and `field_name`. The agent hands the URL to the user (e.g. as a `curl -F media=@path/to/file '{upload_url}'` command) or to its client. Use when no public URL exists — otherwise prefer `attach-media-from-url-tool`. |
-| **attach-media-from-upload-tool** | Attach a Media uploaded via `request-media-upload-tool` to a post. Takes `post_id` + `upload_token`. The Media is resolved by the token within the current workspace, then appended to the post. Rejects if the media type isn't accepted by any enabled platform. |
-| **delete-post-tool** | Delete a post permanently. Marked `IsDestructive`. |
+| **attach-media-from-url-tool** | Download images, videos, or **PDF** documents from public URLs and attach them to a post. Input: `post_id` + `urls` (array of `{ "url": string, "alt"?: string }`, max **10**). Per-type size caps match config (defaults: image **10 MB**, video **1 GB**, document **100 MB**). Allowed MIME types: jpeg/png/gif/webp, mp4/MOV, `application/pdf`. Types are intersected with the enabled platforms on the post. Returns `post`, `attached_count`, `failed_urls`. Requires update permission on the post. |
+| **request-media-upload-tool** | Issue a one-shot signed POST URL so the user can upload a **local** file (image, video, or PDF) to their workspace. No input — workspace is resolved from the MCP session. Requires create-post permission. Returns `upload_token`, `upload_url`, `expires_at` (ISO 8601; default TTL **15 minutes**, via `MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES`), `max_bytes` (overall ceiling = video cap, default **1 GB**), `max_bytes_by_type` (`image` / `video` / `document`, defaults 10 MB / 1 GB / 100 MB), and `field_name` (`media`). Hand the URL to the user (e.g. `curl -F media=@path/to/file '{upload_url}'`) or to the MCP client. Then call `attach-media-from-upload-tool`. Prefer `attach-media-from-url-tool` when a public URL already exists. |
+| **attach-media-from-upload-tool** | Attach a Media uploaded via `request-media-upload-tool` to a post. Takes `post_id` + `upload_token`, optional `alt` (image alt text). The Media is resolved by the token within the current workspace, then appended to the post. Rejects if the media type isn't accepted by any enabled platform. |
+| **delete-post-tool** | Delete a post permanently. Input: `post_id`. Marked `IsDestructive`. |
 | **get-post-metrics-tool** | Fetch engagement metrics (likes, comments, shares, etc.) for a published post across every platform. Returns `unsupported` entries for platforms that don't expose post-level metrics. |
 
 ## Platforms (read-only)
 
 | Tool | Description |
 |------|-------------|
-| **list-content-types-tool** | List valid `content_type` values per social platform plus their constraints — `max_content_length`, `recommended_content_length`, `max_media_count`, `requires_media`, `default_content_type`, `allowed_media_types`. Use this before `create-post-tool` / `update-post-tool` so the AI doesn't guess. |
+| **list-content-types-tool** | Returns `{ platforms: [...] }` — same catalog as [`GET /content-types`](/api-reference/endpoint/list-content-types). Each platform has `max_content_length`, `recommended_content_length`, `allowed_media_types`, `default_content_type`, and `content_types[]` rows with `max_media_count`, `min_media_count`, `requires_media`, `accept_images` / `accept_videos` / `accept_documents` / `accepts_gif`, `forbids_mixed_media`, and per-type byte caps. **20** content types total — there is no `linkedin_carousel` / `instagram_carousel`. Use before `create-post-tool` / `update-post-tool`. |
 
 ## Signatures
 
 | Tool | Description |
 |------|-------------|
 | **list-signatures-tool** | List all signatures for the current workspace. Signatures are reusable text blocks (hashtags, links, custom text) that can be appended to posts. |
-| **create-signature-tool** | Create a new signature with a name and content (hashtags, links, custom text — anything you want to append to posts). |
-| **update-signature-tool** | Update a signature's name or content. |
-| **delete-signature-tool** | Delete a signature. Marked `IsDestructive`. |
+| **create-signature-tool** | Create a signature. Input: `name` (required, max 255), `content` (required). Requires create-post permission. |
+| **update-signature-tool** | Update a signature. Input: `signature_id`, `name`, `content` (all required). |
+| **delete-signature-tool** | Delete a signature by `signature_id`. Marked `IsDestructive`. |
 
 ## Labels
 
 | Tool | Description |
 |------|-------------|
 | **list-labels-tool** | List all labels for the current workspace. Each label has a name and hex color. |
-| **create-label-tool** | Create a new label with a name and hex color (e.g. `#FF5733`). |
-| **update-label-tool** | Update a label's name or color. |
-| **delete-label-tool** | Delete a label. Detaches it from all posts that referenced it. Marked `IsDestructive`. |
+| **create-label-tool** | Create a label. Input: `name` (required, max 255), `color` (required hex `#RRGGBB`, e.g. `#FF5733`). Requires create-post permission. |
+| **update-label-tool** | Update a label. Input: `label_id`, `name`, `color` (all required). |
+| **delete-label-tool** | Delete a label by `label_id`. Detaches it from all posts that referenced it. Marked `IsDestructive`. |
 
 ## Social accounts
 
 | Tool | Description |
 |------|-------------|
 | **list-social-accounts-tool** | List all connected social accounts for the current workspace (LinkedIn, X, Instagram, etc.). Returns id, platform, display_name, username, is_active, status. |
-| **toggle-social-account-tool** | Toggle a social account active/inactive. When inactive, the account is skipped during publishing. |
+| **list-pinterest-boards-tool** | List boards for a Pinterest account (`account_id`). Returns `{ boards: [{ id, name }], truncated }`. Use a board `id` as `platforms[].meta.board_id` (**required to publish** Pinterest). Requires **create-post** permission (Owner / Admin / Member) — **Viewers** get `Not authorized to manage posts.` |
+| **list-discord-channels-tool** | List text/announcement channels the bot can post to for a Discord account (`account_id`). Returns `{ channels: [{ id, name }] }`. Use a channel `id` as `platforms[].meta.channel_id` (**required to publish** Discord). Same permission as boards: create-post only — **Viewers** cannot call it. |
+| **toggle-social-account-tool** | Toggle a social account active/inactive. Input: `account_id`. When inactive, the account is skipped during publishing. Requires manage-accounts (Owner / Admin). |
 
 ## Workspace
 
@@ -76,13 +80,34 @@ To create and publish a post end-to-end:
 
 | Tool | Description |
 |------|-------------|
-| **list-api-keys-tool** | List Personal Access Tokens for the current workspace. Returns metadata only — the secret token value is shown only once at creation. OAuth-flow tokens (e.g. ChatGPT MCP sessions) are excluded. |
-| **create-api-key-tool** | Create a new Personal Access Token. The plain token is returned once — store it immediately, it cannot be retrieved later. |
-| **delete-api-key-tool** | Revoke a Personal Access Token. The current OAuth session token cannot be revoked through this tool. Marked `IsDestructive`. |
+| **list-api-keys-tool** | List Personal Access Tokens for the current workspace. Returns metadata only — the secret token value is shown only once at creation. OAuth-flow tokens (e.g. ChatGPT MCP sessions) are excluded. Requires **manageTeam** (Owner / Admin). |
+| **create-api-key-tool** | Create a Personal Access Token. Input: `name` (required, max 255), optional `expires_at` (YYYY-MM-DD or ISO 8601; omit for non-expiring). Requires **manageTeam** (Owner / Admin). Response includes key metadata plus **`token`** (plain secret once) — note: REST create returns `plain_token`; MCP returns `token`. Store it immediately. |
+| **delete-api-key-tool** | Revoke a Personal Access Token. Input: `api_key_id` (required). The current OAuth session token cannot be revoked through this tool. Marked `IsDestructive`. Requires manageTeam. |
+
+## Per-platform `meta` (MCP)
+
+`platforms[].meta` uses the **same keys** as the REST API. Full tables, limits, and examples: [Per-platform meta](/api-reference/endpoint/update-post#per-platform-meta).
+
+Quick checklist for agents:
+
+| Platform | Set in `meta` | Required before publish |
+|----------|---------------|-------------------------|
+| Instagram / Facebook | `aspect_ratio` — exact strings `"1:1"`, `"4:5"`, `"16:9"`, `"original"` | No |
+| LinkedIn / LinkedIn Page | `document_title` (PDF document posts, max 300) | No |
+| TikTok | `privacy_level` — exact strings `"PUBLIC_TO_EVERYONE"`, `"MUTUAL_FOLLOW_FRIENDS"`, `"FOLLOWER_OF_CREATOR"`, `"SELF_ONLY"`; plus booleans `allow_comments`, `allow_duet`, `allow_stitch`, `auto_add_music`, `is_aigc`, `disclose`, `brand_content_toggle`, `brand_organic_toggle` | `privacy_level` |
+| Pinterest | `board_id`, optional `title` (max 100), `link` (http/https). Pin description = post `content`. | `board_id` |
+| Discord | `channel_id`, optional `channel_name`, `mentions` (`[{token,label}]`), `embeds` (max 10) | `channel_id` |
+
+<Note>
+  Enum-like fields are **JSON strings**. Send `"privacy_level": "PUBLIC_TO_EVERYONE"`, not an integer or a renamed value. Unknown meta keys are dropped.
+</Note>
 
 ## Notes
 
 - **Workspace scoping** — every tool operates on the user's currently-selected workspace. To act on a different workspace, switch it in the TryPost UI (or, for personal API tokens, create a new key in that workspace).
+- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, and they also cannot call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. See [Team](/knowledge-base/team).
 - **Cross validation** — `create-post-tool` and `update-post-tool` reject mismatched combos (e.g. `content_type=x_post` on a LinkedIn account). Inactive social accounts are also rejected at validation time.
 - **Destructive tools** — operations that delete data or publish to the world (`publish-post-tool`, `delete-*`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
-- **Local-file uploads** — `request-media-upload-tool` returns a single-use signed URL valid for 15 minutes, capped at 50 MB. The underlying endpoint is documented at [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload). After upload, call `attach-media-from-upload-tool` with the same `upload_token` to attach the resulting Media to a post.
+- **Local-file uploads** — `request-media-upload-tool` returns a single-use signed URL (default TTL 15 minutes). `max_bytes` is the video ceiling (default 1 GB); per-type caps are in `max_bytes_by_type` (image / video / document). POST the file as multipart field `media`, then call `attach-media-from-upload-tool` with the same `upload_token` (optional `alt` for images). See [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload).
+- **Media alt text** — image accessibility text lives on `media[].meta.alt_text`, not on `platforms[].meta`. Via MCP, set it with `attach-media-from-url-tool` (`urls[].alt`) or `attach-media-from-upload-tool` (`alt`). The REST create/update endpoints also accept `media[].meta.alt_text` when hosting from URL.
+- **No inline `media[]` on MCP create/update** — unlike REST `POST`/`PUT /posts`, the MCP create/update tools do not accept a `media` array. Always use the attach tools after create.
