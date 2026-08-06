@@ -50,27 +50,11 @@ icon: "/images/ai/github-copilot.svg"
   VS Code uses `"servers"` as the top-level key (not `"mcpServers"`). This is different from most other MCP clients.
 </Tip>
 
-## Copilot coding agent (cloud) — Bearer required
+## Copilot coding agent (cloud)
 
-GitHub's **coding agent** (the one that runs on GitHub's infrastructure to handle issues and PRs) does not yet support OAuth for remote MCP servers. To use TryPost there, you must use a Personal Access Token.
+GitHub's **coding agent** (the one that runs on GitHub's infrastructure to handle issues and PRs) does not yet support OAuth for remote MCP servers. TryPost's MCP endpoint requires OAuth (`mcp:use`) and **rejects** Personal Access Tokens, so cloud coding agent MCP is not supported today.
 
-In your repository's **Settings → Copilot → Coding agent → MCP servers**, add a JSON entry like:
-
-```json
-{
-  "servers": {
-    "trypost": {
-      "type": "http",
-      "url": "https://app.trypost.it/mcp/trypost",
-      "headers": {
-        "Authorization": "Bearer $TRYPOST_API_KEY"
-      }
-    }
-  }
-}
-```
-
-Add `TRYPOST_API_KEY` to the repo's **Copilot agent secrets** (not regular Actions secrets). Issue the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
+Use Copilot's **IDE agent mode** (above) for MCP, or call the [REST API](/api-reference/introduction) from Actions / scripts with an API key from **Settings → API Keys**.
 
 ## Global IDE configuration
 

@@ -43,26 +43,6 @@ icon: "/images/ai/windsurf.svg"
     ```
   </Step>
 </Steps>
-
-<Accordion title="Bearer token fallback">
-  If your environment blocks the OAuth callback, use a Personal Access Token instead:
-
-  ```json
-  {
-    "mcpServers": {
-      "trypost": {
-        "serverUrl": "https://app.trypost.it/mcp/trypost",
-        "headers": {
-          "Authorization": "Bearer YOUR_API_KEY"
-        }
-      }
-    }
-  }
-  ```
-
-  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
-</Accordion>
-
 ## Example prompts
 
 Use Cascade to interact with TryPost:

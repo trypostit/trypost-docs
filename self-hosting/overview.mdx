@@ -23,7 +23,7 @@ Every path needs the same building blocks:
 1. **App key** (`APP_KEY`)
 2. **Database** configured and migrated
 3. **Redis** + `QUEUE_CONNECTION=redis` (Horizon)
-4. **Passport keys** + **Personal Access Client** (API / MCP tokens)
+4. **Passport keys** + **Personal Access Client** (REST API keys; MCP OAuth also uses the keys)
 5. **Admin user** (`UserSeeder`)
 6. Long-running **Horizon**, **Reverb**, and the **scheduler** (Docker prod starts these for you)
 

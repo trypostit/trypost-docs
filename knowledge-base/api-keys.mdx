@@ -1,22 +1,24 @@
 ---
 title: "API Keys"
-description: "Create and manage API keys to authenticate your requests to the TryPost API and MCP server."
+description: "Create and manage API keys to authenticate your requests to the TryPost REST API."
 icon: "key"
 ---
 
 ## What are API keys?
 
-API keys authenticate requests to the TryPost REST API and MCP server. Every API call and AI assistant connection requires a valid key.
+API keys (Personal Access Tokens) authenticate requests to the TryPost **REST API**. Keys are scoped to a **single workspace** — an API key can only access the workspace it was created in.
 
-Keys are scoped to a **single workspace** — an API key can only access the workspace it was created in.
+<Warning>
+  API keys do **not** authenticate the [MCP server](/ai/introduction). MCP connections use OAuth (`mcp:use`) via browser sign-in. Use workspace **Settings → MCP** to connect assistants, and **Settings → API Keys** for REST / scripts.
+</Warning>
 
 ## Creating an API key
 
-Go to **API Keys** in the sidebar and click **Create API Key**.
+Go to workspace **Settings → API Keys** and click **Create API Key**.
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| **Name** | Yes | A label to identify the key (e.g., `Production`, `CI/CD`, `MCP`, `Cursor`) |
+| **Name** | Yes | A label to identify the key (e.g., `Production`, `CI/CD`, `Scripts`) |
 | **Expiration** | No | Optional expiration date. After this date, the key stops working |
 
 After creation, the full key is shown **once**. Copy it immediately.
@@ -27,36 +29,14 @@ After creation, the full key is shown **once**. Copy it immediately.
 
 ## Where to use your API key
 
-The same key works for both the REST API and MCP server:
-
-### REST API
-
-Pass the key as a Bearer token in the `Authorization` header:
+Pass the key as a Bearer token in the `Authorization` header for REST requests:
 
 ```bash
 curl -X GET https://app.trypost.it/api/posts \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### MCP Server
-
-Use the key in your AI assistant's MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "trypost": {
-      "type": "http",
-      "url": "https://app.trypost.it/mcp/trypost",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
-      }
-    }
-  }
-}
-```
-
-See the [Build with AI](/ai/introduction) section for setup guides for each AI assistant.
+See the [API reference](/api-reference/introduction) for endpoints. To connect Claude, ChatGPT, Cursor, and other assistants, follow [Build with AI](/ai/introduction) (OAuth).
 
 ## Expiration
 
@@ -71,7 +51,7 @@ Expired keys are not deleted — they stay visible so you can track usage histor
 
 <Steps>
   <Step title="Use separate keys per use case">
-    Create different keys for different purposes: `Production API`, `Cursor MCP`, `CI/CD Pipeline`. If one is compromised, you only need to rotate one.
+    Create different keys for different purposes: `Production API`, `CI/CD Pipeline`. If one is compromised, you only need to rotate one.
   </Step>
   <Step title="Set expiration for temporary access">
     If you're sharing a key with a contractor or external tool, set an expiration date.
@@ -86,7 +66,7 @@ Expired keys are not deleted — they stay visible so you can track usage histor
 
 ## Deleting an API key
 
-You can delete an API key at any time from the dashboard or via the [API](/api-reference/endpoint/delete-api-key). Deletion is **immediate and irreversible** — any application or AI assistant using the key will immediately start receiving `401` errors.
+You can delete an API key at any time from the dashboard or via the [API](/api-reference/endpoint/delete-api-key). Deletion is **immediate and irreversible** — any application using the key will immediately start receiving `401` errors.
 
 Check the **Last used** column before deleting to make sure the key isn't actively in use.
 
@@ -100,7 +80,7 @@ Check the **Last used** column before deleting to make sure the key isn't active
     No. The full key is only shown once. TryPost stores a secure hash, not the original key.
   </Accordion>
   <Accordion title="Does the same key work for API and MCP?">
-    Yes. One key authenticates both REST API requests and MCP connections. They're the same authentication mechanism.
+    No. API keys authenticate the REST API only. MCP requires OAuth — see [Build with AI](/ai/introduction).
   </Accordion>
   <Accordion title="What happens if I use an expired key?">
     The API returns a `401 Unauthorized` error. Create a new key to restore access.

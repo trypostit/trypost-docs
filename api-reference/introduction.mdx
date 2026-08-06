@@ -16,7 +16,7 @@ For self-hosted instances, the base URL is your `APP_URL` followed by `/api` (e.
 
 ## Authentication
 
-All API requests require a Bearer token in the `Authorization` header. You can create API keys (Personal Access Tokens) from the [TryPost dashboard](https://app.trypost.it/settings/authentication) or via the [`POST /api-keys`](/api-reference/endpoint/create-api-key) endpoint.
+All API requests require a Bearer token in the `Authorization` header. You can create API keys (Personal Access Tokens) from [Settings → API Keys](https://app.trypost.it/settings/workspace/api-keys) or via the [`POST /api-keys`](/api-reference/endpoint/create-api-key) endpoint.
 
 ```bash
 Authorization: Bearer YOUR_API_KEY
@@ -30,7 +30,7 @@ Authorization: Bearer YOUR_API_KEY
 
 Every API key is bound to a specific workspace at creation time. All requests act on that workspace — you cannot list or modify resources from other workspaces with the same key. To work with multiple workspaces, create one API key per workspace.
 
-The same key works for the REST API and the [MCP server](/ai/introduction).
+API keys authenticate the REST API only. The [MCP server](/ai/introduction) uses OAuth (`mcp:use`), not Personal Access Tokens.
 
 ## Rate limiting
 

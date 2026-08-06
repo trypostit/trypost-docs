@@ -17,7 +17,7 @@ Confirm the install checklist is done:
 - [ ] `APP_KEY` set
 - [ ] Database migrated
 - [ ] `QUEUE_CONNECTION=redis` and Redis reachable
-- [ ] `php artisan passport:keys` ran
+- [ ] Passport keys present (`PASSPORT_*` env for Docker prod, or `php artisan passport:keys` on bare metal)
 - [ ] `php artisan db:seed` + `UserSeeder` ran
 - [ ] `storage:link` ran **if** `FILESYSTEM_DISK=public`
 - [ ] `npm run build` completed
@@ -268,8 +268,8 @@ Make sure all of these are in place in production:
 | Item | How | Purpose |
 |------|-----|---------|
 | **App key** | `php artisan key:generate` | Encrypts sessions / cookies |
-| **Passport keys** | `php artisan passport:keys` (once) | Sign/verify API & MCP tokens |
-| **Passport client** | `php artisan db:seed` (once) | Issue personal access tokens |
+| **Passport keys** | `PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY` (or `php artisan passport:keys` once on bare metal) | Sign/verify API & MCP tokens |
+| **Passport client** | `php artisan db:seed` (once; Docker prod also runs `PassportSeeder` on boot) | Issue personal access tokens |
 | **Admin user** | `php artisan db:seed --class=UserSeeder` (once) | First login |
 | **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
 | **Redis** | `QUEUE_CONNECTION=redis` + Redis up | Queues, cache, schedule locks |
@@ -297,5 +297,5 @@ Regularly backup:
 
 - Database
 - `.env` file
-- Passport keys (`storage/oauth-*.key`) — losing them invalidates all API tokens
+- Passport keys (`storage/oauth-*.key` or `PASSPORT_*` env) — losing them invalidates API keys and MCP OAuth grants
 - Uploaded media (if using local storage)
