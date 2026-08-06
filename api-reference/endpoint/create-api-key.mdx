@@ -6,6 +6,8 @@ description: "Create a new API key. Returns the plain text token which is only s
 
 ## Request
 
+Requires **manage team** permission on the workspace (Owner / Admin). Members and Viewers get `403`.
+
 <ParamField body="name" type="string" required>
   The API key name. Maximum 255 characters.
 </ParamField>
