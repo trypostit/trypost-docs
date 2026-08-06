@@ -65,7 +65,8 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
 
 - **Only the keys listed below are accepted.** Unknown keys are dropped (they never persist).
 - On update, `meta` is **merged** into the platform's existing object. Send a key as `null` to remove it (e.g. `"title": null`).
-- Required-to-publish keys are enforced when `status` is `scheduled` or `publishing`. Drafts are not checked. A missing key returns `422` on `platforms.{i}.meta.{field}` (e.g. `platforms.0.meta.channel_id`).
+- Required-to-publish keys are enforced on this request when `status` is `scheduled` or `publishing` **and** you include a `platforms[]` array in the body (each submitted row is checked). Drafts are not checked. A missing key returns `422` on `platforms.{i}.meta.{field}` (e.g. `platforms.0.meta.channel_id`).
+- If you publish with only `{ "status": "publishing" }` (no `platforms[]`), this endpoint does **not** re-validate stored meta — ensure `board_id` / `privacy_level` / `channel_id` were saved earlier. The MCP `publish-post-tool` always validates stored meta before publishing.
 - Enum-like fields are **JSON strings** — send the exact literal (e.g. `"privacy_level": "PUBLIC_TO_EVERYONE"`), not an integer or a different casing.
 - Platforms with **no** `meta` keys: X, YouTube, Threads, Bluesky, Mastodon, Telegram.
 
@@ -172,7 +173,9 @@ Example Discord meta:
 
 ## Response
 
-Returns the updated post (including `platforms[].meta`). Returns `422` with `{ "message": "Cannot edit a published post." }` if the post has already been published.
+Returns the updated post (including `platforms[].meta`).
+
+Returns `422` with a `message` when the post is already finalized and cannot be edited (`published`, `publishing`, `partially_published`, or `failed`). English copy: *"This post has already been processed and cannot be re-published. Duplicate it to try again."*
 
 <RequestExample>
 ```bash
@@ -243,7 +246,7 @@ curl -X PUT https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5
 
 ## Tips
 
-- To publish an existing draft, send only `{ "status": "publishing" }` — content/platforms already saved are kept (required meta must already be stored).
+- To publish an existing draft, send `{ "status": "publishing" }` — content/platforms already saved are kept. Required meta (`board_id`, `privacy_level`, `channel_id`) must already be stored; include `platforms[]` on this request if you want the API to 422 when a key is missing.
 - To schedule, send `{ "status": "scheduled", "scheduled_at": "2025-12-31T15:30:00Z" }`.
 - To toggle which platforms are active without changing content, send only the `platforms[]` array.
 - Clear a meta field with `null`: `{ "meta": { "title": null, "link": null } }`.
