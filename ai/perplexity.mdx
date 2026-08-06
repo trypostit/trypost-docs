@@ -51,9 +51,9 @@ icon: "/images/ai/perplexity.svg"
   Perplexity reaches the MCP server from its cloud over HTTPS. The hosted endpoint `https://app.trypost.it/mcp/trypost` works out of the box. Self-hosted instances must be publicly reachable over HTTPS (or use a tunnel).
 </Note>
 
-<Accordion title="API key authentication instead of OAuth">
-  Perplexity also supports **API Key** (and open/no auth) for custom connectors. Paste a TryPost Personal Access Token from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). Prefer OAuth when both options work.
-</Accordion>
+<Warning>
+  Choose **OAuth 2.0** for the connector. TryPost rejects Personal Access Tokens on `/mcp/trypost` — an “API Key” auth mode in Perplexity will not work against TryPost MCP.
+</Warning>
 
 <Accordion title="Enterprise / organization connectors">
   On Enterprise, admins can share connectors organization-wide and control whether members may add their own. Members still authenticate individually for OAuth connectors unless your admin configures organization-wide auth.

@@ -98,7 +98,7 @@ Only `GET /posts` paginates (15 per page). All other list endpoints return full 
 - Plus: `list-content-types-tool` (Platforms), `list-signatures-tool` / `create-signature-tool` / `update-signature-tool` / `delete-signature-tool`, `list-labels-tool` / `create-label-tool` / `update-label-tool` / `delete-label-tool`, `list-social-accounts-tool` / `toggle-social-account-tool`, `get-workspace-tool`, `list-api-keys-tool` / `create-api-key-tool` / `delete-api-key-tool`.
 - `create-post-tool` accepts `platforms[]` (each with `social_account_id` and `content_type`), `scheduled_at`, `label_ids`, etc. — same shape as REST `POST /posts`.
 - `publish-post-tool` is a separate, destructive tool (annotated `IsDestructive`); REST clients use `PUT /posts/{id}` with `status=publishing` instead.
-- Server route: `Mcp::web('/mcp/trypost', TryPostServer::class)->middleware(['auth:api', 'workspace.token'])`. The `workspace.token` middleware (`LoadWorkspaceFromToken`) is what returns `402 Active subscription required` on Cloud accounts without an active trial/subscription.
+- Server route: `Mcp::web('/mcp/trypost', TryPostServer::class)->middleware(['auth:api', 'workspace.token:mcp'])`. The `workspace.token:mcp` middleware (`LoadWorkspaceFromToken`) requires an OAuth grant with `mcp:use` (not a Personal Access Token) and returns `402 Active subscription required` on Cloud accounts without app access.
 
 ## Enum Values
 
