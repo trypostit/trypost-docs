@@ -100,14 +100,16 @@ Without Redis queues, Horizon has nothing useful to process. Without Redis cache
 
 ## Passport (API & MCP tokens)
 
-Self-hosted API keys and MCP Bearer auth need both:
+Passport signs and verifies both **REST API keys** (Personal Access Tokens) and **MCP OAuth** grants. You need:
 
 ```bash
 php artisan passport:keys          # once — RSA files in storage/
-php artisan db:seed                # once — Personal Access Client in the DB
+php artisan db:seed                # once — Personal Access Client in the DB (API keys)
 ```
 
 Alternatively, set `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in `.env` (PEM contents) instead of key files — useful for secret managers. Do not regenerate keys after users have issued tokens.
+
+MCP clients authenticate with OAuth (`mcp:use`), not with an API key Bearer header. API keys are for the REST API only.
 
 Full install order: [Installation](/self-hosting/installation).
 

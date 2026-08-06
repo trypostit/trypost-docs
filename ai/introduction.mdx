@@ -52,26 +52,27 @@ https://app.trypost.it/mcp/trypost
 
 TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Perplexity, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
 
-<Accordion title="Bearer token fallback (CI, scripts, or clients without OAuth)">
-  If your environment can't open a browser — for example a CI pipeline, the GitHub Copilot cloud coding agent, or a client that doesn't speak OAuth yet — you can authenticate with a Personal Access Token instead. Create one in **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it) and send it as `Authorization: Bearer YOUR_API_KEY`. The same token works for both the REST API and the MCP endpoint.
-
-  Keep the token in a secret store, not committed to source. Rotate from **Settings &gt; API Keys** if a key leaks.
-</Accordion>
+<Warning>
+  Personal Access Tokens from **Settings → API Keys** authenticate the [REST API](/api-reference/introduction) only. They are **not** accepted on `/mcp/trypost`. MCP requires an OAuth grant with the `mcp:use` scope (browser sign-in from a supported client). Manage connected assistants under workspace **Settings → MCP**.
+</Warning>
 
 ## Troubleshooting
 
 <AccordionGroup>
   <Accordion title="HTTP 402 — Active subscription required">
-    Your token is valid and the config is correct — the account behind it just doesn't have an active trial or subscription. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan (7-day free trial), then reconnect the MCP server. Self-hosted instances skip this check.
+    Your OAuth grant is valid and the config is correct — the account behind it just doesn't have an active trial or subscription. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan (7-day free trial), then reconnect the MCP server. Self-hosted instances skip this check.
   </Accordion>
   <Accordion title="HTTP 401 — Unauthenticated">
-    The OAuth session expired and refresh failed, or (in the Bearer fallback) the token is missing/malformed/revoked. Re-run the assistant's connect flow to re-authenticate, or issue a new PAT from **Settings &gt; API Keys**.
+    The OAuth session expired and refresh failed, or the access token is missing/malformed/revoked. Re-run the assistant's connect flow to sign in again.
+  </Accordion>
+  <Accordion title="HTTP 403 — MCP OAuth authorization required">
+    The request used a Personal Access Token (API key) or an OAuth token without the `mcp:use` scope. Remove any `Authorization: Bearer …` API key from the MCP config and connect with OAuth instead. For scripts and CI, call the [REST API](/api-reference/introduction) with an API key — not the MCP endpoint.
   </Accordion>
   <Accordion title="Server shows as “Failed to connect”">
-    Run the connection probe your assistant exposes (for example `claude mcp list`). The HTTP status from the probe tells you which case you're in: `402` → see above; `401` → re-authenticate; anything else → open an issue on [GitHub](https://github.com/trypostit/trypost/issues).
+    Run the connection probe your assistant exposes (for example `claude mcp list`). The HTTP status from the probe tells you which case you're in: `402` → see above; `401` → re-authenticate; `403` → use OAuth (not an API key); anything else → open an issue on [GitHub](https://github.com/trypostit/trypost/issues).
   </Accordion>
   <Accordion title="Browser doesn't open during sign-in">
-    Some clients print the authorize URL to the terminal instead of launching the browser when running over SSH or inside a container. Copy the URL into a local browser, complete the flow, and the assistant will pick up the callback automatically. If the callback port is blocked, use the Bearer fallback.
+    Some clients print the authorize URL to the terminal instead of launching the browser when running over SSH or inside a container. Copy the URL into a local browser, complete the flow, and the assistant will pick up the callback automatically. If the callback port is blocked, use a client that can finish OAuth locally, or drive TryPost through the [REST API](/api-reference/introduction) with an API key.
   </Accordion>
 </AccordionGroup>
 

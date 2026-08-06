@@ -90,7 +90,7 @@ docker compose -f compose.prod.yaml exec app php artisan db:seed --class=UserSee
 Change the admin password on first login. Extra accounts come from workspace invites (Settings → Members).
 
 <Tip>
-  Passport **keys** = entrypoint. Passport **Personal Access Client** = `db:seed`. API keys and MCP need both.
+  Passport **keys** = entrypoint. Passport **Personal Access Client** = `db:seed`. API keys need both. MCP OAuth uses the same Passport keys (not API-key Bearer headers).
 </Tip>
 
 ### 5. Optional HTTPS with Caddy
@@ -113,8 +113,9 @@ docker compose -f compose.prod.yaml logs -f app
 ```
 
 1. Open `APP_URL` and sign in as admin
-2. Create an API key (Settings → API) — proves Passport keys + client exist
-3. Schedule a post — Horizon must show as running
+2. Create an API key (Settings → API Keys) — proves Passport keys + Personal Access Client exist
+3. Connect an MCP client via OAuth (Settings → MCP), if you use assistants
+4. Schedule a post — Horizon must show as running
 
 ### Access
 

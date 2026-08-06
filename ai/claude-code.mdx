@@ -54,18 +54,6 @@ If you prefer to edit the config file directly, this is what `claude mcp add` wr
 ```
 
 Drop it in `.mcp.json` for project scope or `~/.claude.json` for user scope.
-
-<Accordion title="Bearer token fallback (CI, scripts, no browser available)">
-  When you can't open a browser — CI runners, remote SSH boxes, scripts — use a Personal Access Token instead:
-
-  ```bash
-  claude mcp add --transport http trypost https://app.trypost.it/mcp/trypost \
-    --header "Authorization: Bearer YOUR_API_KEY"
-  ```
-
-  Create the key from **Settings &gt; API Keys** in the [TryPost dashboard](https://app.trypost.it). Store it in your secrets manager, not in a committed file.
-</Accordion>
-
 ## Example prompts
 
 ```

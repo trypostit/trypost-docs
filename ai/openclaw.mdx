@@ -88,38 +88,6 @@ Equivalent config written by `openclaw mcp add`:
 ```
 
 Save in `~/.openclaw/openclaw.json`, then run `openclaw mcp login trypost` and complete the `--code` step.
-
-<Accordion title="Bearer token fallback (CI, headless, no browser)">
-  When you cannot complete OAuth, use a Personal Access Token and **do not** set `auth: "oauth"` — while OAuth auth is enabled, static `Authorization` headers are ignored.
-
-  ```bash
-  openclaw mcp add trypost \
-    --url https://app.trypost.it/mcp/trypost \
-    --transport streamable-http \
-    --header "Authorization: Bearer YOUR_API_KEY"
-  ```
-
-  Or in config:
-
-  ```json5
-  {
-    mcp: {
-      servers: {
-        trypost: {
-          url: "https://app.trypost.it/mcp/trypost",
-          transport: "streamable-http",
-          headers: {
-            Authorization: "Bearer ${TRYPOST_API_KEY}",
-          },
-        },
-      },
-    },
-  }
-  ```
-
-  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it). Prefer an env var over committing the token.
-</Accordion>
-
 ## Example prompts
 
 ```

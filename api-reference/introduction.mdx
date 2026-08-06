@@ -30,7 +30,7 @@ Authorization: Bearer YOUR_API_KEY
 
 Every API key is bound to a specific workspace at creation time. All requests act on that workspace — you cannot list or modify resources from other workspaces with the same key. To work with multiple workspaces, create one API key per workspace.
 
-The same key works for the REST API and the [MCP server](/ai/introduction).
+API keys authenticate the REST API only. The [MCP server](/ai/introduction) uses OAuth (`mcp:use`), not Personal Access Tokens.
 
 ## Rate limiting
 

@@ -124,7 +124,7 @@ php artisan db:seed --class=UserSeeder
   1. **Keys** (`passport:keys`) — files on disk
   2. **Personal Access Client** (`db:seed`) — row in `oauth_clients`
 
-  API keys in Settings and MCP Bearer auth need **both**.
+  API keys in Settings need **both**. MCP OAuth uses the same Passport keys (not API-key Bearer headers).
 </Tip>
 
 Admin credentials — **change the password immediately on first login**:
@@ -187,9 +187,10 @@ Full Supervisor configs, Nginx (including Reverb `/app/` + `/apps/`), SSL, and c
 ## Verify
 
 1. Sign in at `APP_URL` with the admin credentials
-2. Create an API key under workspace Settings → API (fails with 500 if Passport keys or client are missing)
-3. Upload a media file (404s if you use `public` disk without `storage:link`)
-4. Schedule a test post and confirm Horizon processes it
+2. Create an API key under workspace Settings → API Keys (fails with 500 if Passport keys or client are missing)
+3. Connect an MCP client via OAuth (Settings → MCP), or call the REST API with the key above
+4. Upload a media file (404s if you use `public` disk without `storage:link`)
+5. Schedule a test post and confirm Horizon processes it
 
 ## Next steps
 

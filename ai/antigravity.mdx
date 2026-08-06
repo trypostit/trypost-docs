@@ -4,46 +4,34 @@ description: "Connect TryPost to Google Antigravity for AI-powered social media 
 icon: "/images/ai/antigravity.svg"
 ---
 
-[Antigravity](https://antigravity.google) is Google's AI coding agent. You can connect it to TryPost's MCP server to manage your social media scheduling with natural language.
-
-<Note>
-  As of May 2026, Antigravity's MCP layer doesn't fully support the standard OAuth + Dynamic Client Registration flow that other clients use. We recommend the **Personal Access Token (Bearer)** method below until Antigravity adds first-class OAuth support.
-</Note>
+[Antigravity](https://antigravity.google) is Google's AI coding agent. You can connect it to TryPost's MCP server when the client can complete OAuth.
 
 ## Prerequisites
 
 - Antigravity installed
 - A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
-- A TryPost Personal Access Token (Settings &gt; API Keys)
 
 ## Setup
 
 <Steps>
   <Step title="Open the MCP configuration file">
-    From Antigravity, open **MCP Servers → Manage → View raw config**, then add the TryPost server:
+    From Antigravity, open **MCP Servers → Manage → View raw config**, then add the TryPost server **without** an `Authorization` header so OAuth can run:
 
     ```json
     {
       "mcpServers": {
         "trypost": {
-          "serverUrl": "https://app.trypost.it/mcp/trypost",
-          "headers": {
-            "Authorization": "Bearer YOUR_API_KEY"
-          }
+          "serverUrl": "https://app.trypost.it/mcp/trypost"
         }
       }
     }
     ```
-
-    <Note>
-      Replace `YOUR_API_KEY` with your Personal Access Token from the [TryPost dashboard](https://app.trypost.it).
-    </Note>
   </Step>
-  <Step title="Restart Antigravity">
-    Restart Antigravity to load the new MCP configuration.
+  <Step title="Sign in through your browser">
+    Restart Antigravity if needed, then trigger a TryPost tool call. Complete the browser OAuth flow (**Allow**). Personal Access Tokens are not accepted on the MCP endpoint.
   </Step>
   <Step title="Verify the connection">
-    Ask Antigravity to interact with your TryPost account:
+    Ask Antigravity:
 
     ```
     List all my TryPost social accounts
@@ -54,6 +42,10 @@ icon: "/images/ai/antigravity.svg"
 <Tip>
   Antigravity uses `"serverUrl"` for remote MCP connections (not `"url"`). This is the same format used by Windsurf.
 </Tip>
+
+<Note>
+  If Antigravity cannot finish OAuth (no browser callback), use the [REST API](/api-reference/introduction) with an API key from **Settings → API Keys** instead of MCP.
+</Note>
 
 ## Example prompts
 

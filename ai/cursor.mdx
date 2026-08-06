@@ -40,26 +40,6 @@ icon: "/images/ai/cursor.svg"
     ```
   </Step>
 </Steps>
-
-<Accordion title="Bearer token fallback">
-  For environments where the OAuth callback can't reach Cursor (some sandboxed setups), set the `Authorization` header explicitly with a Personal Access Token:
-
-  ```json
-  {
-    "mcpServers": {
-      "trypost": {
-        "url": "https://app.trypost.it/mcp/trypost",
-        "headers": {
-          "Authorization": "Bearer YOUR_API_KEY"
-        }
-      }
-    }
-  }
-  ```
-
-  Create the key from **Settings &gt; API Keys** on the [TryPost dashboard](https://app.trypost.it).
-</Accordion>
-
 ## Example prompts
 
 Use Cursor's AI chat or inline editing to interact with TryPost:
