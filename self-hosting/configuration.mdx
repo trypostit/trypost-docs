@@ -107,7 +107,7 @@ php artisan passport:keys          # once — RSA files in storage/
 php artisan db:seed                # once — Personal Access Client in the DB (API keys)
 ```
 
-Alternatively, set `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in `.env` (PEM contents) instead of key files — useful for secret managers. Do not regenerate keys after users have issued tokens.
+Alternatively, set `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in `.env` (PEM contents) instead of key files — **required for Docker production** (`compose.prod.yaml`) and useful for secret managers / multi-node deploys. Do not regenerate keys after users have issued tokens.
 
 MCP clients authenticate with OAuth (`mcp:use`), not with an API key Bearer header. API keys are for the REST API only.
 

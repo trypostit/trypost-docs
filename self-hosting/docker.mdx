@@ -28,9 +28,9 @@ No local PHP/Node install required. The published image includes the built front
 
 | You (once) | Entrypoint / Supervisor (automatic) |
 |------------|-------------------------------------|
-| Set `APP_KEY`, `APP_URL`, DB passwords, `REVERB_APP_SECRET` | Wait for Postgres, run migrations |
-| `docker compose … up -d` | `passport:keys` if missing, `storage:link` if missing |
-| `db:seed` + `UserSeeder` | Cache config/routes/views/events |
+| Set `APP_KEY`, `APP_URL`, DB passwords, `REVERB_APP_SECRET`, **`PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY`** | Wait for Postgres, run migrations |
+| `docker compose … up -d` | Use Passport keys from env, `storage:link` if missing, ensure Personal Access Client |
+| `db:seed` (plans) + `UserSeeder` | Cache config/routes/views/events |
 | Optional: Caddy TLS profile | Start nginx, php-fpm, **Horizon**, **Reverb**, **schedule:work** |
 
 ### 1. Clone the repository
@@ -53,6 +53,13 @@ Paste the value into `APP_KEY` in `compose.prod.yaml`. Also set:
 - `APP_URL` — your public URL (e.g. `https://post.yourdomain.com`)
 - `DB_PASSWORD` / `POSTGRES_PASSWORD` (must match)
 - `REVERB_APP_SECRET`
+- `PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY` — **required in production** (file keys under `storage/` are not on a persisted volume). Generate once:
+
+```bash
+docker compose -f compose.prod.yaml run --rm app php artisan passport:keys --show
+```
+
+Paste the PEM contents into the compose env vars (use `\n` for newlines). Do not regenerate after users have issued API or MCP tokens.
 
 Leave `REVERB_APP_KEY` as `trypost-reverb-key` unless you rebuild the image — it must match the key baked into the published frontend bundle.
 
@@ -69,13 +76,14 @@ On first boot the entrypoint:
 - waits for Postgres
 - runs migrations
 - creates `storage:link` if missing (unused if you later switch to S3 / R2 / Spaces)
-- generates Passport keys if missing (`passport:keys`)
+- loads Passport keys from `PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY` (exits if unset in production)
+- ensures the Passport Personal Access Client (`PassportSeeder`)
 - caches config / routes / views / events
 - starts nginx, php-fpm, Horizon, Reverb, and `schedule:work`
 
-It does **not** seed the database — next step.
+It does **not** create the admin user or plan rows — next step.
 
-### 4. Seed Passport client and admin user (one-time)
+### 4. Seed plans and admin user (one-time)
 
 ```bash
 docker compose -f compose.prod.yaml exec app php artisan db:seed
@@ -84,13 +92,13 @@ docker compose -f compose.prod.yaml exec app php artisan db:seed --class=UserSee
 
 | Seeder | Purpose |
 |--------|---------|
-| `DatabaseSeeder` | Passport Personal Access Client + plan rows |
+| `DatabaseSeeder` | Plan rows (+ idempotent Passport Personal Access Client) |
 | `UserSeeder` | Admin (`admin@trypost.it` / `password`) |
 
 Change the admin password on first login. Extra accounts come from workspace invites (Settings → Members).
 
 <Tip>
-  Passport **keys** = entrypoint. Passport **Personal Access Client** = `db:seed`. API keys need both. MCP OAuth uses the same Passport keys (not API-key Bearer headers).
+  Production Passport **keys** come from `PASSPORT_*` env vars (set before `up`). The entrypoint also runs `PassportSeeder` so API-key creation works without a manual client step. MCP uses OAuth (`mcp:use`) with those same keys — not API-key Bearer headers. Still run `db:seed` / `UserSeeder` for plans and the admin user.
 </Tip>
 
 ### 5. Optional HTTPS with Caddy
