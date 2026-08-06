@@ -13,15 +13,17 @@ Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](
 ## Request
 
 <ParamField body="platforms" type="array" required>
-  At least one platform entry. Each entry pins this post to a connected social account and a `content_type`.
+  At least one platform entry (`min:1`). Each entry pins this post to a connected social account and a `content_type`.
   <Expandable>
     <ParamField body="social_account_id" type="string" required>
       UUID of an active social account in the current workspace. Inactive or external accounts are rejected.
     </ParamField>
     <ParamField body="content_type" type="string" required>
-      Format for this platform — must match the social account's platform. Discover the catalog with [`GET /content-types`](/api-reference/endpoint/list-content-types).
+      Format for this platform — must match the social account's platform. Discover the live catalog with [`GET /content-types`](/api-reference/endpoint/list-content-types).
 
-      Allowed values: `linkedin_post`, `linkedin_carousel`, `linkedin_page_post`, `linkedin_page_carousel`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_carousel`, `instagram_reel`, `instagram_story`, `tiktok_video`, `tiktok_photo`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`, `telegram_post`, `discord_message`.
+      Allowed values today: `linkedin_post`, `linkedin_page_post`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_reel`, `instagram_story`, `tiktok_video`, `tiktok_photo`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`, `telegram_post`, `discord_message`.
+
+      There is **no** `linkedin_carousel` / `instagram_carousel` — use `linkedin_post` + PDF for LinkedIn documents, and `instagram_feed` with multiple images for Instagram carousels.
     </ParamField>
     <ParamField body="meta" type="object">
       Optional per-platform settings. Only documented keys are stored; unknown keys are dropped.
@@ -38,15 +40,50 @@ Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](
 </ParamField>
 
 <ParamField body="content" type="string">
-  The post body shared across all platforms. Up to 10 000 characters at the API level (per-platform hard caps are enforced separately — see [`GET /content-types`](/api-reference/endpoint/list-content-types) for the matrix). Defaults to empty. For Pinterest, this is the pin description.
+  The post body shared across all platforms. Up to **10 000** characters at the API level (per-platform hard caps are enforced separately — see [`GET /content-types`](/api-reference/endpoint/list-content-types)). Defaults to empty. For Pinterest, this is the pin description.
 </ParamField>
 
 <ParamField body="media" type="array">
-  Media items to attach to the post. Each item should match the shape returned by [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — `id`, `path`, `url`, `type`, `mime_type`, `original_filename`, optional `meta.alt_text` (image alt text, max 2000 — this is **not** `platforms[].meta`). Most callers use the dedicated upload or [attach-from-URL](/api-reference/endpoint/attach-media-from-url) endpoint instead.
+  Optional media to attach on create. Each item must include a public `url` — the API downloads and hosts it.
+
+  <Expandable>
+    <ParamField body="url" type="string" required>
+      Public `http`/`https` URL of the file (max 2048).
+    </ParamField>
+    <ParamField body="meta" type="object">
+      Optional. `meta.alt_text` (string, max **2000**) for image accessibility. Not the same as `platforms[].meta`.
+    </ParamField>
+    <ParamField body="id" type="string">
+      Optional — usually omitted on create (assigned after host).
+    </ParamField>
+    <ParamField body="path" type="string">
+      Optional — usually omitted on create.
+    </ParamField>
+    <ParamField body="type" type="string">
+      Optional hint: `image`, `video`, or `document`.
+    </ParamField>
+    <ParamField body="mime_type" type="string">
+      Optional MIME hint.
+    </ParamField>
+    <ParamField body="original_filename" type="string">
+      Optional display filename (max 500).
+    </ParamField>
+    <ParamField body="size" type="integer">
+      Optional size in bytes.
+    </ParamField>
+    <ParamField body="source" type="string">
+      Optional: `ai`, `unsplash`, or `giphy`.
+    </ParamField>
+    <ParamField body="source_meta" type="object">
+      Optional opaque source metadata.
+    </ParamField>
+  </Expandable>
+
+  Prefer dedicated endpoints when practical: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
 </ParamField>
 
 <ParamField body="scheduled_at" type="string">
-  ISO 8601 datetime in the future (e.g. `2026-05-10T15:30:00Z`). Stored on the draft so a follow-up `PUT` with `status=scheduled` doesn't have to repeat it. Defaults to today at 09:00 UTC.
+  ISO 8601 datetime in the future (e.g. `2026-05-10T15:30:00Z`). Stored on the draft so a follow-up `PUT` with `status=scheduled` doesn't have to repeat it. **If omitted, the draft has `scheduled_at: null`** (no default time).
 </ParamField>
 
 <ParamField body="label_ids" type="array">
@@ -55,7 +92,7 @@ Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](
 
 ## Response
 
-Returns `201` with the created post (including `platforms[].meta`). Response shape is identical to [`GET /posts/{post}`](/api-reference/endpoint/get-post) — see that endpoint for full field documentation.
+Returns `201` with the created post (including `platforms[].meta`). Response shape matches [`GET /posts/{post}`](/api-reference/endpoint/get-post). Labels may not be eager-loaded on create — call `GET` if you need them immediately after setting `label_ids`.
 
 <RequestExample>
 ```bash

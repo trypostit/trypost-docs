@@ -1,7 +1,7 @@
 ---
 title: "Upload media file"
 api: "POST /posts/{post}/media"
-description: "Upload an image or video from your machine and attach it to a post."
+description: "Upload an image, video, or PDF from your machine and attach it to a post."
 ---
 
 For attaching media from a public URL instead of uploading bytes, use [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
@@ -19,16 +19,17 @@ Send as `multipart/form-data` with a single `media` field.
 <ParamField body="media" type="file" required>
   The file to upload. Must be one of the allowed types:
 
-  - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp` — up to **10 MB**
-  - **Videos**: `video/mp4`, `video/quicktime` (MOV) — up to **1 GB**
+  - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp` — up to **10 MB** (`MEDIA_IMAGE_MAX_SIZE_MB`)
+  - **Videos**: `video/mp4`, `video/quicktime` (MOV) — up to **1 GB** (`MEDIA_VIDEO_MAX_SIZE_MB`)
+  - **Documents**: `application/pdf` — up to **100 MB** (`MEDIA_DOCUMENT_MAX_SIZE_MB`)
 </ParamField>
 
 ## Behaviour
 
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
-- The file's MIME type is **intersected with the platforms enabled on the post**. For example, uploading an image to a TikTok-only post returns `422` unless the post targets `tiktok_photo`.
-- Per-type size caps are enforced after MIME detection (a video over 1 GB returns `422` even if the FormRequest's overall cap allowed it). On self-hosted, caps come from `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB`.
-- PNG and WebP still images are normalized to **JPEG (q100)** at storage time for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram / Discord). MP4 and MOV videos are stored as-is.
+- The file's MIME type is **intersected with the platforms enabled on the post**. For example, uploading an image to a TikTok-only post returns `422` unless the post targets `tiktok_photo`. Uploading a PDF only succeeds on platforms that accept documents (e.g. LinkedIn `linkedin_post`).
+- Per-type size caps are enforced after MIME detection. The FormRequest uses the video ceiling as an overall bound; per-type limits still apply.
+- PNG and WebP still images are normalized to **JPEG (q100)** at storage time for universal platform compatibility. GIF is preserved (animation kept for X / Bluesky / Mastodon / Telegram / Discord). MP4, MOV, and PDF are stored as-is.
 - The new media is stored under `medias/{uuid}.{ext}` on the configured filesystem disk (`local`, `s3`, or `r2`) and appended to the post's `media[]` array.
 
 ## Response

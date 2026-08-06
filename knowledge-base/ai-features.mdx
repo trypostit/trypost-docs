@@ -45,12 +45,12 @@ The wizard creates a draft post from scratch — including selecting media — b
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `format` | Yes | One of the AI-supported `content_type` values: `instagram_feed`, `instagram_carousel`, `instagram_story`, `linkedin_post`, `linkedin_page_post`, `x_post`, `threads_post`, `bluesky_post`, `mastodon_post`, `facebook_post`, `facebook_story`, `pinterest_pin` |
+| `format` | Yes | AI-supported values: `instagram_feed`, `instagram_carousel` (wizard-only; draft is saved as `instagram_feed`), `instagram_story`, `linkedin_post`, `linkedin_page_post`, `x_post`, `threads_post`, `bluesky_post`, `mastodon_post`, `facebook_post`, `pinterest_pin`, `pinterest_carousel` |
 | `social_account_id` | No | Pre-select which account to publish to |
-| `image_count` | No | 0–10 images to generate alongside the caption (carousels only) |
+| `image_count` | No | 0–10 images to generate alongside the caption (multi-image / carousel formats) |
 | `prompt` | Yes | Up to 2 000 chars describing what the post is about |
 
-Reels, Shorts, and TikTok video formats are not in the AI Create wizard yet — the wizard intentionally only generates text + images.
+Reels, Shorts, TikTok video, Facebook Story, and similar video-only formats are not in the AI Create wizard yet — the wizard intentionally only generates text + images.
 
 ## How brand profile is used
 

@@ -25,12 +25,11 @@ TryPost supports posting to LinkedIn personal profiles and company pages.
 
 ## Supported content types
 
-| Type | Description |
-|------|-------------|
-| **Post** | Text with optional 1 image or 1 video |
-| **Carousel** | Swipeable image carousel — up to 20 images |
+| Type | `content_type` | Description |
+|------|----------------|-------------|
+| **Post** | `linkedin_post` / `linkedin_page_post` | Text with optional media — up to **10 images**, **1 video**, or **1 PDF**. Format is inferred from the attached files (no separate carousel / document content type). For PDF posts you can set `platforms[].meta.document_title`. |
 
-Both content types are available for personal profiles (`linkedin_post` / `linkedin_carousel`) and company pages (`linkedin_page_post` / `linkedin_page_carousel`).
+Personal profiles use `linkedin_post`; company pages use `linkedin_page_post`.
 
 ## OAuth scopes
 

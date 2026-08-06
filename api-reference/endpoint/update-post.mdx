@@ -21,13 +21,13 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
 </ParamField>
 
 <ParamField body="content" type="string">
-  The post caption/text body. For Pinterest pins, this becomes the pin **description** (not `meta.title`).
+  The post caption/text body (max **10 000** characters at the API level; per-platform hard caps still apply via [`GET /content-types`](/api-reference/endpoint/list-content-types)). For Pinterest pins, this becomes the pin **description** (not `meta.title`).
 </ParamField>
 
 <ParamField body="media" type="array">
-  Media items to associate with the post. Most callers upload first via [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) (URL) and let those endpoints append to `media[]` directly.
+  Replace the post's media set. Each item must include a public `url` — the API downloads and hosts it (same shape as [`POST /posts`](/api-reference/endpoint/create-post)). Nested `meta.alt_text` (string, max **2000**) is allowed for accessibility — that is **media** meta, not `platforms[].meta`.
 
-  Each item may include `meta.alt_text` (string, max 2000 characters) for image accessibility. That is **media** meta — not `platforms[].meta`.
+  Prefer dedicated endpoints when practical: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (multipart file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
 </ParamField>
 
 <ParamField body="platforms" type="array">
@@ -37,7 +37,11 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
       The post_platform entry ID (from `GET /posts/{id}` or `GET /posts`).
     </ParamField>
     <ParamField body="content_type" type="string">
-      Override the content_type for this platform (e.g. `linkedin_carousel` instead of the default `linkedin_post`). Use [`GET /content-types`](/api-reference/endpoint/list-content-types) to discover valid values. Cross-validated against the platform of the underlying social account.
+      Override the content_type for this platform. Cross-validated against the social account's platform. Discover the live catalog with [`GET /content-types`](/api-reference/endpoint/list-content-types).
+
+      Allowed values: `linkedin_post`, `linkedin_page_post`, `x_post`, `facebook_post`, `facebook_reel`, `facebook_story`, `instagram_feed`, `instagram_reel`, `instagram_story`, `tiktok_video`, `tiktok_photo`, `youtube_short`, `threads_post`, `pinterest_pin`, `pinterest_video_pin`, `pinterest_carousel`, `bluesky_post`, `mastodon_post`, `telegram_post`, `discord_message`.
+
+      There is **no** `linkedin_carousel` / `instagram_carousel` — use `linkedin_post` + PDF (and optional `meta.document_title`) for LinkedIn documents, and `instagram_feed` with multiple images for Instagram carousels.
     </ParamField>
     <ParamField body="meta" type="object">
       Per-platform settings. See [Per-platform `meta`](#per-platform-meta) below for the full contract.
