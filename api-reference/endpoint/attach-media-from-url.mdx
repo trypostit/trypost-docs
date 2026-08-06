@@ -1,10 +1,10 @@
 ---
 title: "Attach media from URLs"
 api: "POST /posts/{post}/media/from-url"
-description: "Download images or videos from public URLs and attach them to a post."
+description: "Download images, videos, or PDF documents from public URLs and attach them to a post."
 ---
 
-For uploading a file directly from your machine instead of fetching a URL, use [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media).
+For uploading a file directly from your machine instead of fetching a URL, use [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media). MCP agents use the same contract via [`attach-media-from-url-tool`](/ai/tools-reference#posts).
 
 ## Path parameters
 
@@ -15,12 +15,24 @@ For uploading a file directly from your machine instead of fetching a URL, use [
 ## Request
 
 <ParamField body="urls" type="array" required>
-  Public HTTP/HTTPS URLs of images or videos. **Max 10 URLs per call.** Size caps are enforced per type (10 MB for images, 1 GB for videos).
+  Media to download. **Max 10 items per call.** Each item is an object (not a bare string):
 
-  Allowed MIME types:
+  <Expandable>
+    <ParamField body="url" type="string" required>
+      Public `http`/`https` URL. Validated with `active_url` (must resolve).
+    </ParamField>
+    <ParamField body="alt" type="string">
+      Optional accessibility alt text (max 2000 characters). Applied to **images** only — ignored for video/PDF.
+    </ParamField>
+  </Expandable>
 
-  - **Images**: `image/jpeg`, `image/png`, `image/gif`, `image/webp`
-  - **Videos**: `video/mp4`, `video/quicktime` (MOV)
+  Per-type size caps (from `trypost.media.max_size_mb` / env):
+
+  | Type | Default max | MIME allow-list |
+  |------|-------------|-----------------|
+  | **image** | **10 MB** | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
+  | **video** | **1 GB** | `video/mp4`, `video/quicktime` (MOV) |
+  | **document** | **100 MB** | `application/pdf` |
 
   URLs are downloaded server-side and stored as Media records on the workspace.
 </ParamField>
@@ -29,7 +41,7 @@ For uploading a file directly from your machine instead of fetching a URL, use [
 
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
 - Allowed media types are **intersected with the platforms enabled on the post**. If an enabled platform doesn't support the file type (e.g. video on a platform that's image-only), that file is rejected and listed in `failed_urls`.
-- Successful attachments are appended to the post's `media[]` array.
+- Successful attachments are appended to the post's `media[]` array (image `alt` becomes `media[].meta.alt_text`).
 
 ## Response
 
@@ -52,8 +64,8 @@ curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b
   -H "Content-Type: application/json" \
   -d '{
     "urls": [
-      "https://cdn.example.com/photo.jpg",
-      "https://cdn.example.com/video.mp4"
+      { "url": "https://cdn.example.com/photo.jpg", "alt": "Product hero shot" },
+      { "url": "https://cdn.example.com/deck.pdf" }
     ]
   }'
 ```
@@ -72,7 +84,8 @@ curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b
         "url": "https://media.trypost.it/medias/2681a1bf-131f-41b1-9866-755c1cb51f97.jpg",
         "type": "image",
         "mime_type": "image/jpeg",
-        "original_filename": "photo.jpg"
+        "original_filename": "photo.jpg",
+        "meta": { "alt_text": "Product hero shot" }
       }
     ],
     "status": "draft",
@@ -85,7 +98,7 @@ curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b
   },
   "attached_count": 1,
   "failed_urls": [
-    "https://cdn.example.com/video.mp4"
+    "https://cdn.example.com/deck.pdf"
   ]
 }
 ```
