@@ -1,0 +1,69 @@
+---
+title: AI Providers
+description: Configure AI text and image generation for self-hosted TryPost
+icon: "microchip-ai"
+---
+
+# AI Providers
+
+TryPost's AI features are built on [Laravel AI](https://laravel.com/docs/13.x/ai-sdk) ([GitHub](https://github.com/laravel/ai)), the official first-party AI SDK for Laravel. Every provider and model documented on this page is whatever that package supports — TryPost doesn't add its own provider integrations on top. If a provider/capability combination isn't listed below, it's because the package's provider class doesn't implement it, not a TryPost limitation.
+
+TryPost only uses this SDK for **text** (the Generate / Review / Create AI flows in the post editor) and **image** generation (the Create wizard) — the package also supports audio, transcription, embeddings, and reranking, but no TryPost feature calls any of those today.
+
+The Generate / Review / Create AI flows need a configured text-generation provider. Without one, the AI buttons stay disabled.
+
+```env
+AI_TEXT_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+
+# Optional — image generation for the AI Create wizard
+AI_IMAGE_PROVIDER=openai
+```
+
+| Variable | Description |
+|----------|-------------|
+| `AI_TEXT_PROVIDER` | `openai` (default), `anthropic`, `gemini`, `azure`, `bedrock`, `groq`, `xai`, `deepseek`, `mistral`, `ollama`, `openrouter`, or `openai-compatible`. |
+| `AI_IMAGE_PROVIDER` | Provider used for AI image generation in the Create wizard. Defaults to `openai`. Only `openai`, `gemini`, `xai`, `bedrock`, and `openrouter` support image generation — picking any other provider here leaves the Create wizard's image step non-functional. |
+| Provider API keys | Each provider reads its own env: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY`, `DEEPSEEK_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`. Ollama uses `OLLAMA_URL` (defaults to `http://localhost:11434`, no key needed). Bedrock uses AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BEDROCK_REGION`) instead of a single API key. `openai-compatible` needs `OPENAI_COMPATIBLE_URL` plus a pinned model (see below) — it has no built-in default since it can point at any endpoint. |
+
+Self-hosted instances skip the credit/quota check entirely (`SELF_HOSTED=true`), so AI calls go straight to the configured provider — you pay the provider directly.
+
+## Pinning a specific model
+
+Each provider ships with a sensible default text/image model, so setting just `AI_TEXT_PROVIDER` / `AI_IMAGE_PROVIDER` above is enough to get started. To pin a specific model instead of the provider's default, set the matching `<PROVIDER>_TEXT_MODEL` / `<PROVIDER>_IMAGE_MODEL` env var:
+
+| Provider | Text | Image |
+|----------|------|-------|
+| `openai` | `OPENAI_TEXT_MODEL` | `OPENAI_IMAGE_MODEL` |
+| `anthropic` | `ANTHROPIC_TEXT_MODEL` | — |
+| `gemini` | `GEMINI_TEXT_MODEL` | `GEMINI_IMAGE_MODEL` |
+| `azure` | `AZURE_OPENAI_DEPLOYMENT` | `AZURE_OPENAI_IMAGE_DEPLOYMENT` |
+| `bedrock` | `AWS_BEDROCK_TEXT_MODEL` | `AWS_BEDROCK_IMAGE_MODEL` |
+| `groq` | `GROQ_TEXT_MODEL` | — |
+| `xai` | `XAI_TEXT_MODEL` | `XAI_IMAGE_MODEL` |
+| `deepseek` | `DEEPSEEK_TEXT_MODEL` | — |
+| `mistral` | `MISTRAL_TEXT_MODEL` | — |
+| `ollama` | `OLLAMA_TEXT_MODEL` | — |
+| `openrouter` | `OPENROUTER_TEXT_MODEL` | `OPENROUTER_IMAGE_MODEL` |
+| `openai-compatible` | `OPENAI_COMPATIBLE_TEXT_MODEL` **(required)** | — |
+
+```env
+OPENAI_TEXT_MODEL=gpt-5.4
+OPENAI_IMAGE_MODEL=gpt-image-2
+
+OPENROUTER_TEXT_MODEL=anthropic/claude-haiku-4.5
+OPENROUTER_IMAGE_MODEL=google/gemini-3.1-flash-image-preview
+
+ANTHROPIC_TEXT_MODEL=claude-sonnet-5
+GEMINI_TEXT_MODEL=gemini-3.6-flash
+```
+
+All of these are optional — leave them unset to use the provider's built-in default. `azure` is the exception to the naming pattern: it resolves models via **deployment names** you create in the Azure portal (`AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_IMAGE_DEPLOYMENT`), not raw model identifiers. `openai-compatible` is the other exception: `OPENAI_COMPATIBLE_TEXT_MODEL` is **required**, since an arbitrary self-hosted endpoint has no sensible default to fall back to.
+
+<Warning>
+  **Using OpenRouter for images:** the app generates images through OpenRouter's chat-completions API, which only works with multimodal chat models — the Gemini image-preview family (the default) is confirmed working. Dedicated image-only models like `openai/gpt-image-2` or `openai/gpt-image-1` are **not** compatible this way — OpenRouter rejects them outright (404), since those require [OpenRouter's separate Image API](https://openrouter.ai/docs/guides/overview/multimodal/image-generation), which this app doesn't call. If image generation fails immediately after switching to OpenRouter, check that `OPENROUTER_IMAGE_MODEL` points at a Gemini-family model.
+
+  **OpenRouter credit pre-checks:** OpenRouter validates your balance against a request's *maximum possible* token usage before generating anything, not the tokens actually used. A low-balance key can fail with `402 insufficient credits` even on a cheap model and a short prompt, because the check is based on the model's max output ceiling (which can be tens of thousands of tokens), not your real usage. Funding the account with a few dollars usually clears this — see [OpenRouter's limits documentation](https://openrouter.ai/docs/api-reference/limits) for how credits and rate limits work.
+
+  For anything else OpenRouter-specific (available models, pricing, routing behavior), check [OpenRouter's documentation](https://openrouter.ai/docs) directly — TryPost just passes your prompt through.
+</Warning>
