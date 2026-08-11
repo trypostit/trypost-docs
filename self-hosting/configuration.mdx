@@ -408,30 +408,12 @@ Register a new OAuth App at [github.com/settings/developers](https://github.com/
 
 ## AI features (optional)
 
-The Generate / Review / Create AI flows in the post editor need a configured text-generation provider. Without one, the AI buttons stay disabled.
+The Generate / Review / Create AI flows in the post editor need a configured text-generation provider. Without one, the AI buttons stay disabled. See [AI Providers](/self-hosting/ai) for the full list of supported providers, per-provider model overrides, and OpenRouter-specific gotchas.
 
 ```env
 AI_TEXT_PROVIDER=openai
-AI_TEXT_MODEL=gpt-5.4
 OPENAI_API_KEY=sk-...
-
-# Optional — image generation for the AI Create wizard
-AI_IMAGE_PROVIDER=openai
-
-# Optional — voiceover / TTS (used by future video flows)
-AI_AUDIO_PROVIDER=eleven
-ELEVENLABS_API_KEY=
 ```
-
-| Variable | Description |
-|----------|-------------|
-| `AI_TEXT_PROVIDER` | `openai` (default), `anthropic`, `gemini`, `azure`, `groq`, `xai`, `deepseek`, `mistral`, `ollama`, `openrouter`, `cohere`, `jina`, or `voyageai`. |
-| `AI_TEXT_MODEL` | Model identifier for the text provider. Defaults to `gpt-5.4`. |
-| `AI_IMAGE_PROVIDER` | Provider used for AI image generation in the Create wizard. Defaults to `openai`. The active OpenAI image model is hardcoded to `gpt-image-2`. |
-| `AI_AUDIO_PROVIDER` | TTS provider. `openai` (default) or `eleven`. Note the key is `eleven`, not `elevenlabs` — setting `elevenlabs` will not resolve. |
-| Provider API keys | Each provider reads its own env: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY`, `DEEPSEEK_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`, `COHERE_API_KEY`, `JINA_API_KEY`, `VOYAGEAI_API_KEY`, `ELEVENLABS_API_KEY`. Ollama uses `OLLAMA_BASE_URL` (no key by default). |
-
-Self-hosted instances skip the credit/quota check entirely (`SELF_HOSTED=true`), so AI calls go straight to the configured provider — you pay the provider directly.
 
 ## Asset library (Unsplash & Giphy)
 
