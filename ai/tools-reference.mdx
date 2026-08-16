@@ -42,7 +42,18 @@ To create and publish a post end-to-end:
 
 These tools use the workspace **Asset Library** (the Library tab) — not logos or avatars, and not other workspaces. Viewers cannot use them (`Not authorized to view assets.` / `Not authorized to update this post.`).
 
-Each asset object has: `id`, `original_filename`, `type` (`image` \| `video` \| `document`), `mime_type`, `size` (bytes), `url` (public file URL), `meta` (`width` / `height` / `duration` / `alt_text` when present), `created_at` (`Y-m-d H:i:s`). There is no `path`.
+Asset object (list items and get). There is no `path`.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| **id** | string | Asset UUID. Use as `asset_id` when attaching. |
+| **original_filename** | string | Filename as uploaded or imported. |
+| **type** | string | `image`, `video`, or `document`. |
+| **mime_type** | string | Stored MIME type. |
+| **size** | integer | File size in bytes. |
+| **url** | string | Public URL of the stored file. |
+| **meta** | object | Extra file data when present (`width`, `height`, `duration`, `alt_text`, plus any other stored keys). `null` or `[]` when empty. |
+| **created_at** | string | Creation time in `Y-m-d H:i:s`. |
 
 ### list-assets-tool
 
@@ -65,7 +76,7 @@ Get one library file. REST: [`GET /assets/{media}`](/api-reference/endpoint/get-
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| **asset_id** | Yes | UUID from `list-assets-tool`. Required. Not a UUID is rejected. Missing IDs, other workspaces, logos, and avatars return `Asset not found.` |
+| **asset_id** | Yes | UUID from `list-assets-tool`. Not a UUID is rejected. Missing IDs, other workspaces, logos, and avatars return `Asset not found.` |
 
 Returns the asset object (fields above) at the top level — no wrapper.
 
@@ -75,13 +86,13 @@ Attach a library file to a post. Does **not** upload a new file. REST: [`POST /p
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| **post_id** | Yes | Post UUID in this workspace. Required. Not a UUID is rejected. Post must be `draft` or `scheduled`. Other workspaces return `Post not found.` |
-| **asset_id** | Yes | Library UUID from `list-assets-tool` or `get-asset-tool`. Required. Not a UUID is rejected. Missing / other-workspace / non-library IDs return `Asset not found.` |
+| **post_id** | Yes | Post UUID in this workspace. Not a UUID is rejected. Post must be `draft` or `scheduled`. Other workspaces return `Post not found.` |
+| **asset_id** | Yes | Library UUID from `list-assets-tool` or `get-asset-tool`. Not a UUID is rejected. Missing / other-workspace / non-library IDs return `Asset not found.` |
 | **alt** | No | Image alt text, max **2000** characters (longer is rejected). Ignored for video and PDF. A non-empty value **replaces** the library `alt_text`. Omit (or empty) to **keep** the library `alt_text`. |
 
 | Returns | Type | Description |
 |---------|------|-------------|
-| **post** | object | The updated post, same shape as `get-post-tool`. The library item is now in `media[]` (includes `path` and `size`). |
+| **post** | object | Updated post (same fields as `get-post-tool`). Wrapped in `post` — `get-post-tool` returns the post at the top level. The library item is now in `media[]` (includes `path` and `size`). |
 
 - File type must be allowed by **every** enabled platform on the post. If none are enabled, any type is allowed. Example: TikTok video only + image → `This file type is not supported by the platforms enabled on the post.`
 - `published` / `partially_published` / `failed` / `publishing` posts are rejected (`This post has already been processed and cannot be re-published. Duplicate it to try again.`).

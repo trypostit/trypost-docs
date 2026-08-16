@@ -46,7 +46,7 @@ Same fields as one item in [`GET /assets`](/api-reference/endpoint/list-assets).
   Public URL of the stored file.
 </ResponseField>
 <ResponseField name="meta" type="object">
-  Extra file data when present: `width`, `height`, `duration`, `alt_text`. `null` or `[]` when nothing was stored.
+  Extra file data when present (`width`, `height`, `duration`, `alt_text`, plus any other stored keys). `null` or `[]` when nothing was stored.
 </ResponseField>
 <ResponseField name="created_at" type="string">
   Creation time in `Y-m-d H:i:s`.

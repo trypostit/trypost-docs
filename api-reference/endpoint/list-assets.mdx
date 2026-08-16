@@ -44,7 +44,7 @@ Paginated envelope, **25** items per page. No storage `path` on items.
     <ResponseField name="mime_type" type="string">Stored MIME type (e.g. `image/jpeg`, `video/mp4`, `application/pdf`).</ResponseField>
     <ResponseField name="size" type="integer">File size in bytes.</ResponseField>
     <ResponseField name="url" type="string">Public URL of the stored file.</ResponseField>
-    <ResponseField name="meta" type="object">Extra file data when present: `width`, `height`, `duration`, `alt_text`. `null` or `[]` when nothing was stored. This is media meta, not `platforms[].meta`.</ResponseField>
+    <ResponseField name="meta" type="object">Extra file data when present (`width`, `height`, `duration`, `alt_text`, plus any other stored keys). `null` or `[]` when nothing was stored. This is media meta, not `platforms[].meta`.</ResponseField>
     <ResponseField name="created_at" type="string">Creation time in `Y-m-d H:i:s`.</ResponseField>
   </Expandable>
 </ResponseField>
