@@ -15,11 +15,12 @@ To create and publish a post end-to-end:
 3. **`list-pinterest-boards-tool`** *(if targeting Pinterest)* — resolve `platforms[].meta.board_id`
 4. **`list-discord-channels-tool`** *(if targeting Discord)* — resolve `platforms[].meta.channel_id`
 5. **`create-post-tool`** — create the draft with content + chosen platforms + `meta`
-6. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
-7. **`request-media-upload-tool`** + **`attach-media-from-upload-tool`** *(optional)* — upload a **local** file when no public URL exists
-8. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
-9. **`publish-post-tool`** — publish immediately or schedule for a future time
-10. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
+6. **`list-assets-tool`** + **`attach-existing-asset-tool`** *(optional)* — reuse an item already in the Asset Library
+7. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
+8. **`request-media-upload-tool`** + **`attach-media-from-upload-tool`** *(optional)* — upload a **local** file when no public URL exists
+9. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
+10. **`publish-post-tool`** — publish immediately or schedule for a future time
+11. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
 
 ## Posts
 
@@ -27,8 +28,8 @@ To create and publish a post end-to-end:
 |------|-------------|
 | **list-posts-tool** | List posts for the current workspace, ordered by scheduled date (newest first). Supports filters: `status` (draft \| scheduled \| published \| failed), `search` (case-insensitive substring on content), `limit` (1–100, default 50). |
 | **get-post-tool** | Get a specific post by ID with all its platform entries (including `meta`), media, and labels. |
-| **create-post-tool** | Create a draft post. Accepts `content` (max 10 000), `scheduled_at` (ISO 8601; stored on the draft but **does not** schedule by itself — still `status=draft`), `label_ids[]`, and `platforms[]` — each entry has `social_account_id` + `content_type` and optional `meta`. **No `media[]` on this tool** — attach media with `attach-media-from-url-tool` or `request-media-upload-tool` + `attach-media-from-upload-tool`. Same `meta` contract as the REST API ([full reference](/api-reference/endpoint/update-post#per-platform-meta)). Cross-validates that the content_type matches the account's platform. |
-| **update-post-tool** | Update a draft: `post_id`, `content`, `scheduled_at`, `status` (`draft` \| `scheduled` only — immediate publish is `publish-post-tool`), `label_ids[]`, and `platforms[]`. Each platform entry uses **`id`** (the `post_platform` UUID from `get-post-tool` / `list-posts-tool`), optional `content_type`, optional `meta` (merged; send `null` to clear a key). Platforms **not listed are disabled**. **No `media[]`** — use the attach tools. Cannot edit a finalized post. |
+| **create-post-tool** | Create a draft post. Accepts `content` (max 10 000), `scheduled_at` (ISO 8601; stored on the draft but **does not** schedule by itself — still `status=draft`), `label_ids[]`, and `platforms[]` — each entry has `social_account_id` + `content_type` and optional `meta`. **No `media[]` on this tool** — attach media with `attach-existing-asset-tool`, `attach-media-from-url-tool`, or `request-media-upload-tool` + `attach-media-from-upload-tool`. Same `meta` contract as the REST API ([full reference](/api-reference/endpoint/update-post#per-platform-meta)). Cross-validates that the content_type matches the account's platform. |
+| **update-post-tool** | Update a draft: `post_id`, `content`, `scheduled_at`, `status` (`draft` \| `scheduled` only — immediate publish is `publish-post-tool`), `label_ids[]`, and `platforms[]`. Each platform entry uses **`id`** (the `post_platform` UUID from `get-post-tool` / `list-posts-tool`), optional `content_type`, optional `meta` (merged; send `null` to clear a key). Platforms **not listed are disabled**. **No `media[]`** — use `attach-existing-asset-tool`, `attach-media-from-url-tool`, or `request-media-upload-tool` + `attach-media-from-upload-tool`. Cannot edit a finalized post. |
 | **publish-post-tool** | Publish a draft. Input: `post_id` (required) + optional `scheduled_at` (ISO 8601 future). **Omit `scheduled_at` → publish immediately**; provide it → schedule. Requires at least one enabled platform; validates **stored** required meta (Pinterest `board_id`, TikTok `privacy_level`, Discord `channel_id`) and that media matches each platform's content_type. Marked `IsDestructive` so the AI confirms with you first. |
 | **preview-post-tool** | Preview how the post will render on each enabled platform — applies platform-specific sanitization (length truncation, etc.) without publishing. |
 | **attach-media-from-url-tool** | Download images, videos, or **PDF** documents from public URLs and attach them to a post. Input: `post_id` + `urls` (array of `{ "url": string, "alt"?: string }`, max **10**). Per-type size caps match config (defaults: image **10 MB**, video **1 GB**, document **100 MB**). Allowed MIME types: jpeg/png/gif/webp, mp4/MOV, `application/pdf`. Types are intersected with the enabled platforms on the post. Returns `post`, `attached_count`, `failed_urls`. Requires update permission on the post. |
@@ -36,6 +37,55 @@ To create and publish a post end-to-end:
 | **attach-media-from-upload-tool** | Attach a Media uploaded via `request-media-upload-tool` to a post. Takes `post_id` + `upload_token`, optional `alt` (image alt text). The Media is resolved by the token within the current workspace, then appended to the post. Rejects if the media type isn't accepted by any enabled platform. |
 | **delete-post-tool** | Delete a post permanently. Input: `post_id`. Marked `IsDestructive`. |
 | **get-post-metrics-tool** | Fetch engagement metrics (likes, comments, shares, etc.) for a published post across every platform. Returns `unsupported` entries for platforms that don't expose post-level metrics. |
+
+## Assets
+
+These tools use the workspace **Asset Library** (the Library tab) — not logos or avatars, and not other workspaces. Viewers cannot use them (`Not authorized to view assets.` / `Not authorized to update this post.`).
+
+Each asset object has: `id`, `original_filename`, `type` (`image` \| `video` \| `document`), `mime_type`, `size` (bytes), `url` (public file URL), `meta` (`width` / `height` / `duration` / `alt_text` when present), `created_at` (`Y-m-d H:i:s`). There is no `path`.
+
+### list-assets-tool
+
+List library files, newest first. REST: [`GET /assets`](/api-reference/endpoint/list-assets).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| **search** | No | Case-insensitive substring of `original_filename` only. Max **255** characters (longer is rejected). Omit to skip this filter. |
+| **type** | No | `image`, `video`, or `document`. Omit to return all three. Other values (e.g. `audio`) are rejected. |
+| **limit** | No | How many items to return. Integer **1–100** (`0` and `101+` are rejected). Defaults to **50**. There is no `page`, cursor, or offset — you only get the first `limit` matches. |
+
+| Returns | Type | Description |
+|---------|------|-------------|
+| **assets** | array | Asset objects (fields above), newest first. At most `limit` items. |
+| **has_more** | boolean | `true` when more matches exist beyond this `limit`. |
+
+### get-asset-tool
+
+Get one library file. REST: [`GET /assets/{media}`](/api-reference/endpoint/get-asset).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| **asset_id** | Yes | UUID from `list-assets-tool`. Required. Not a UUID is rejected. Missing IDs, other workspaces, logos, and avatars return `Asset not found.` |
+
+Returns the asset object (fields above) at the top level — no wrapper.
+
+### attach-existing-asset-tool
+
+Attach a library file to a post. Does **not** upload a new file. REST: [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| **post_id** | Yes | Post UUID in this workspace. Required. Not a UUID is rejected. Post must be `draft` or `scheduled`. Other workspaces return `Post not found.` |
+| **asset_id** | Yes | Library UUID from `list-assets-tool` or `get-asset-tool`. Required. Not a UUID is rejected. Missing / other-workspace / non-library IDs return `Asset not found.` |
+| **alt** | No | Image alt text, max **2000** characters (longer is rejected). Ignored for video and PDF. A non-empty value **replaces** the library `alt_text`. Omit (or empty) to **keep** the library `alt_text`. |
+
+| Returns | Type | Description |
+|---------|------|-------------|
+| **post** | object | The updated post, same shape as `get-post-tool`. The library item is now in `media[]` (includes `path` and `size`). |
+
+- File type must be allowed by **every** enabled platform on the post. If none are enabled, any type is allowed. Example: TikTok video only + image → `This file type is not supported by the platforms enabled on the post.`
+- `published` / `partially_published` / `failed` / `publishing` posts are rejected (`This post has already been processed and cannot be re-published. Duplicate it to try again.`).
+- Same `post_id` + `asset_id` again does not duplicate the media and does not change `alt`.
 
 ## Platforms (read-only)
 
@@ -105,9 +155,10 @@ Quick checklist for agents:
 ## Notes
 
 - **Workspace scoping** — every tool operates on the user's currently-selected workspace. To act on a different workspace, switch it in the TryPost UI (or, for personal API tokens, create a new key in that workspace).
-- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, and they also cannot call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. See [Team](/knowledge-base/team).
+- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, list or get assets (`Not authorized to view assets.`), or call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. See [Team](/knowledge-base/team).
 - **Cross validation** — `create-post-tool` and `update-post-tool` reject mismatched combos (e.g. `content_type=x_post` on a LinkedIn account). Inactive social accounts are also rejected at validation time.
 - **Destructive tools** — operations that delete data or publish to the world (`publish-post-tool`, `delete-*`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
 - **Local-file uploads** — `request-media-upload-tool` returns a single-use signed URL (default TTL 15 minutes). `max_bytes` is the video ceiling (default 1 GB); per-type caps are in `max_bytes_by_type` (image / video / document). POST the file as multipart field `media`, then call `attach-media-from-upload-tool` with the same `upload_token` (optional `alt` for images). See [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload).
-- **Media alt text** — image accessibility text lives on `media[].meta.alt_text`, not on `platforms[].meta`. Via MCP, set it with `attach-media-from-url-tool` (`urls[].alt`) or `attach-media-from-upload-tool` (`alt`). The REST create/update endpoints also accept `media[].meta.alt_text` when hosting from URL.
-- **No inline `media[]` on MCP create/update** — unlike REST `POST`/`PUT /posts`, the MCP create/update tools do not accept a `media` array. Always use the attach tools after create.
+- **Media alt text** — image accessibility text lives on `media[].meta.alt_text`, not on `platforms[].meta`. Via MCP, set it with `attach-media-from-url-tool` (`urls[].alt`), `attach-media-from-upload-tool` (`alt`), or `attach-existing-asset-tool` (`alt`). On `attach-existing-asset-tool`, omitting `alt` **keeps** the library item's existing `alt_text`. The REST create/update endpoints also accept `media[].meta.alt_text` when hosting from URL.
+- **No inline `media[]` on MCP create/update** — unlike REST `POST`/`PUT /posts`, the MCP create/update tools do not accept a `media` array. Always use the attach tools after create (`attach-existing-asset-tool`, `attach-media-from-url-tool`, or the signed-upload pair).
+- **Asset Library reuse** — prefer `list-assets-tool` + `attach-existing-asset-tool` when the file is already in the workspace library. That path does not copy bytes; the post snapshot shares the library file path. Use the URL / signed-upload tools only for **new** files.

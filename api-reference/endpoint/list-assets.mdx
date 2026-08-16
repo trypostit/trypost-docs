@@ -1,0 +1,108 @@
+---
+title: "List assets"
+api: "GET /assets"
+description: "List Asset Library files for the current workspace, 25 per page."
+---
+
+Lists files in this workspace's Asset Library (the **Library** tab). Logos, avatars, and other workspaces are never included. Newest first.
+
+Owner, Admin, and Member can call this. Viewers get `403`.
+
+To attach an item to a post, use [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset). MCP: [`list-assets-tool`](/ai/tools-reference#list-assets-tool).
+
+## Query parameters
+
+<ParamField query="search" type="string">
+  Filter by filename. Case-insensitive substring of `original_filename` only (not tags or captions). Max **255** characters. Longer values return `422`. Omit to skip this filter.
+</ParamField>
+
+<ParamField query="type" type="string">
+  Keep only one media type: `image`, `video`, or `document`. Omit to return all three. Any other value (e.g. `audio`) returns `422`.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number. Defaults to `1`. There is no `limit` or `per_page` parameter — page size is always **25**.
+</ParamField>
+
+## Errors
+
+| Status | When |
+|--------|------|
+| `403` | Viewer |
+| `422` | `search` longer than 255 characters, or `type` is not `image` / `video` / `document` |
+
+## Response
+
+Paginated envelope, **25** items per page. No storage `path` on items.
+
+<ResponseField name="data" type="array">
+  Asset objects, newest first.
+  <Expandable>
+    <ResponseField name="id" type="string">Asset UUID. Pass this as `asset_id` when attaching.</ResponseField>
+    <ResponseField name="original_filename" type="string">Filename as uploaded or imported.</ResponseField>
+    <ResponseField name="type" type="string">`image`, `video`, or `document`.</ResponseField>
+    <ResponseField name="mime_type" type="string">Stored MIME type (e.g. `image/jpeg`, `video/mp4`, `application/pdf`).</ResponseField>
+    <ResponseField name="size" type="integer">File size in bytes.</ResponseField>
+    <ResponseField name="url" type="string">Public URL of the stored file.</ResponseField>
+    <ResponseField name="meta" type="object">Extra file data when present: `width`, `height`, `duration`, `alt_text`. `null` or `[]` when nothing was stored. This is media meta, not `platforms[].meta`.</ResponseField>
+    <ResponseField name="created_at" type="string">Creation time in `Y-m-d H:i:s`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="links" type="object">
+  Pagination URLs: `first`, `last`, `prev`, `next`.
+</ResponseField>
+
+<ResponseField name="meta" type="object">
+  Pagination info. `per_page` is always `25`. Also includes `current_page`, `last_page`, `total`, `from`, `to`, `path`, and `links`.
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X GET "https://app.trypost.it/api/assets?search=hero&type=image" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "data": [
+    {
+      "id": "2681a1bf-131f-41b1-9866-755c1cb51f97",
+      "original_filename": "hero.jpg",
+      "type": "image",
+      "mime_type": "image/jpeg",
+      "size": 245760,
+      "url": "https://media.trypost.it/medias/2681a1bf-131f-41b1-9866-755c1cb51f97.jpg",
+      "meta": {
+        "width": 1920,
+        "height": 1080,
+        "alt_text": "Product hero shot"
+      },
+      "created_at": "2025-01-14 09:00:00"
+    }
+  ],
+  "links": {
+    "first": "https://app.trypost.it/api/assets?page=1",
+    "last":  "https://app.trypost.it/api/assets?page=1",
+    "prev":  null,
+    "next":  null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "to": 1,
+    "last_page": 1,
+    "per_page": 25,
+    "total": 1,
+    "path": "https://app.trypost.it/api/assets",
+    "links": [
+      { "url": null, "label": "&laquo; Previous", "page": null, "active": false },
+      { "url": "https://app.trypost.it/api/assets?page=1", "label": "1", "page": 1, "active": true },
+      { "url": null, "label": "Next &raquo;", "page": null, "active": false }
+    ]
+  }
+}
+```
+</ResponseExample>

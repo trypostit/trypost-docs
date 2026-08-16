@@ -12,7 +12,7 @@ You normally don't call this endpoint directly. The flow is:
 2. The agent (or the user) POSTs the file to `upload_url` as multipart field `media`
 3. AI agent calls [`attach-media-from-upload-tool`](/ai/tools-reference#posts) with the same `upload_token` (and optional `alt` for images) to attach the resulting Media to a post
 
-If you already have a Personal Access Token, the simpler endpoint is [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — direct upload to a specific post, no signed URL.
+If you already have a Personal Access Token, the simpler endpoint is [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — direct upload to a specific post, no signed URL. To reuse a file already in the Asset Library, use [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) instead of uploading again.
 
 ## Path parameter
 

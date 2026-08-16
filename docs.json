@@ -78,6 +78,7 @@
               "api-reference/endpoint/delete-post",
               "api-reference/endpoint/upload-media",
               "api-reference/endpoint/attach-media-from-url",
+              "api-reference/endpoint/attach-existing-asset",
               "api-reference/endpoint/request-media-upload",
               "api-reference/endpoint/get-post-metrics",
               "api-reference/endpoint/get-post-preview"
@@ -93,6 +94,13 @@
             "group": "Workspace",
             "pages": [
               "api-reference/endpoint/get-workspace"
+            ]
+          },
+          {
+            "group": "Assets",
+            "pages": [
+              "api-reference/endpoint/list-assets",
+              "api-reference/endpoint/get-asset"
             ]
           },
           {
