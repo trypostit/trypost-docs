@@ -12,11 +12,12 @@ icon: "image"
 | **Video** | MP4, MOV | `video/mp4`, `video/quicktime` |
 | **Document** | PDF | `application/pdf` |
 
-Three upload paths share the same MIME set:
+You can attach media in four ways (same MIME allow-list for uploads):
 
-- [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — direct upload with a Bearer token, attaches straight to a post.
-- [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) — server-side fetch of a public URL.
-- [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload) — one-shot **signed URL** (MCP [`request-media-upload-tool`](/ai/tools-reference#posts) or REST). Used by AI agents to upload local files without provisioning an API key.
+- [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) — upload a file with a Bearer token.
+- [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) — fetch a public URL.
+- [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload) — one-shot signed URL (MCP [`request-media-upload-tool`](/ai/tools-reference#posts)).
+- [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) — reuse a file already in the [Asset Library](/knowledge-base/assets) (`asset_id`). MCP: [`attach-existing-asset-tool`](/ai/tools-reference#attach-existing-asset-tool).
 
 WebM is intentionally excluded — every major social platform rejects it, so accepting it would just produce platform-specific publish failures.
 
@@ -147,7 +148,7 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
     Defaults: **10 MB** per image, **1 GB** per video, **100 MB** per PDF. Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers. Self-hosters can raise the caps with `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB` / `MEDIA_DOCUMENT_MAX_SIZE_MB`.
   </Accordion>
   <Accordion title="Can I use the same media in multiple posts?">
-    Each post stores its own media records. To reuse the same image, upload it again or copy from the asset library.
+    Yes — store the file in the [Asset Library](/knowledge-base/assets), then attach it with [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) or MCP `attach-existing-asset-tool`. The post snapshot shares the library file path. You can also upload again via [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
   </Accordion>
   <Accordion title="What happens to media when I delete a post?">
     The media records are removed along with the post.

@@ -79,7 +79,7 @@ Creates a `draft`. To schedule or publish, follow up with [`PUT /posts/{post}`](
     </ParamField>
   </Expandable>
 
-  Prefer dedicated endpoints when practical: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
+  Prefer dedicated endpoints when practical: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (file), [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url), or [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) to reuse a library item.
 </ParamField>
 
 <ParamField body="scheduled_at" type="string">

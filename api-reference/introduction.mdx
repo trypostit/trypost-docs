@@ -1,6 +1,6 @@
 ---
 title: "Introduction"
-description: "The TryPost API lets you manage social media posts, signatures, labels, and more with a simple REST API."
+description: "The TryPost API lets you manage social media posts, the Asset Library, signatures, labels, and more with a simple REST API."
 icon: "book-open"
 ---
 
@@ -47,6 +47,7 @@ The API uses conventional HTTP status codes. All error responses include a `mess
 | `204` | No content (successful deletion) |
 | `401` | Missing or invalid API key |
 | `402` | Active subscription required (Cloud only — self-hosted instances skip this check) |
+| `403` | Forbidden — e.g. a Viewer calling a create-post or update endpoint (including listing assets) |
 | `404` | Resource not found, or resource not in the key's workspace |
 | `422` | Validation error |
 | `429` | Rate limit exceeded |
@@ -78,11 +79,18 @@ A non-paginated collection looks like a plain array:
 ]
 ```
 
-The only endpoint that wraps in `data:` is `GET /posts`, because it's paginated.
+The endpoints that wrap in `data:` are the paginated lists: [`GET /posts`](/api-reference/endpoint/list-posts) and [`GET /assets`](/api-reference/endpoint/list-assets).
 
 ## Pagination
 
-The [`GET /posts`](/api-reference/endpoint/list-posts) endpoint returns 15 posts per page. The response uses Laravel's standard pagination envelope:
+Two list endpoints paginate. Both use Laravel's standard pagination envelope (`data`, `links`, `meta`) and the `page` query parameter:
+
+| Endpoint | Per page | Notes |
+|---|---|---|
+| [`GET /posts`](/api-reference/endpoint/list-posts) | **15** | Posts only |
+| [`GET /assets`](/api-reference/endpoint/list-assets) | **25** | Asset Library. No `per_page` parameter |
+
+Example envelope for posts:
 
 ```json
 {
@@ -116,9 +124,10 @@ Use the `page` query parameter to navigate. Other list endpoints (signatures, la
 
 | Resource | Endpoints |
 |---|---|
-| Posts | `GET /posts`, `POST /posts`, `GET /posts/{id}`, `PUT /posts/{id}`, `DELETE /posts/{id}`, `POST /posts/{id}/media`, `POST /posts/{id}/media/from-url`, `GET /posts/{id}/metrics`, `GET /posts/{id}/preview` |
+| Posts | `GET /posts`, `POST /posts`, `GET /posts/{id}`, `PUT /posts/{id}`, `DELETE /posts/{id}`, `POST /posts/{id}/media`, `POST /posts/{id}/media/from-url`, `POST /posts/{id}/media/from-asset`, `GET /posts/{id}/metrics`, `GET /posts/{id}/preview` |
 | Platforms | `GET /content-types` |
 | Workspace | `GET /workspace` |
+| Assets | `GET /assets`, `GET /assets/{id}` |
 | Signatures | `GET /signatures`, `POST /signatures`, `PUT /signatures/{id}`, `DELETE /signatures/{id}` |
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
 | Social accounts | `GET /social-accounts`, `PUT /social-accounts/{id}/toggle`, `GET /social-accounts/{id}/boards` (Pinterest), `GET /social-accounts/{id}/channels` (Discord) |

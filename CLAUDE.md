@@ -71,9 +71,10 @@ Same paths, user configures `APP_URL` in `.env`:
 ### Endpoints
 | Group | Endpoints |
 |-------|-----------|
-| Posts | `GET /posts`, `POST /posts`, `GET /posts/{post}`, `PUT /posts/{post}`, `DELETE /posts/{post}`, `POST /posts/{post}/media`, `POST /posts/{post}/media/from-url`, `GET /posts/{post}/metrics`, `GET /posts/{post}/preview` |
+| Posts | `GET /posts`, `POST /posts`, `GET /posts/{post}`, `PUT /posts/{post}`, `DELETE /posts/{post}`, `POST /posts/{post}/media`, `POST /posts/{post}/media/from-url`, `POST /posts/{post}/media/from-asset`, `GET /posts/{post}/metrics`, `GET /posts/{post}/preview` |
 | Platforms | `GET /content-types` |
 | Workspace | `GET /workspace` |
+| Assets | `GET /assets`, `GET /assets/{media}` |
 | Signatures | `GET /signatures`, `POST /signatures`, `PUT /signatures/{id}`, `DELETE /signatures/{id}` |
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
 | Social Accounts | `GET /social-accounts`, `PUT /social-accounts/{account}/toggle`, `GET /social-accounts/{account}/boards` (Pinterest), `GET /social-accounts/{account}/channels` (Discord) |
@@ -102,17 +103,26 @@ Do not confuse with `media[].meta.alt_text` (media accessibility, max 2000). Pin
 ### Response shape
 - Resources are returned **unwrapped** (`JsonResource::withoutWrapping()` is set globally). A single resource looks like `{ "id": ..., ... }` — no `data:` envelope.
 - Non-paginated collections return a plain JSON array (`[ {...}, {...} ]`).
-- Only `GET /posts` returns the Laravel pagination envelope (`{ data, links, meta }`).
-- `attach-media-from-url`, `metrics`, and `preview` are bespoke — not Resource-shaped (no `data:` wrapper, just the documented fields at top level). The multipart `/media` upload returns a regular Post resource.
+- `GET /posts` and `GET /assets` return the Laravel pagination envelope (`{ data, links, meta }`). Posts are **15** per page (API contract). Assets are **25** per page (`config('app.pagination.default')`).
+- `attach-media-from-url`, `metrics`, and `preview` are bespoke — not Resource-shaped (no `data:` wrapper, just the documented fields at top level). The multipart `/media` upload and `POST /posts/{post}/media/from-asset` return a regular Post resource.
 - `POST /api-keys` returns `{ "token": {...}, "plain_token": "..." }`. The plain token is shown ONCE.
 
 ### Pagination
-Only `GET /posts` paginates (15 per page). All other list endpoints return full results as a plain array.
+`GET /posts` paginates at **15** per page. `GET /assets` paginates at **25** per page. All other list endpoints return full results as a plain array.
+
+### Asset Library (API & MCP)
+
+- List/show only the workspace `assets` collection (not logos/avatars). Other workspaces and non-library media → API `404` on show, omitted from list; MCP get → `Asset not found.`
+- Asset JSON (`AssetResource`): `id`, `original_filename`, `type`, `mime_type`, `size`, `url`, `meta`, `created_at`. **No `path`.** `url` is the stored public file URL, not a signed preview.
+- Attach (`POST /posts/{post}/media/from-asset` / `attach-existing-asset-tool`): `{ asset_id, alt? }`. Draft/scheduled only. Foreign post → API `404` / MCP `Post not found.` Foreign/missing/non-library asset → `Asset not found.` Type not allowed by enabled platforms → `This file type is not supported by the platforms enabled on the post.` Repeat same post+asset → no duplicate and **does not change alt**. **Omit `alt`** → keep library `alt_text`. Set `alt` → override on images only.
+- MCP list: `limit` 1–100 (default **50**), `{ assets, has_more }`. No cursor/offset — cannot page past the first `limit` items.
+- Auth: list/get require `createPost` (viewers 403 / `Not authorized to view assets.`). Attach requires `update` on the post.
 
 ## MCP Server
 
 - Tool names are auto-derived from class basenames as kebab-case + `-tool` suffix (Laravel MCP convention — no `#[Name]` overrides in `TryPostServer`).
-- Post tools: `list-posts-tool`, `get-post-tool`, `create-post-tool`, `update-post-tool`, `publish-post-tool`, `preview-post-tool`, `delete-post-tool`, `attach-media-from-url-tool`, `request-media-upload-tool`, `attach-media-from-upload-tool`, `get-post-metrics-tool`.
+- Post tools: `list-posts-tool`, `get-post-tool`, `create-post-tool`, `update-post-tool`, `publish-post-tool`, `preview-post-tool`, `delete-post-tool`, `attach-media-from-url-tool`, `request-media-upload-tool`, `attach-media-from-upload-tool`, `attach-existing-asset-tool`, `get-post-metrics-tool`.
+- Asset tools: `list-assets-tool`, `get-asset-tool`, `attach-existing-asset-tool`.
 - Plus: `list-content-types-tool` (Platforms), `list-signatures-tool` / `create-signature-tool` / `update-signature-tool` / `delete-signature-tool`, `list-labels-tool` / `create-label-tool` / `update-label-tool` / `delete-label-tool`, `list-social-accounts-tool` / `list-pinterest-boards-tool` / `list-discord-channels-tool` / `toggle-social-account-tool`, `get-workspace-tool`, `list-api-keys-tool` / `create-api-key-tool` / `delete-api-key-tool`.
 - `create-post-tool` accepts `platforms[]` (each with `social_account_id`, `content_type`, optional `meta`), `scheduled_at`, `label_ids` — same fields as REST `POST /posts` **except** MCP does **not** accept inline `media[]` (use attach tools). `update-post-tool` uses `platforms[].id` (post_platform UUID), not `social_account_id`.
 - `create-api-key-tool` returns plain secret as `token` (REST create returns `plain_token`).
