@@ -1,65 +1,155 @@
 ---
 title: "Grok"
-description: "Connect TryPost to Grok for AI-powered social media management"
+description: "Connect TryPost to Grok as a custom MCP connector"
 icon: "/images/ai/grok.svg"
 ---
 
-[Grok](https://grok.com) can connect to TryPost's MCP server as a [custom connector](https://docs.x.ai/grok/connectors), so you can manage social media scheduling with natural language in Grok on the web, iOS, and Android.
+[Grok](https://grok.com) is xAI's assistant. Add TryPost as a [custom MCP connector](https://docs.x.ai/grok/connectors) and you can schedule, publish, and manage social posts from a normal Grok chat — on the web, iOS, or Android.
+
+This page is for **Grok chat connectors**. It is not the [Grok Build CLI](https://docs.x.ai/build/features/mcp-servers) (`grok mcp add`) and not the [xAI API Remote MCP](https://docs.x.ai/developers/tools/remote-mcp) tools. Those are separate products.
+
+<Note>
+  TryPost is not in Grok's built-in or catalog connectors. You add it yourself: **New Connector → Custom**, then paste the TryPost MCP URL.
+</Note>
 
 ## Prerequisites
 
-- A [Grok](https://grok.com) account (web, iOS, or Android)
+- A [Grok](https://grok.com) account. [xAI documents connectors as available to all Grok users](https://docs.x.ai/grok/connectors) on web, iOS, and Android.
 - An active TryPost Cloud account
+- On **Grok Business or Enterprise**, a team admin must provision the connector first — see [Grok Business and Enterprise](#grok-business-and-enterprise)
+
+## Server URL
+
+Use this exact URL. Do not add a trailing slash. Do not paste an OAuth authorize URL.
+
+```
+https://app.trypost.it/mcp/trypost
+```
 
 ## Setup
 
 <Steps>
   <Step title="Open Connectors">
-    Go to **[grok.com/connectors](https://grok.com/connectors)**. You can also start from a chat: click **+** → **Connectors** → **+ Add connector**.
+    On the web, go to **[grok.com/connectors](https://grok.com/connectors)**.
+
+    You can also start from a chat: click **+** → **Connectors** → **+ Add connector**.
 
     On iOS and Android, open **Settings → Connectors**.
   </Step>
-  <Step title="Add a custom MCP connector">
-    Click **New Connector**, then select **Custom**. Enter the MCP server URL:
+  <Step title="Add a custom connector">
+    Click **New Connector**, then select **Custom**.
+
+    Paste the MCP server URL:
 
     ```
     https://app.trypost.it/mcp/trypost
     ```
 
-    Give it a name such as `TryPost` if Grok asks for one. Leave Client ID / Secret empty if those fields appear — TryPost supports Dynamic Client Registration and discovers OAuth from the URL.
+    Name it `TryPost` if Grok asks for a name.
+
+    If Grok shows OAuth client fields (Client ID, Client Secret, authorize/token URLs), leave them empty. TryPost uses OAuth 2.1 with Dynamic Client Registration. Grok discovers the endpoints from the MCP URL and registers itself.
   </Step>
-  <Step title="Authorize TryPost">
-    Complete any required authentication. Sign in to TryPost, review the permissions, and click **Allow**. Grok discovers the TryPost tools and makes them available in conversations.
+  <Step title="Sign in to TryPost">
+    Grok then asks you to authenticate. Complete the browser sign-in.
+
+    1. Sign in to your TryPost account
+    2. Review the permissions
+    3. Click **Allow**
+
+    After that, Grok discovers the TryPost tools and makes them available in conversations — the same way it uses built-in and catalog connectors. You do not need to paste an API key.
   </Step>
-  <Step title="Use TryPost in a conversation">
-    Start a new chat and ask:
+  <Step title="Ask Grok to use TryPost">
+    Open a new chat and ask in plain language. For example:
 
     ```
     List all my scheduled posts
     ```
 
-    Grok will call the TryPost tools to fetch your posts.
+    Grok should call TryPost tools instead of guessing. If it answers without tools, say you want it to use the **TryPost** connector.
+
+    See the [Tools reference](/ai/tools-reference) for every tool and the recommended create → attach media → publish workflow.
   </Step>
 </Steps>
 
-<Note>
-  Grok's servers must reach the MCP URL over the public internet. The hosted endpoint `https://app.trypost.it/mcp/trypost` works out of the box. Self-hosted instances must be publicly reachable over HTTPS — Grok rejects `localhost` and private-network URLs. See xAI's [custom MCP tunneling](https://docs.x.ai/grok/connectors/custom-mcp-tunneling) guide if you need to expose a local server.
-</Note>
+## Authentication
+
+TryPost MCP accepts **OAuth only** — a browser sign-in with the `mcp:use` scope. Personal Access Tokens from **Settings → API Keys** work on the [REST API](/api-reference/introduction), not on `/mcp/trypost`.
 
 <Warning>
-  Complete the OAuth sign-in when Grok prompts for authentication. TryPost rejects Personal Access Tokens on `/mcp/trypost` — do not paste an API key from **Settings → API Keys** into Grok.
+  If Grok offers an API key or bearer-token field, leave it blank and finish the OAuth prompt instead. A pasted API key returns `403 MCP OAuth authorization required`.
 </Warning>
 
-<Accordion title="Grok Business and Enterprise">
-  On Grok Business and Enterprise, a team admin must provision the connector in the [xAI console](https://console.x.ai) before members can connect:
+Manage connected assistants later under workspace **Settings → MCP** in TryPost.
 
+## What you can do
+
+Once the connector is authorized, Grok can:
+
+| Task | Examples |
+|------|----------|
+| **Posts** | List, create, update, schedule, publish, preview, delete, fetch metrics |
+| **Media** | Attach from a public URL, upload a local file, reuse an Asset Library item |
+| **Accounts** | List connected social accounts, toggle them, resolve Pinterest boards and Discord channels |
+| **Workspace** | Read the current workspace, manage signatures, labels, and API keys |
+
+Pinterest needs a `board_id` and Discord needs a `channel_id` before you publish. Ask Grok to list boards or channels first. Details and tool names: [Tools reference](/ai/tools-reference).
+
+## Self-hosted
+
+Grok reaches the MCP server from xAI's cloud, not from your phone or browser. `localhost`, `127.0.0.1`, and private LAN addresses are [rejected](https://docs.x.ai/grok/connectors/custom-mcp-tunneling).
+
+<Accordion title="Use a public HTTPS URL">
+  Point the custom connector at your instance:
+
+  ```
+  {APP_URL}/mcp/trypost
+  ```
+
+  Example: `https://trypost.yourdomain.com/mcp/trypost`.
+
+  The URL must be reachable on the public internet over HTTPS. If the app only runs on your machine, expose it with a tunnel first — xAI's [custom MCP tunneling](https://docs.x.ai/grok/connectors/custom-mcp-tunneling) guide covers ngrok and Cloudflare Tunnel. After you authorize, Grok still opens the TryPost OAuth screen on your instance. Do not put a Personal Access Token in the connector.
+</Accordion>
+
+## Grok Business and Enterprise
+
+On these plans, members cannot add a custom connector until a team admin provisions it.
+
+<Accordion title="Admin: provision TryPost for the team">
   1. Sign in to [console.x.ai](https://console.x.ai), select your team, and open **Grok Business → Connectors**
   2. Click **+ Add Connector** → **Other**
-  3. Paste `https://app.trypost.it/mcp/trypost` and complete any required authentication
-  4. Each member then opens **[grok.com/connectors](https://grok.com/connectors)** and connects their own TryPost account
+  3. Paste `https://app.trypost.it/mcp/trypost` (or your self-hosted `{APP_URL}/mcp/trypost`)
+  4. Complete any required authentication
 
-  Adding and removing connectors requires **Team Read-Write** permissions. See xAI's [connector management](https://docs.x.ai/grok/connector-management) docs.
+  Adding and removing connectors requires **Team Read-Write** permissions. xAI's [connector management](https://docs.x.ai/grok/connector-management) page has the full admin flow.
+
+  After the admin adds it, each member still opens **[grok.com/connectors](https://grok.com/connectors)** and signs in to **their own** TryPost account. The admin step only makes the connector available; it does not share one TryPost login across the team.
 </Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Grok never asks me to sign in to TryPost">
+    You may have pasted the wrong URL. Use `https://app.trypost.it/mcp/trypost` — not `/oauth/authorize`, not `/api`, and not a trailing slash. Remove the connector and add it again, then allow pop-ups so the OAuth window can open.
+  </Accordion>
+  <Accordion title="The connector is added but Grok does not call TryPost tools">
+    Finish OAuth. Grok can list a custom server before you have authorized it. Open **[grok.com/connectors](https://grok.com/connectors)**, connect TryPost, and click **Allow** on the TryPost screen. Then start a **new** chat and ask it to use the TryPost connector.
+  </Accordion>
+  <Accordion title="Grok says it cannot reach the server">
+    Cloud TryPost is already public. If you self-host, Grok must reach the URL from the internet. `localhost` and private IPs fail. Use a public HTTPS URL or a tunnel.
+  </Accordion>
+  <Accordion title="HTTP 402 — Active subscription required">
+    The OAuth grant worked; the TryPost account is not active. Open [app.trypost.it](https://app.trypost.it), activate the account, then reconnect the connector. Self-hosted instances skip this check. See [Introduction](/ai/introduction#troubleshooting).
+  </Accordion>
+  <Accordion title="HTTP 401 or I need to sign in again">
+    The OAuth session expired or was revoked. Open the connector and complete sign-in again.
+  </Accordion>
+  <Accordion title="HTTP 403 — MCP OAuth authorization required">
+    The request used an API key (Personal Access Token) or an OAuth token without `mcp:use`. Remove any bearer token from the connector and sign in with OAuth.
+  </Accordion>
+  <Accordion title="Custom is missing, or I cannot add a connector">
+    On Grok Business / Enterprise, only an admin can provision custom MCP. Ask someone with **Team Read-Write** to add TryPost in [console.x.ai](https://console.x.ai) first. On personal Grok, open **[grok.com/connectors](https://grok.com/connectors)** and choose **Custom**, not a catalog app.
+  </Accordion>
+</AccordionGroup>
 
 ## Example prompts
 
@@ -76,5 +166,15 @@ What posts do I have scheduled for this week?
 ```
 
 ```
+Attach this image to my draft, then preview it before publishing
+```
+
+```
 Create a label called "Campaign" with color #f59e0b
 ```
+
+## Related
+
+- [Introduction](/ai/introduction) — MCP overview, auth, and shared troubleshooting
+- [Tools reference](/ai/tools-reference) — every tool, parameters, and the publish workflow
+- [xAI: Grok connectors](https://docs.x.ai/grok/connectors) — official custom MCP steps
