@@ -51,7 +51,7 @@ https://app.trypost.it/mcp/trypost
 
 ## Authentication
 
-TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Perplexity, Grok, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Hermes, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
+TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Perplexity, Grok, Cursor, Devin, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Hermes, Codex, Antigravity) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
 
 <Warning>
   Personal Access Tokens from **Settings → API Keys** authenticate the [REST API](/api-reference/introduction) only. They are **not** accepted on `/mcp/trypost`. MCP requires an OAuth grant with the `mcp:use` scope (browser sign-in from a supported client). Manage connected assistants under workspace **Settings → MCP**.
@@ -70,7 +70,7 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
     The request used a Personal Access Token (API key) or an OAuth token without the `mcp:use` scope. Remove any `Authorization: Bearer …` API key from the MCP config and connect with OAuth instead. For scripts and CI, call the [REST API](/api-reference/introduction) with an API key — not the MCP endpoint.
   </Accordion>
   <Accordion title="Server shows as “Failed to connect”">
-    Run the connection probe your assistant exposes (for example `claude mcp list`). The HTTP status from the probe tells you which case you're in: `402` → see above; `401` → re-authenticate; `403` → use OAuth (not an API key); anything else → open an issue on [GitHub](https://github.com/trypostit/trypost/issues).
+    Run the connection probe your assistant exposes (for example `claude mcp list` or `devin mcp list`). The HTTP status from the probe tells you which case you're in: `402` → see above; `401` → re-authenticate; `403` → use OAuth (not an API key); anything else → open an issue on [GitHub](https://github.com/trypostit/trypost/issues).
   </Accordion>
   <Accordion title="Browser doesn't open during sign-in">
     Some clients print the authorize URL to the terminal instead of launching the browser when running over SSH or inside a container. Copy the URL into a local browser, complete the flow, and the assistant will pick up the callback automatically. If the callback port is blocked, use a client that can finish OAuth locally, or drive TryPost through the [REST API](/api-reference/introduction) with an API key.
@@ -101,8 +101,8 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
   <Card title="Cursor" icon="/images/ai/cursor.svg" href="/ai/cursor">
     AI-powered code editor.
   </Card>
-  <Card title="Windsurf" icon="/images/ai/windsurf.svg" href="/ai/windsurf">
-    Editor with Cascade AI.
+  <Card title="Devin" icon="/images/ai/devin.png" href="/ai/devin">
+    AI software engineer by Cognition.
   </Card>
   <Card title="VS Code" icon="/images/ai/vscode.svg" href="/ai/vs-code">
     Native MCP support in Copilot Chat.
