@@ -14,7 +14,7 @@ This page is for **Grok chat connectors**. It is not the [Grok Build CLI](https:
 
 ## Prerequisites
 
-- A [Grok](https://grok.com) account. [xAI documents connectors as available to all Grok users](https://docs.x.ai/grok/connectors) on web, iOS, and Android.
+- A [Grok](https://grok.com) account. [xAI documents connectors as available to all Grok users](https://docs.x.ai/grok/connectors).
 - An active TryPost Cloud account
 - On **Grok Business or Enterprise**, a team admin must provision the connector first — see [Grok Business and Enterprise](#grok-business-and-enterprise)
 
@@ -92,7 +92,7 @@ Once the connector is authorized, Grok can:
 | **Accounts** | List connected social accounts, toggle them, resolve Pinterest boards and Discord channels |
 | **Workspace** | Read the current workspace, manage signatures, labels, and API keys |
 
-Pinterest needs a `board_id` and Discord needs a `channel_id` before you publish. Ask Grok to list boards or channels first. Details and tool names: [Tools reference](/ai/tools-reference).
+Pinterest needs a `board_id`, Discord needs a `channel_id`, and TikTok needs a `privacy_level` before you publish. Ask Grok to list boards or channels first. Details and tool names: [Tools reference](/ai/tools-reference).
 
 ## Self-hosted
 
@@ -118,7 +118,7 @@ On these plans, members cannot add a custom connector until a team admin provisi
   1. Sign in to [console.x.ai](https://console.x.ai), select your team, and open **Grok Business → Connectors**
   2. Click **+ Add Connector** → **Other**
   3. Paste `https://app.trypost.it/mcp/trypost` (or your self-hosted `{APP_URL}/mcp/trypost`)
-  4. Complete any required authentication
+  4. Finish the TryPost sign-in if Grok asks
 
   Adding and removing connectors requires **Team Read-Write** permissions. xAI's [connector management](https://docs.x.ai/grok/connector-management) page has the full admin flow.
 
@@ -166,7 +166,7 @@ What posts do I have scheduled for this week?
 ```
 
 ```
-Attach this image to my draft, then preview it before publishing
+Attach https://example.com/photo.jpg to my draft, then preview it before publishing
 ```
 
 ```
