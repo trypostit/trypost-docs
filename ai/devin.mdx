@@ -60,7 +60,7 @@ Using the wrong field name (`url` vs `serverUrl`) makes Devin **silently ignore*
 
     Leave **OAuth credentials** (client ID / secret) empty. TryPost uses OAuth 2.1 with Dynamic Client Registration — Devin discovers `/.well-known` from the URL and registers itself.
 
-    Set **Access** to **Personal** so each Devin member signs in to their own TryPost account. **Organization** shares one TryPost login across every member's sessions — only use that if you intend a shared workspace login.
+    Set **Access** to **Personal** so each Devin member signs in to their own TryPost account. **Organization** shares one TryPost login across every member's sessions — only use that if you intend a shared workspace login. Personal is not a security boundary: other org members can still open your Devin sessions.
 
     Do not choose **Auth Header** or **None**. Do not paste a TryPost API key.
   </Step>
@@ -113,6 +113,14 @@ On Cloud, the same custom server is available in web sessions and in sessions st
 
 [Devin CLI](https://docs.devin.ai/cli/extensibility/mcp/configuration) and [Devin Local](https://docs.devin.ai/desktop/devin-local) (the default agent in new Devin Desktop tabs) share this config. The URL field is `"url"`, not `"serverUrl"`.
 
+Install the CLI if you do not have it:
+
+```bash
+curl -fsSL https://cli.devin.ai/install.sh | bash
+```
+
+Unlike Cascade, Devin Local and the CLI **prompt before every MCP tool** until you allow the server. If TryPost is connected but Devin never calls a tool, approve the prompt or add `mcp__trypost__*` to `permissions.allow`.
+
 <Steps>
   <Step title="Add the server">
     ```bash
@@ -132,12 +140,16 @@ On Cloud, the same custom server is available in web sessions and in sessions st
     devin mcp login trypost
     ```
 
-    Complete the TryPost browser sign-in (**Allow**). To sign in again later:
+    Complete the TryPost browser sign-in (**Allow**). First use can also open this flow. Do **not** pass `--scopes` — TryPost needs the `mcp:use` scope that Devin discovers from the server. A custom scope list will fail.
+
+    To sign in again later:
 
     ```bash
     devin mcp logout trypost
     devin mcp login trypost
     ```
+
+    To remove the server: `devin mcp remove trypost`.
   </Step>
   <Step title="Verify">
     ```bash
@@ -159,17 +171,22 @@ Equivalent JSON (no `Authorization` header, no `serverUrl`):
 {
   "mcpServers": {
     "trypost": {
-      "url": "https://app.trypost.it/mcp/trypost"
+      "url": "https://app.trypost.it/mcp/trypost",
+      "transport": "http"
     }
   }
 }
 ```
 
-Before CLI v3000.3, MCP servers lived under `mcpServers` inside the main `config.json`. Current versions use the dedicated `mcp_config.json` files above and migrate the old key on startup.
+`transport` is optional — a URL defaults to Streamable HTTP. Do not set `"sse"`. Do not add `headers`, `oauthClientId`, or `oauthClientSecret`.
+
+Before CLI v3000.3 (Local 3.6), MCP servers lived under `mcpServers` inside the main `config.json` files. Current versions use the dedicated `mcp_config.json` files above and migrate the old key on startup. Some Devin Local docs still show `.devin/config.json` — if that file has `mcpServers`, the CLI moves it on the next start.
 
 ## Devin Desktop (Cascade)
 
-New Devin Desktop tabs use [Devin Local](#devin-cli-and-devin-local). The legacy **Cascade** agent still uses a separate file and `"serverUrl"`.
+New Devin Desktop tabs use [Devin Local](#devin-cli-and-devin-local). Configuring only the Cascade file does **not** give new tabs TryPost — add the CLI config too.
+
+The legacy **Cascade** agent still uses a separate file and `"serverUrl"`. Enterprise orgs may need an admin to turn MCP on in settings. Cascade can load at most **100 tools** across all MCP servers; if other servers fill that budget, disable unused tools on the TryPost MCP settings page.
 
 <Steps>
   <Step title="Open the MCP config">
@@ -236,6 +253,14 @@ Example: `https://trypost.yourdomain.com/mcp/trypost`.
   </Accordion>
   <Accordion title="The server is added but Devin does not call TryPost tools">
     Finish OAuth in the surface you are using (Cloud session, `devin mcp login`, or Cascade). Tokens are not shared across surfaces. Start a **new** session and say you want the **TryPost** MCP server.
+
+    On Devin Local / CLI, also approve the MCP permission prompt (or allow `mcp__trypost__*`). Cascade does not prompt the same way. Check the session logs for MCP errors.
+  </Accordion>
+  <Accordion title="Auth required, AuthRequired, or Needs auth">
+    Official Devin CLI/Local wording when OAuth is missing or expired. Run `devin mcp login trypost`, or click **Authenticate** on the Devin Local MCP card. Cloud: start a new session and complete **Allow**.
+  </Accordion>
+  <Accordion title="I passed --scopes on devin mcp login">
+    Remove the flag and log in again. `--scopes read,write` (or any custom list) skips TryPost's `mcp:use` scope and the tools never authorize.
   </Accordion>
   <Accordion title="Config looks correct but the server never appears (Desktop / CLI)">
     You used the wrong URL key. Cascade needs `"serverUrl"`. CLI and Devin Local need `"url"`. The wrong key is ignored with no error. Also check you edited the file for that agent — Cascade does not read `.devin/mcp_config.json`.
@@ -259,7 +284,7 @@ Example: `https://trypost.yourdomain.com/mcp/trypost`.
     Over SSH or inside a container, `devin mcp login` prints the authorize URL instead of opening a browser. Copy it into a local browser, complete **Allow**, and the CLI picks up the callback. If the loopback port is blocked, finish OAuth on a machine that can receive the callback, or use the [REST API](/api-reference/introduction) with an API key.
   </Accordion>
   <Accordion title="Enterprise team blocked the server">
-    A Devin admin can disable MCP or allowlist only certain servers. If TryPost never connects on a Teams / Enterprise plan, ask an admin to allow a custom HTTP server at `https://app.trypost.it/mcp/trypost` (or your `{APP_URL}/mcp/trypost`).
+    A Devin admin can disable MCP, require it to be turned on in team settings, or allowlist only certain servers. Cascade on Enterprise is off until an admin enables it. If TryPost never connects on a Teams / Enterprise plan, ask an admin to allow a custom HTTP server at `https://app.trypost.it/mcp/trypost` (or your `{APP_URL}/mcp/trypost`).
   </Accordion>
 </AccordionGroup>
 
@@ -292,3 +317,4 @@ Create a label called "Campaign" with color #f59e0b
 - [Devin: custom MCP](https://docs.devin.ai/work-with-devin/mcp) — Cloud marketplace and Add a custom MCP
 - [Devin CLI: MCP configuration](https://docs.devin.ai/cli/extensibility/mcp/configuration) — `devin mcp add` / `login` / scopes
 - [Devin Desktop FAQ](https://docs.devin.ai/desktop/devin-desktop-faq) — Desktop vs Devin Local vs Cascade
+- [Devin Local](https://docs.devin.ai/desktop/devin-local) — default Desktop agent, MCP permissions, Needs auth
