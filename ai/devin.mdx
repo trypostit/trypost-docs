@@ -1,0 +1,320 @@
+---
+title: "Devin"
+description: "Connect TryPost to Devin as a custom MCP server"
+icon: "/images/ai/devin.svg"
+---
+
+[Devin](https://docs.devin.ai/get-started/devin-intro) is Cognition's AI software engineer. Add TryPost as a custom MCP server and you can schedule, publish, and manage social posts from [Devin Cloud](https://app.devin.ai), [Devin CLI](https://cli.devin.ai), or [Devin Desktop](https://docs.devin.ai/desktop/devin-desktop-faq).
+
+This page is for **Devin as an MCP client** — you point Devin at TryPost. It is not the [Devin MCP server](https://docs.devin.ai/work-with-devin/devin-mcp) at `https://mcp.devin.ai/mcp`, which exposes Devin itself to other agents. Do not use `mcp.devin.ai` as the TryPost URL, and do not paste a Devin `cog_` API key into the TryPost config.
+
+<Note>
+  TryPost is not in [Devin's MCP marketplace](https://docs.devin.ai/work-with-devin/mcp). Do not look for a TryPost tile. Add a **custom HTTP** server with **OAuth**.
+</Note>
+
+## Prerequisites
+
+- A [Devin](https://app.devin.ai) account
+- A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
+- On Devin Cloud, the **Manage MCP Servers** permission — required both to add a custom server and to complete OAuth. If you don't have it, ask an organization admin or use **Suggest MCP Integration**.
+
+## Server URL
+
+Use this exact URL. Do not add a trailing slash. Do not paste `/api`, an OAuth authorize URL, or `https://mcp.devin.ai/mcp`.
+
+```
+https://app.trypost.it/mcp/trypost
+```
+
+Transport is **HTTP** (Streamable HTTP). Do not pick **SSE** or **STDIO**.
+
+## Which Devin surface
+
+Devin has three MCP configs. They do **not** share OAuth tokens. Configure the surface you actually use:
+
+| Surface | Where | URL field | How you sign in |
+|---------|-------|-----------|-----------------|
+| **Devin Cloud** | [app.devin.ai](https://app.devin.ai) sessions, including Slack / Teams | Form field **Server URL** | Browser OAuth on the first session that calls a TryPost tool |
+| **Devin CLI / Devin Local** | `devin` in the terminal; default agent in new Devin Desktop tabs | `"url"` | `devin mcp login trypost` |
+| **Cascade** | Legacy agent in Devin Desktop | `"serverUrl"` | Browser OAuth on the first tool call |
+
+Using the wrong field name (`url` vs `serverUrl`) makes Devin **silently ignore** the server.
+
+## Setup (Devin Cloud)
+
+<Steps>
+  <Step title="Open MCP servers">
+    Go to **[Settings → Connections → MCP servers](https://app.devin.ai/settings/connections?tab=mcps)** and click **Add a custom MCP**.
+  </Step>
+  <Step title="Add the TryPost server">
+    Fill in the form. You do not paste JSON — Devin uses the web form.
+
+    | Field | Value |
+    |-------|-------|
+    | **Server Name** | `TryPost` |
+    | **Short Description** (optional) | `Schedule and publish social posts with TryPost` |
+    | **Transport** | **HTTP** |
+    | **Server URL** | `https://app.trypost.it/mcp/trypost` |
+    | **Authentication** | **OAuth** |
+    | **Access** | **Personal** |
+
+    Leave **OAuth credentials** (client ID / secret) empty. TryPost uses OAuth 2.1 with Dynamic Client Registration — Devin discovers `/.well-known` from the URL and registers itself.
+
+    Set **Access** to **Personal** so each Devin member signs in to their own TryPost account. **Organization** shares one TryPost login across every member's sessions — only use that if you intend a shared workspace login. Personal is not a security boundary: other org members can still open your Devin sessions.
+
+    Do not choose **Auth Header** or **None**. Do not paste a TryPost API key.
+  </Step>
+  <Step title="Save, then start a session">
+    Click **Save**.
+
+    **Test listing tools** may fail until OAuth completes. That flow runs on the **first Devin session**, not at save time. Start a new Cloud session (or tag Devin in Slack / Teams) and ask it to use TryPost. Devin opens a browser window. Sign in, review permissions, click **Allow**.
+  </Step>
+  <Step title="Verify the connection">
+    In that session, ask:
+
+    ```
+    List all my scheduled posts
+    ```
+
+    Devin should call TryPost tools. If it answers without tools, tell it to use the **TryPost** MCP server. See the [Tools reference](/ai/tools-reference) for every tool and the create → attach media → publish workflow.
+  </Step>
+</Steps>
+
+## Authentication
+
+TryPost MCP accepts **OAuth only** — a browser sign-in with the `mcp:use` scope. Personal Access Tokens from **Settings → API Keys** work on the [REST API](/api-reference/introduction), not on `/mcp/trypost`.
+
+<Warning>
+  If Devin offers **Auth Header**, a bearer token, or a TryPost API key field, leave it blank and choose **OAuth**. A pasted API key returns `403 MCP OAuth authorization required`.
+</Warning>
+
+Leave Devin's **OAuth credentials** empty. Client ID and secret are only for providers that reject Dynamic Client Registration. TryPost is not one of them.
+
+Cloud, CLI, and Cascade each store their own OAuth session. Signing in on Cloud does not sign in the CLI.
+
+Manage connected assistants later under workspace **Settings → MCP** in TryPost.
+
+## What you can do
+
+Once authorized, Devin can:
+
+| Task | Examples |
+|------|----------|
+| **Posts** | List, create, update, schedule, publish, preview, delete, fetch metrics |
+| **Media** | Attach from a public URL, upload a local file, reuse an Asset Library item |
+| **Accounts** | List connected social accounts, toggle them, resolve Pinterest boards and Discord channels |
+| **Workspace** | Read the current workspace, manage signatures, labels, and API keys |
+
+Pinterest needs a `board_id`, Discord needs a `channel_id`, and TikTok needs a `privacy_level` before you publish. Ask Devin to list boards or channels first. Details and tool names: [Tools reference](/ai/tools-reference).
+
+On Cloud, the same custom server is available in web sessions and in sessions started from [Slack](https://docs.devin.ai/integrations/slack) or [Microsoft Teams](https://docs.devin.ai/integrations/microsoft-teams).
+
+## Devin CLI and Devin Local
+
+[Devin CLI](https://docs.devin.ai/cli/extensibility/mcp/configuration) and [Devin Local](https://docs.devin.ai/desktop/devin-local) (the default agent in new Devin Desktop tabs) share this config. The URL field is `"url"`, not `"serverUrl"`.
+
+Install the CLI if you do not have it:
+
+```bash
+curl -fsSL https://cli.devin.ai/install.sh | bash
+```
+
+Unlike Cascade, Devin Local and the CLI **prompt before every MCP tool** until you allow the server. If TryPost is connected but Devin never calls a tool, approve the prompt or add `mcp__trypost__*` to `permissions.allow`.
+
+<Steps>
+  <Step title="Add the server">
+    ```bash
+    devin mcp add trypost https://app.trypost.it/mcp/trypost
+    ```
+
+    Default scope is **local**: `.devin/mcp_config.local.json` (gitignored). Change scope with `-s`:
+
+    | Scope | Command | File |
+    |-------|---------|------|
+    | Local (default) | `devin mcp add trypost <URL>` | `.devin/mcp_config.local.json` |
+    | Project (shared) | `devin mcp add -s project trypost <URL>` | `.devin/mcp_config.json` |
+    | User (all projects) | `devin mcp add -s user trypost <URL>` | `~/.config/devin/mcp_config.json` (Windows: `%APPDATA%\devin\mcp_config.json`) |
+  </Step>
+  <Step title="Sign in">
+    ```bash
+    devin mcp login trypost
+    ```
+
+    Complete the TryPost browser sign-in (**Allow**). First use can also open this flow. Do **not** pass `--scopes` — TryPost needs the `mcp:use` scope that Devin discovers from the server. A custom scope list will fail.
+
+    To sign in again later:
+
+    ```bash
+    devin mcp logout trypost
+    devin mcp login trypost
+    ```
+
+    To remove the server: `devin mcp remove trypost`.
+  </Step>
+  <Step title="Verify">
+    ```bash
+    devin mcp list
+    devin mcp get trypost
+    ```
+
+    Then ask Devin in the CLI or a Devin Local tab:
+
+    ```
+    List all my scheduled posts
+    ```
+  </Step>
+</Steps>
+
+Equivalent JSON (no `Authorization` header, no `serverUrl`):
+
+```json
+{
+  "mcpServers": {
+    "trypost": {
+      "url": "https://app.trypost.it/mcp/trypost",
+      "transport": "http"
+    }
+  }
+}
+```
+
+`transport` is optional — a URL defaults to Streamable HTTP. Do not set `"sse"`. Do not add `headers`, `oauthClientId`, or `oauthClientSecret`.
+
+Before CLI v3000.3 (Local 3.6), MCP servers lived under `mcpServers` inside the main `config.json` files. Current versions use the dedicated `mcp_config.json` files above and migrate the old key on startup. Some Devin Local docs still show `.devin/config.json` — if that file has `mcpServers`, the CLI moves it on the next start.
+
+## Devin Desktop (Cascade)
+
+New Devin Desktop tabs use [Devin Local](#devin-cli-and-devin-local). Configuring only the Cascade file does **not** give new tabs TryPost — add the CLI config too.
+
+The legacy **Cascade** agent still uses a separate file and `"serverUrl"`. Enterprise orgs may need an admin to turn MCP on in settings. Cascade can load at most **100 tools** across all MCP servers; if other servers fill that budget, disable unused tools on the TryPost MCP settings page.
+
+<Steps>
+  <Step title="Open the MCP config">
+    In Cascade, click **MCPs** (top-right of the Cascade panel) or go to **Devin Settings → Cascade → MCP Servers**, then **View raw config**. You can also edit the file directly:
+
+    - Desktop Cascade: `~/.codeium/windsurf/mcp_config.json`
+    - JetBrains Windsurf plugin: **Settings → Tools → Windsurf Settings → Add Server**, raw file `~/.codeium/mcp_config.json`
+  </Step>
+  <Step title="Add TryPost">
+    ```json
+    {
+      "mcpServers": {
+        "trypost": {
+          "serverUrl": "https://app.trypost.it/mcp/trypost"
+        }
+      }
+    }
+    ```
+
+    No `headers`. No TryPost API key. After saving, refresh MCP / reload the window.
+  </Step>
+  <Step title="Sign in and verify">
+    Trigger a TryPost tool call. Cascade opens a browser window. Click **Allow**, then ask:
+
+    ```
+    List all my TryPost social accounts
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  Cascade uses `"serverUrl"`. Devin Local / CLI use `"url"`. The [official Devin docs](https://docs.devin.ai/work-with-devin/devin-mcp) say the wrong field name is ignored with no error.
+</Tip>
+
+## Self-hosted
+
+Replace the Cloud URL with your instance:
+
+```
+{APP_URL}/mcp/trypost
+```
+
+Example: `https://trypost.yourdomain.com/mcp/trypost`.
+
+<Accordion title="Public URL vs local URL">
+  **Devin Cloud** reaches MCP from Cognition's infrastructure, not from your laptop. `localhost`, `127.0.0.1`, and private LAN addresses fail. The instance must be on the public internet over HTTPS.
+
+  **Devin CLI and Devin Desktop** run on your machine, so they can use a private `{APP_URL}` or `http://127.0.0.1:.../mcp/trypost`.
+
+  After you authorize, OAuth still opens the TryPost sign-in on that instance. Do not put a Personal Access Token in the config.
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="I added mcp.devin.ai or a cog_ key">
+    That is [Devin's own MCP server](https://docs.devin.ai/work-with-devin/devin-mcp) (Devin as a tool for other clients). Remove it. TryPost's URL is `https://app.trypost.it/mcp/trypost` with OAuth — no Devin API key, no TryPost API key.
+  </Accordion>
+  <Accordion title="Add a custom MCP is missing">
+    You need **Manage MCP Servers**. Ask an org admin, or use **Suggest MCP Integration**. The same permission is required to finish OAuth on Cloud.
+  </Accordion>
+  <Accordion title="Test listing tools fails right after Save">
+    Expected for OAuth. Devin authenticates on the first session, not at save time. Start a Cloud session, complete the browser **Allow** step, then try again.
+  </Accordion>
+  <Accordion title="The server is added but Devin does not call TryPost tools">
+    Finish OAuth in the surface you are using (Cloud session, `devin mcp login`, or Cascade). Tokens are not shared across surfaces. Start a **new** session and say you want the **TryPost** MCP server.
+
+    On Devin Local / CLI, also approve the MCP permission prompt (or allow `mcp__trypost__*`). Cascade does not prompt the same way. Check the session logs for MCP errors.
+  </Accordion>
+  <Accordion title="Auth required, AuthRequired, or Needs auth">
+    Official Devin CLI/Local wording when OAuth is missing or expired. Run `devin mcp login trypost`, or click **Authenticate** on the Devin Local MCP card. Cloud: start a new session and complete **Allow**.
+  </Accordion>
+  <Accordion title="I passed --scopes on devin mcp login">
+    Remove the flag and log in again. `--scopes read,write` (or any custom list) skips TryPost's `mcp:use` scope and the tools never authorize.
+  </Accordion>
+  <Accordion title="Config looks correct but the server never appears (Desktop / CLI)">
+    You used the wrong URL key. Cascade needs `"serverUrl"`. CLI and Devin Local need `"url"`. The wrong key is ignored with no error. Also check you edited the file for that agent — Cascade does not read `.devin/mcp_config.json`.
+  </Accordion>
+  <Accordion title="devin mcp add did not update the file I edited">
+    Default scope is **local** (`.devin/mcp_config.local.json`), not `~/.config/devin/mcp_config.json`. Use `-s user` or `-s project`, or edit the local file.
+  </Accordion>
+  <Accordion title="HTTP 402 — Active subscription required">
+    The OAuth grant worked; the TryPost account is not active. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan, then reconnect. Self-hosted instances skip this check. See [Introduction](/ai/introduction#troubleshooting).
+  </Accordion>
+  <Accordion title="HTTP 401 or I need to sign in again">
+    The OAuth session expired or was revoked. Cloud: start a new session and approve again. CLI: `devin mcp logout trypost` then `devin mcp login trypost`. Cascade: trigger a tool call and complete the browser flow.
+  </Accordion>
+  <Accordion title="HTTP 403 — MCP OAuth authorization required">
+    The request used an API key (Personal Access Token) or an OAuth token without `mcp:use`. Remove any `Authorization` header / Auth Header and sign in with OAuth.
+  </Accordion>
+  <Accordion title="Devin Cloud cannot reach my self-hosted instance">
+    Cloud TryPost is already public. A self-hosted URL must be reachable from the internet over HTTPS. `localhost` works only for CLI and Desktop.
+  </Accordion>
+  <Accordion title="Browser does not open during CLI sign-in">
+    Over SSH or inside a container, `devin mcp login` prints the authorize URL instead of opening a browser. Copy it into a local browser, complete **Allow**, and the CLI picks up the callback. If the loopback port is blocked, finish OAuth on a machine that can receive the callback, or use the [REST API](/api-reference/introduction) with an API key.
+  </Accordion>
+  <Accordion title="Enterprise team blocked the server">
+    A Devin admin can disable MCP, require it to be turned on in team settings, or allowlist only certain servers. Cascade on Enterprise is off until an admin enables it. If TryPost never connects on a Teams / Enterprise plan, ask an admin to allow a custom HTTP server at `https://app.trypost.it/mcp/trypost` (or your `{APP_URL}/mcp/trypost`).
+  </Accordion>
+</AccordionGroup>
+
+## Example prompts
+
+```
+Show me all my connected social media accounts
+```
+
+```
+Create a draft LinkedIn post for tomorrow at 9am
+```
+
+```
+What posts do I have scheduled for this week?
+```
+
+```
+Attach https://example.com/photo.jpg to my draft, then preview it before publishing
+```
+
+```
+Create a label called "Campaign" with color #f59e0b
+```
+
+## Related
+
+- [Introduction](/ai/introduction) — MCP overview, auth, and shared troubleshooting
+- [Tools reference](/ai/tools-reference) — every tool, parameters, and the publish workflow
+- [Devin: custom MCP](https://docs.devin.ai/work-with-devin/mcp) — Cloud marketplace and Add a custom MCP
+- [Devin CLI: MCP configuration](https://docs.devin.ai/cli/extensibility/mcp/configuration) — `devin mcp add` / `login` / scopes
+- [Devin Desktop FAQ](https://docs.devin.ai/desktop/devin-desktop-faq) — Desktop vs Devin Local vs Cascade
+- [Devin Local](https://docs.devin.ai/desktop/devin-local) — default Desktop agent, MCP permissions, Needs auth
