@@ -51,7 +51,7 @@ https://app.trypost.it/mcp/trypost
 
 ## Authentication
 
-TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Perplexity, Grok, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
+TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Perplexity, Grok, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Hermes, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
 
 <Warning>
   Personal Access Tokens from **Settings → API Keys** authenticate the [REST API](/api-reference/introduction) only. They are **not** accepted on `/mcp/trypost`. MCP requires an OAuth grant with the `mcp:use` scope (browser sign-in from a supported client). Manage connected assistants under workspace **Settings → MCP**.
@@ -118,6 +118,9 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
   </Card>
   <Card title="OpenClaw" icon="/images/ai/openclaw.svg" href="/ai/openclaw">
     Personal AI assistant gateway.
+  </Card>
+  <Card title="Hermes" icon="/images/ai/hermes.svg" href="/ai/hermes">
+    Hermes Agent by Nous Research.
   </Card>
   <Card title="Codex" icon="/images/ai/codex.svg" href="/ai/codex">
     CLI agent by OpenAI.
