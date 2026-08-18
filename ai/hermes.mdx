@@ -47,7 +47,7 @@ Leave the transport at Hermes' default (Streamable HTTP). Do not set `transport:
 
     `hermes mcp add` is discovery-first. If it asks `Enable all N tools? [Y/n/select]`, answer **Y**. A subset hides publish, delete, and other write tools from Hermes.
 
-    If the add command times out while the browser is still open, the YAML entry is often already saved. Continue with `hermes mcp login` below. To give the probe more time next time:
+    If the add command fails to connect, Hermes may ask **Save config anyway?** and write the entry with `enabled: false`. Open `~/.hermes/config.yaml`, set `enabled: true` (or run `add` again), then continue with `hermes mcp login` below. To give the probe more time next time:
 
     ```bash
     hermes mcp add trypost --url https://app.trypost.it/mcp/trypost --auth oauth --connect-timeout 300
@@ -209,6 +209,22 @@ When Hermes is not on the same machine as your browser, the OAuth callback to `h
   Then finish the authorize URL in your local browser so the redirect tunnels to the remote listener.
 </Accordion>
 
+<Accordion title="Public HTTPS callback (Tailscale Funnel / reverse proxy)">
+  Official Hermes also supports a proxied callback when a public HTTPS URL forwards to the listener. Pin the port and set `oauth.redirect_uri` ([MCP guide](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)):
+
+  ```yaml
+  mcp_servers:
+    trypost:
+      url: "https://app.trypost.it/mcp/trypost"
+      auth: oauth
+      oauth:
+        redirect_port: 8765
+        redirect_uri: "https://oauth.example.ts.net/callback"
+  ```
+
+  Then run `hermes mcp login trypost`. You do not need this on a laptop where the browser and Hermes share a machine.
+</Accordion>
+
 <Accordion title="No interactive terminal (gateway / bot only)">
   If Hermes is only a messaging bot and you cannot paste at a prompt, use Nous' [mcp-oauth-remote-gateway](https://hermes-agent.nousresearch.com/docs/user-guide/skills/optional/mcp/mcp-mcp-oauth-remote-gateway) skill. It walks through authorize URL → code → token files under `~/.hermes/mcp-tokens/`, then `/reload-mcp`.
 </Accordion>
@@ -232,7 +248,7 @@ When Hermes is not on the same machine as your browser, the OAuth callback to `h
     Stop using the in-session auto-reload. Run `hermes mcp login trypost` in a **new** terminal. If `add` itself is the command that opened the browser, retry with `--connect-timeout 300`, or add the YAML by hand and only use `login`.
   </Accordion>
   <Accordion title="The server is in config but Hermes does not call TryPost tools">
-    Confirm a token file exists under `~/.hermes/mcp-tokens/` for `trypost`. Run `hermes mcp test trypost`, then `/reload-mcp` or a new `hermes chat`. Ask which MCP tools are available. If `tools.include` was saved as a short list, run `hermes mcp configure trypost` and enable everything (or delete the `tools` block).
+    Confirm a token file exists under `~/.hermes/mcp-tokens/` for `trypost`, and that `enabled` is not `false` (a failed `mcp add` can save the server disabled). Run `hermes mcp test trypost`, then `/reload-mcp` or a new `hermes chat`. Ask which MCP tools are available. If `tools.include` was saved as a short list, run `hermes mcp configure trypost` and enable everything (or delete the `tools` block).
   </Accordion>
   <Accordion title="login lists tools but every real call times out">
     Hermes documents this when DCR failed and no token landed on disk. For TryPost, DCR should work. Check that `auth: oauth` is set, no `headers.Authorization` is present, and a token file exists under `~/.hermes/mcp-tokens/` after login. If it is missing, run `hermes mcp login trypost` again — do not add a Client ID.
