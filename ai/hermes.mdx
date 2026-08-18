@@ -159,7 +159,7 @@ hermes mcp configure trypost
 
 ## Hermes Desktop
 
-Desktop uses the same `~/.hermes/config.yaml`. After CLI add + login, restart or reload MCP in the app.
+Desktop shares `~/.hermes/config.yaml`. Official settings include an **MCP servers** pane. After CLI add + login, open that pane or start a new Desktop chat so the tools load.
 
 Official one-click install ([Add to Hermes](https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference)):
 
@@ -174,11 +174,17 @@ Opening that link does **not** install by itself. Desktop shows the name and con
 Hermes connects from **the machine where the agent runs**, not from a vendor cloud. If Hermes and TryPost share a host, a local `{APP_URL}` works.
 
 <Accordion title="Point Hermes at your instance">
-  ```bash
-  hermes mcp add trypost --url {APP_URL}/mcp/trypost --auth oauth
+  Use your instance MCP URL — replace `{APP_URL}` with the real origin, then pass it to `hermes mcp add`:
+
+  ```
+  {APP_URL}/mcp/trypost
   ```
 
-  Examples: `https://trypost.yourdomain.com/mcp/trypost`, or `http://127.0.0.1:8000/mcp/trypost` only if Hermes can open that loopback.
+  ```bash
+  hermes mcp add trypost --url https://trypost.yourdomain.com/mcp/trypost --auth oauth
+  ```
+
+  A loopback URL such as `http://127.0.0.1:8000/mcp/trypost` only works if Hermes can open that address on the same host.
 
   If Hermes runs on a VPS, Docker host, or messaging gateway, **that** host must reach the URL. A TryPost instance that only listens on your laptop is invisible to a remote Hermes — expose it or run Hermes on the same machine.
 
