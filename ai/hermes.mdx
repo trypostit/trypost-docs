@@ -1,0 +1,207 @@
+---
+title: "Hermes"
+description: "Connect TryPost to Hermes Agent as a remote MCP server"
+icon: "/images/ai/hermes.svg"
+---
+
+[Hermes Agent](https://hermes-agent.nousresearch.com/) is the open-source agent from [Nous Research](https://nousresearch.com/). Add TryPost as a remote HTTP MCP server and you can schedule, publish, and manage social posts from the Hermes CLI, Desktop app, or any messaging gateway Hermes is already running on.
+
+This page is for **Hermes as an MCP client** — you point Hermes at TryPost. It is not [`hermes mcp serve`](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp), which exposes Hermes itself to other agents.
+
+<Note>
+  TryPost is not in the [Nous-approved MCP catalog](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp). Add it yourself as a custom HTTP server with `auth: oauth`.
+</Note>
+
+## Prerequisites
+
+- [Hermes Agent](https://hermes-agent.nousresearch.com/docs/getting-started/installation) installed (CLI and/or [Desktop](https://hermes-agent.nousresearch.com/docs/user-guide/desktop)). MCP support ships with the standard install.
+- An active TryPost Cloud account
+
+## Server URL
+
+Use this exact URL. Do not add a trailing slash. Do not paste an OAuth authorize URL.
+
+```
+https://app.trypost.it/mcp/trypost
+```
+
+## Setup
+
+<Steps>
+  <Step title="Add the TryPost MCP server">
+    From a terminal, register the remote HTTP server with OAuth:
+
+    ```bash
+    hermes mcp add trypost --url https://app.trypost.it/mcp/trypost --auth oauth
+    ```
+
+    That writes `mcp_servers.trypost` in `~/.hermes/config.yaml`. Hermes CLI, Desktop, and the messaging gateway all read this file.
+
+    Prefer to edit the file yourself? See [Manual configuration](#manual-configuration).
+  </Step>
+  <Step title="Sign in to TryPost">
+    Complete OAuth from a **fresh terminal** — not from inside a running Hermes session. Hermes' auto-reload only waits about 30 seconds, which is not enough for a browser sign-in. `hermes mcp login` waits up to five minutes.
+
+    ```bash
+    hermes mcp login trypost
+    ```
+
+    Hermes prints an authorize URL and opens your browser when it can.
+
+    1. Sign in to your TryPost account
+    2. Review the permissions
+    3. Click **Allow**
+
+    Tokens land in `~/.hermes/mcp-tokens/` and refresh on their own. You do not paste an API key.
+
+    If the browser cannot reach the loopback callback (SSH, VPS, headless gateway), see [Remote and headless Hermes](#remote-and-headless-hermes).
+  </Step>
+  <Step title="Reload and verify">
+    Probe the server, then start a session:
+
+    ```bash
+    hermes mcp test trypost
+    hermes chat
+    ```
+
+    If a session is already open, run `/reload-mcp` so it picks up the new tools. Then ask:
+
+    ```
+    List all my scheduled posts
+    ```
+
+    Hermes prefixes MCP tools as `mcp__trypost__<tool>` (for example `mcp__trypost__list_posts_tool`). You do not type that name — ask in plain language and Hermes chooses the tool.
+
+    See the [Tools reference](/ai/tools-reference) for every tool and the recommended create → attach media → publish workflow.
+  </Step>
+</Steps>
+
+## Authentication
+
+TryPost MCP accepts **OAuth only** — a browser sign-in with the `mcp:use` scope. Set `auth: oauth`. Hermes handles discovery, Dynamic Client Registration, PKCE, and refresh. Personal Access Tokens from **Settings → API Keys** work on the [REST API](/api-reference/introduction), not on `/mcp/trypost`.
+
+<Warning>
+  Do not pass `--auth header` and do not put `Authorization: Bearer …` in `headers`. A pasted API key returns `403 MCP OAuth authorization required`.
+</Warning>
+
+Manage connected assistants later under workspace **Settings → MCP** in TryPost.
+
+## What you can do
+
+Once the server is authorized, Hermes can:
+
+| Task | Examples |
+|------|----------|
+| **Posts** | List, create, update, schedule, publish, preview, delete, fetch metrics |
+| **Media** | Attach from a public URL, upload a local file, reuse an Asset Library item |
+| **Accounts** | List connected social accounts, toggle them, resolve Pinterest boards and Discord channels |
+| **Workspace** | Read the current workspace, manage signatures, labels, and API keys |
+
+Pinterest needs a `board_id`, Discord needs a `channel_id`, and TikTok needs a `privacy_level` before you publish. Ask Hermes to list boards or channels first. Details and tool names: [Tools reference](/ai/tools-reference).
+
+After it is connected, the same TryPost tools are available in `hermes chat`, Hermes Desktop, and any [messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging) on that install (Telegram, Discord, Slack, and the rest).
+
+## Manual configuration
+
+Equivalent config written by `hermes mcp add`:
+
+```yaml
+mcp_servers:
+  trypost:
+    url: "https://app.trypost.it/mcp/trypost"
+    auth: oauth
+```
+
+Save in `~/.hermes/config.yaml`, then run `hermes mcp login trypost` from a fresh terminal. Do not add a `headers.Authorization` line.
+
+## Self-hosted
+
+Hermes connects from **the machine where the agent runs**, not from a vendor cloud. If Hermes and TryPost are on the same host, a local `{APP_URL}` works.
+
+<Accordion title="Point Hermes at your instance">
+  Use your public or local MCP URL:
+
+  ```
+  {APP_URL}/mcp/trypost
+  ```
+
+  Example: `https://trypost.yourdomain.com/mcp/trypost` or `http://127.0.0.1:8000/mcp/trypost` if both processes share that loopback.
+
+  If Hermes runs on a VPS, Docker host, or messaging gateway, that host must be able to reach the URL. A TryPost instance that only listens on your laptop is invisible to a remote Hermes — expose it or run Hermes on the same machine.
+
+  Auth is still OAuth against your instance. Do not put a Personal Access Token in the connector.
+</Accordion>
+
+## Remote and headless Hermes
+
+When Hermes is not on the same machine as your browser, the OAuth callback to `http://127.0.0.1:<port>/callback` cannot complete by itself. This is the TryPost MCP login, not Hermes' model-provider sign-in.
+
+<Accordion title="Paste the redirect URL back">
+  On an interactive terminal, `hermes mcp login trypost` prints the authorize URL and asks you to paste the redirect. Open the URL on your laptop, click **Allow**, then copy the full URL from the address bar (the page may show a connection error — that is expected) and paste it at the Hermes prompt. A bare `?code=…&state=…` string works too. See [OAuth over SSH / Remote Hosts](https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh).
+</Accordion>
+
+<Accordion title="SSH port forward">
+  Hermes prints the port it bound. In a separate laptop terminal:
+
+  ```bash
+  ssh -N -L <port>:127.0.0.1:<port> user@remote-host
+  ```
+
+  Then finish the authorize URL in your local browser so the redirect tunnels to the remote listener.
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="hermes mcp login times out or never asks me to sign in">
+    Use `https://app.trypost.it/mcp/trypost` — not `/oauth/authorize`, not `/api`, and not a trailing slash. Run `hermes mcp login trypost` from a **new** terminal. Editing `config.yaml` inside a live session auto-reloads MCP with a 30-second cap, which is too short for OAuth.
+  </Accordion>
+  <Accordion title="The server is added but Hermes does not call TryPost tools">
+    Finish OAuth so a token file exists under `~/.hermes/mcp-tokens/`. Then run `hermes mcp test trypost` and `/reload-mcp` (or start a new `hermes chat`). Ask Hermes which MCP tools it has, and name the **TryPost** server if it answers without tools.
+  </Accordion>
+  <Accordion title="Hermes cannot reach the server">
+    Cloud TryPost is already public. If you self-host, the **Hermes host** must reach the URL. A remote gateway cannot see `localhost` on your laptop.
+  </Accordion>
+  <Accordion title="HTTP 402 — Active subscription required">
+    The OAuth grant worked; the TryPost account is not active. Open [app.trypost.it](https://app.trypost.it), activate the account, then run `hermes mcp login trypost` again. Self-hosted instances skip this check. See [Introduction](/ai/introduction#troubleshooting).
+  </Accordion>
+  <Accordion title="HTTP 401 or I need to sign in again">
+    The OAuth session expired or was revoked. Run `hermes mcp login trypost` again.
+  </Accordion>
+  <Accordion title="HTTP 403 — MCP OAuth authorization required">
+    The request used an API key (`--auth header` or a Bearer token in `headers`) or an OAuth token without `mcp:use`. Remove the header, keep `auth: oauth`, and sign in again.
+  </Accordion>
+  <Accordion title="Tools I expected are missing">
+    Check `tools.include` / `tools.exclude` on the `trypost` entry, and that `enabled` is not `false`. Hermes only registers tools that pass your filter. Re-run `hermes mcp configure trypost` or edit `config.yaml`, then `/reload-mcp`.
+  </Accordion>
+</AccordionGroup>
+
+## Example prompts
+
+```
+Show me all my connected social media accounts
+```
+
+```
+Create a draft LinkedIn post for tomorrow at 9am
+```
+
+```
+What posts do I have scheduled for this week?
+```
+
+```
+Attach https://example.com/photo.jpg to my draft, then preview it before publishing
+```
+
+```
+Create a label called "Campaign" with color #f59e0b
+```
+
+## Related
+
+- [Introduction](/ai/introduction) — MCP overview, auth, and shared troubleshooting
+- [Tools reference](/ai/tools-reference) — every tool, parameters, and the publish workflow
+- [Hermes: MCP](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp) — official client, OAuth, and catalog
+- [Hermes: MCP config reference](https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference) — `mcp_servers` keys
+- [Hermes: Use MCP](https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes) — add, test, filter, and reload

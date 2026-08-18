@@ -167,6 +167,7 @@
               "ai/gemini-cli",
               "ai/opencode",
               "ai/openclaw",
+              "ai/hermes",
               "ai/codex",
               "ai/antigravity"
             ]
