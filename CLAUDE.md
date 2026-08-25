@@ -48,6 +48,25 @@ Same paths, user configures `APP_URL` in `.env`:
 - Default instructions assume the user is on **TryPost Cloud**
 - Self-hosted specifics go in `<Accordion>`, `<Note>`, or the Self-Hosting anchor
 - Example: Platform pages say "click Connect" for cloud, API credentials in `<Accordion>` for self-hosted
+- This includes `api-reference/` — those endpoints are documented against `https://app.trypost.it/api`, so describe the Cloud response
+
+**When a fixed behaviour becomes configurable**, keep the Cloud value as the statement and push the setting into self-hosting. Do not rewrite body prose into a two-mode comparison — it makes every reader parse a branch that only one of them is on.
+
+```mdx
+{/* Wrong — the Cloud reader has to work out which half applies to them */}
+On TryPost Cloud each workspace connects one account per network. On
+self-hosted instances the cap is a setting; see ALLOW_MULTIPLE_SOCIAL_ACCOUNTS.
+
+{/* Right — Cloud is the statement, self-hosting is a pointer */}
+Each workspace connects one account per network.
+
+<Note>
+  Self-hosting TryPost? This cap is a setting on your instance — see
+  [multiple accounts per network](/self-hosting/configuration#...).
+</Note>
+```
+
+The same applies to anything a self-hoster can switch off or raise: platform availability, limits, AI providers. State what Cloud does; link out for the knob.
 
 ### URLs in examples
 - API curl examples: `https://app.trypost.it/api/...`

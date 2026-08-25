@@ -31,21 +31,33 @@ Social accounts are the connections between TryPost and your social media profil
 
 Go to **Accounts** in the dashboard and click the platform you want to connect. For most platforms, you'll be redirected to their authorization page. A few have extra steps:
 
-- **LinkedIn Page** — after authorizing, pick which company page to connect
+- **LinkedIn** — one card covers both your personal profile and the company pages you administer. After authorizing, pick which identity to connect
 - **Facebook** — after authorizing, pick which page to manage
-- **Instagram (Standalone)** — uses Instagram's own OAuth flow; suitable for personal IG accounts
-- **Instagram (Facebook Business)** — authorize through Facebook, then pick the Instagram account linked to a Facebook page (required for first-party publishing of feed/reels/stories/carousels)
-- **YouTube** — authorize with Google, then pick the channel
+- **Instagram** — one card offers both connection methods. **Standalone** uses Instagram's own OAuth (suitable for personal IG accounts); **Facebook Business** authorizes through Facebook and then picks the Instagram account linked to a page (required for first-party publishing of feed/reels/stories/carousels)
+- **YouTube** — authorize with Google; the channel comes from the account you pick on Google's own screen
 - **Bluesky** — enter your handle and an [App Password](https://bsky.app/settings/app-passwords) (not your main password)
 - **Mastodon** — enter your instance URL first, then authorize on that instance
 - **Telegram** — add the TryPost bot as an admin to your channel or group, then post the `/connect` command shown in the dialog
 - **Discord** — authorize TryPost and choose which server to add the bot to (requires *Manage Server*); the whole server connects as one account and you pick the channel on each post
 
-## Connection limits (Cloud only)
+<Note>
+  Facebook and Instagram only show their page picker when there is something to choose between — administer a single page and TryPost connects it without asking. If the login has nothing to offer, it says so rather than showing an empty list. LinkedIn always shows its identity screen, even when your profile is the only thing on it.
+</Note>
 
-On TryPost Cloud, each workspace connects one account on every supported network (its social set). To connect a second account on the same network, add another workspace.
+## Connection limits
 
-Self-hosted instances have no cap.
+Each workspace connects one account per network. To manage a second account on the same network, add another workspace.
+
+Two platforms count as **one network** when they are two ways into the same place, so they share that single slot:
+
+- LinkedIn profile and LinkedIn Page
+- Instagram Standalone and Instagram (Facebook Business)
+
+Connecting one of a pair uses up the network's slot, so a workspace holds either a LinkedIn profile or a LinkedIn Page, not both.
+
+<Note>
+  Self-hosting TryPost? This cap is a setting on your instance — see [multiple accounts per network](/self-hosting/configuration#multiple-accounts-per-network).
+</Note>
 
 ## Active vs. inactive
 
@@ -83,6 +95,23 @@ If any of these detects a disconnected or expired account, the workspace owner r
 - **Permission revoked** — You manually revoked TryPost's access in the platform's settings.
 - **Platform policy** — The platform may revoke tokens for inactivity or policy changes.
 
+## Reconnecting an account
+
+A card that needs attention shows a **Reconnect** button. Reconnecting refreshes that specific card — it keeps its posts, its scheduling history, and its place in your automations. It never creates a second card.
+
+Because it is tied to one card, you have to authorize **the same account** you are reconnecting:
+
+| What you'll see | What happened | What to do |
+|---|---|---|
+| *That is a different account. Authorize the one you are reconnecting.* | You signed in as someone else during the reconnect | Sign out of the platform, then reconnect and authorize the original account |
+| *Page not found.* | The company page you are reconnecting is not administered by the login you used | Authorize with the account that administers that page |
+| *This workspace already has an account for this network. Disconnect it first.* | The network's single slot is taken | Disconnect the existing account, or use another workspace |
+| *Another connection is still finishing. Please try again in a moment.* | Two connections to the same network overlapped | Wait a moment and try again |
+
+<Note>
+  On Telegram, a reconnect must be confirmed **from the same channel or group** the card points at. Posting the `/connect` command somewhere else is rejected — and the code is not consumed, so you can still post it in the right place.
+</Note>
+
 ## Token security
 
 - Access tokens and refresh tokens are **encrypted at rest** using Laravel's encryption
@@ -101,7 +130,7 @@ Go to **Accounts**, find the account, and click **Disconnect**. This:
 
 <AccordionGroup>
   <Accordion title="Can I connect the same account twice?">
-    No. Each social media account can only be connected once per workspace. If you try to connect an account that's already connected, TryPost will update the existing connection.
+    No. Each social media account is connected once per workspace, and its network's slot is taken while it is — so there is nothing to click to add it again. To refresh an account you already have, use [Reconnect](#reconnecting-an-account) on its card, which updates that card rather than creating another.
   </Accordion>
   <Accordion title="What happens to scheduled posts if an account disconnects?">
     Posts scheduled for a disconnected account will fail for that platform when the scheduled time arrives. Other platforms in the same post are not affected. You'll receive a notification about the failure.

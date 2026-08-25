@@ -86,6 +86,10 @@ Also configure **mail** (invites / password reset) and optional social OAuth / A
 php artisan migrate --force
 ```
 
+<Note>
+  On a fresh install this just builds the schema. When you run it later to **upgrade** an existing instance, back the database up first and check [Upgrading](/self-hosting/upgrading) — some releases rewrite data as well as schema.
+</Note>
+
 ### 5. Passport keys (and local storage symlink)
 
 Passport needs an RSA key pair on disk to **sign and verify** API / MCP tokens:

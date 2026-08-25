@@ -20,7 +20,13 @@ TryPost publishes to Telegram **channels and groups** through a shared TryPost b
   The bot must be an **administrator** of the channel. Telegram only delivers channel posts (including the `/connect` command and reactions) to bots that are admins, and the bot needs admin rights to publish.
 </Note>
 
-You can connect as many channels and groups as you like — each one becomes its own account.
+Each channel or group becomes its own account, and a workspace connects one of them. To run a second channel, add another workspace — see [connection limits](/knowledge-base/social-accounts#connection-limits).
+
+## Reconnecting a channel
+
+A channel that lost its connection shows a **Reconnect** button, which issues a fresh `/connect` code. Post that code **in the same channel the card points at** — a reconnect is tied to one card and will not move it to a different chat.
+
+Posting it somewhere else is rejected with *Post the command in the channel you are reconnecting*. The code is **not** consumed, so you can still post the same one in the right channel.
 
 ## Supported content types
 

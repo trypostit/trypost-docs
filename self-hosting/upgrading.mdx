@@ -1,0 +1,55 @@
+---
+title: "Upgrading"
+description: "What to check before pulling a new version of TryPost"
+---
+
+## The routine
+
+Pull the new version, then run the same steps you already run on a deploy:
+
+- Rebuild dependencies and assets, and re-run the [optimization commands](/self-hosting/production#optimizations)
+- Apply migrations with `php artisan migrate --force`
+- Restart the queue workers so they pick up the new code — `php artisan horizon:terminate` lets Supervisor bring them back
+
+On Docker, [Common production commands](/self-hosting/docker#common-production-commands) has the container equivalents.
+
+<Warning>
+  **Back the database up before `migrate --force`.** Migrations run unattended and some of them rewrite data, not just schema. A dump you can restore is the only reliable way back.
+</Warning>
+
+## Release notes that need attention
+
+Most upgrades need nothing beyond the routine above. The ones below change data or defaults, so read them if you are crossing that version.
+
+### Multiple social accounts per network
+
+This release adds a database constraint that a workspace cannot hold the same identity twice on the same platform.
+
+**Why it matters:** earlier versions could store the same account more than once — the per-network guard was skipped on self-hosted installs, and Pinterest created a fresh row on every connect. Duplicates like that would block the new constraint, so the migration merges them first.
+
+For each duplicated identity it keeps the **most recently created** account, moves that account's scheduled posts and automation targets onto the survivor, and deletes the rest.
+
+Merging can leave a post aimed at the same account twice, which would publish it twice. Those repeats are collapsed:
+
+- If the post has **not** published there yet, one target survives — the one you had enabled, if any
+- If it **has** already published there, every unpublished repeat is removed, since the content has gone out
+
+Targets that already published are never deleted or altered. They record what went out, and hold the id the platform needs to manage that post later.
+
+**This is one-way.** Rolling the migration back drops the constraint but does not bring the merged rows back.
+
+Every merge is written to your log at `warning` level with enough detail to reconstruct it:
+
+```
+Collapsed duplicate social accounts
+  workspace_id, platform, platform_user_id,
+  kept_id, dropped_ids,
+  post_platforms_repointed, post_platforms_deleted,
+  automations_rewritten
+```
+
+<Tip>
+  Want to know what it will do before it does it? Restore a copy of your production database somewhere disposable, run `php artisan migrate --force` against the copy, and read those log lines. If nothing is logged, you have no duplicates and the migration is a no-op.
+</Tip>
+
+**New setting:** [`ALLOW_MULTIPLE_SOCIAL_ACCOUNTS`](/self-hosting/configuration#multiple-accounts-per-network) decides whether a workspace may connect several accounts on one network. You do not have to set it — when it is missing it follows `SELF_HOSTED`, so an existing self-hosted install keeps the behaviour it had.

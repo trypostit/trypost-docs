@@ -8,6 +8,12 @@ description: "List all connected social accounts for the current workspace, orde
 
 Plain array of social account objects. Each item has these fields:
 
+<Note>
+  **Read accounts by `id`, not by `platform`.** A workspace holds [one account per network](/knowledge-base/social-accounts#connection-limits), so each `platform` appears at most once — but that is a plan limit, not a guarantee of this endpoint.
+</Note>
+
+Accounts are connected from the dashboard, since every platform needs a browser to authorize. The API reads them and can toggle one [active or inactive](/api-reference/endpoint/toggle-social-account); it cannot add or remove one.
+
 <ResponseField name="id" type="string">
   Social account UUID.
 </ResponseField>
