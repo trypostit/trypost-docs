@@ -5,24 +5,13 @@ description: "What to check before pulling a new version of TryPost"
 
 ## The routine
 
-Whatever version you are coming from, an upgrade is:
+Pull the new version, then run the same steps you already run on a deploy:
 
-```bash
-git pull
-composer install --no-dev --optimize-autoloader
-npm ci && npm run build
-php artisan migrate --force
-php artisan config:cache && php artisan route:cache && php artisan view:cache
-php artisan horizon:terminate
-```
+- Rebuild dependencies and assets, and re-run the [optimization commands](/self-hosting/production#optimizations)
+- Apply migrations with `php artisan migrate --force`
+- Restart the queue workers so they pick up the new code — `php artisan horizon:terminate` lets Supervisor bring them back
 
-On Docker, the same thing through the running container:
-
-```bash
-docker compose -f compose.prod.yaml pull
-docker compose -f compose.prod.yaml up -d
-docker compose -f compose.prod.yaml exec app php artisan migrate --force
-```
+On Docker, [Common production commands](/self-hosting/docker#common-production-commands) has the container equivalents.
 
 <Warning>
   **Back the database up before `migrate --force`.** Migrations run unattended and some of them rewrite data, not just schema. A dump you can restore is the only reliable way back.
@@ -38,7 +27,14 @@ This release adds a database constraint that a workspace cannot hold the same id
 
 **Why it matters:** earlier versions could store the same account more than once — the per-network guard was skipped on self-hosted installs, and Pinterest created a fresh row on every connect. Duplicates like that would block the new constraint, so the migration merges them first.
 
-For each duplicated identity it keeps the **most recently created** account, moves that account's scheduled posts and automation targets onto the survivor, and deletes the rest. Where a post ended up with two targets pointing at the same account, the unpublished repeats are dropped so it isn't published twice — preferring the row you had enabled. Posts already published are never touched.
+For each duplicated identity it keeps the **most recently created** account, moves that account's scheduled posts and automation targets onto the survivor, and deletes the rest.
+
+Merging can leave a post aimed at the same account twice, which would publish it twice. Those repeats are collapsed:
+
+- If the post has **not** published there yet, one target survives — the one you had enabled, if any
+- If it **has** already published there, every unpublished repeat is removed, since the content has gone out
+
+Targets that already published are never deleted or altered. They record what went out, and hold the id the platform needs to manage that post later.
 
 **This is one-way.** Rolling the migration back drops the constraint but does not bring the merged rows back.
 
