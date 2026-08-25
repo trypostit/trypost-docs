@@ -8,11 +8,9 @@ description: "List all connected social accounts for the current workspace, orde
 
 Plain array of social account objects. Each item has these fields:
 
-<Warning>
-  **`platform` is not unique.** A workspace can hold several accounts on the same network, so more than one item may share the same `platform` value — two `"linkedin"` entries, for example. Key your integration on `id`, never on `platform`.
-
-  This applies to any instance where [multiple accounts per network](/knowledge-base/social-accounts#how-many-accounts-per-network) are allowed, which is the default for self-hosted. Use `display_name` or `username` to tell two accounts of the same platform apart.
-</Warning>
+<Note>
+  **Key on `id`, not on `platform`.** A workspace holds one account per network, so today each `platform` appears at most once — but that is a [plan limit](/knowledge-base/social-accounts#connection-limits), not a guarantee of this endpoint. Self-hosted instances can be configured to return several accounts sharing one `platform` value.
+</Note>
 
 <ResponseField name="id" type="string">
   Social account UUID.
