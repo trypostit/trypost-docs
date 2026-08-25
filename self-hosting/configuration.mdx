@@ -42,6 +42,30 @@ SELF_HOSTED=true
 
 There's no reason to flip this to `false` on a self-hosted install. The Cloud SaaS deployment is the only place that runs with billing enabled.
 
+## Multiple accounts per network
+
+```env
+ALLOW_MULTIPLE_SOCIAL_ACCOUNTS=true
+```
+
+Controls whether a workspace can connect more than one account on the same social network — two LinkedIns, two Instagrams, and so on. `.env.example` and the Docker compose file ship with it set to `true`.
+
+Two flavours of the same platform count as **one network**, so they share the slot:
+
+- LinkedIn profile + LinkedIn Page
+- Instagram Standalone + Instagram (Facebook Business)
+
+| Value | Behaviour |
+|---|---|
+| `true` | A workspace may connect several accounts on the same network. Each network's tile gains a **Connect another** card |
+| `false` | One account per network. A second one is refused with *This workspace already has an account for this network* |
+
+<Note>
+  When the variable is unset it falls back to `SELF_HOSTED`, so instances that upgrade without touching `.env` keep allowing multiple accounts. This is deliberately independent of `SELF_HOSTED` so it can be flipped on its own.
+</Note>
+
+The same account is never connected twice, whatever the value — reconnecting an identity that already has a card updates that card instead of adding another, including across the two flavours of one network.
+
 ## Database
 
 TryPost supports PostgreSQL and MySQL.

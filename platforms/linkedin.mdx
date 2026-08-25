@@ -10,18 +10,20 @@ TryPost supports posting to LinkedIn personal profiles and company pages.
 
 ## Connect your account
 
-### Personal profile
+A single **LinkedIn** card covers both your personal profile and the company pages you administer — there is no separate "Connect LinkedIn Page" button.
 
 1. Go to **Accounts** in the TryPost dashboard
-2. Click **Connect LinkedIn**
-3. Authorize TryPost on LinkedIn — your profile is connected directly, no extra picker needed
+2. Click **Connect** on **LinkedIn**
+3. Authorize TryPost on LinkedIn
+4. Pick what to connect on the **Select a LinkedIn identity** screen: your personal profile, or one of the Pages you administer
 
-### Company page
+Each identity connects as its own social account. Repeat the flow to add another — anything already connected to this workspace is left out of the picker.
 
-1. Go to **Accounts** and click **Connect LinkedIn Page**
-2. Authorize TryPost on LinkedIn with organization admin scope
-3. TryPost loads every Page you administer and redirects you to a dedicated **Select a LinkedIn Page** screen
-4. Pick the Page you want to schedule for. Each Page connects as its own social account — repeat the flow to add more.
+<Note>
+  Profile and Page count as **one network**, so they share the same slot. On TryPost Cloud that means one LinkedIn account per workspace; a standard self-hosted install allows both. See [how many accounts per network](/knowledge-base/social-accounts#how-many-accounts-per-network).
+
+  Connecting a second identity means authorizing again, which is normal — LinkedIn keeps both tokens valid as long as TryPost asks for the same permissions each time.
+</Note>
 
 ## Supported content types
 

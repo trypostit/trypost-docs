@@ -13,23 +13,29 @@ TryPost supports two Instagram connection flavors, each backed by a different OA
 | **Instagram (Standalone)** | `instagram` | Personal Instagram accounts that aren't linked to a Facebook page. Uses Instagram's own OAuth. |
 | **Instagram (Facebook Business)** | `instagram-facebook` | Business or Creator accounts linked to a Facebook page. Required for first-party publishing of feed, reels, and stories at full quality. |
 
-Connect either (or both) from **Accounts** in the dashboard.
+Both are reached from the single **Instagram** card on the **Accounts** page, which asks which method you want.
+
+<Note>
+  The two count as **one network**, so they share the same slot. On TryPost Cloud that means one Instagram account per workspace, by either method. See [how many accounts per network](/knowledge-base/social-accounts#how-many-accounts-per-network).
+
+  The same Instagram account cannot be connected through both methods — authorizing one that is already connected the other way is refused rather than duplicated.
+</Note>
 
 ## Connect your account
 
 ### Standalone (personal)
 
 1. Go to **Accounts** in the TryPost dashboard
-2. Click **Connect Instagram**
+2. Click **Connect** on the **Instagram** card, then choose **Instagram**
 3. Authorize TryPost on instagram.com
 4. The account shows up immediately
 
 ### Business (via Facebook)
 
 1. Go to **Accounts** in the TryPost dashboard
-2. Click **Connect Instagram (Facebook Business)**
+2. Click **Connect** on the **Instagram** card, then choose **Instagram (Facebook Business)**
 3. Authorize TryPost through Facebook
-4. Select the Facebook page whose Instagram account you want to connect
+4. Select the Facebook page whose Instagram account you want to connect. Accounts already connected to this workspace are left out of the list
 
 ## Supported content types
 

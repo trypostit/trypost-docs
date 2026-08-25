@@ -31,21 +31,35 @@ Social accounts are the connections between TryPost and your social media profil
 
 Go to **Accounts** in the dashboard and click the platform you want to connect. For most platforms, you'll be redirected to their authorization page. A few have extra steps:
 
-- **LinkedIn Page** — after authorizing, pick which company page to connect
+- **LinkedIn** — one card covers both your personal profile and the company pages you administer. After authorizing, pick which identity to connect
 - **Facebook** — after authorizing, pick which page to manage
-- **Instagram (Standalone)** — uses Instagram's own OAuth flow; suitable for personal IG accounts
-- **Instagram (Facebook Business)** — authorize through Facebook, then pick the Instagram account linked to a Facebook page (required for first-party publishing of feed/reels/stories/carousels)
-- **YouTube** — authorize with Google, then pick the channel
+- **Instagram** — one card offers both connection methods. **Standalone** uses Instagram's own OAuth (suitable for personal IG accounts); **Facebook Business** authorizes through Facebook and then picks the Instagram account linked to a page (required for first-party publishing of feed/reels/stories/carousels)
+- **YouTube** — authorize with Google; the channel comes from the account you pick on Google's own screen
 - **Bluesky** — enter your handle and an [App Password](https://bsky.app/settings/app-passwords) (not your main password)
 - **Mastodon** — enter your instance URL first, then authorize on that instance
 - **Telegram** — add the TryPost bot as an admin to your channel or group, then post the `/connect` command shown in the dialog
 - **Discord** — authorize TryPost and choose which server to add the bot to (requires *Manage Server*); the whole server connects as one account and you pick the channel on each post
 
-## Connection limits (Cloud only)
+<Note>
+  Where a platform asks you to pick (LinkedIn identities, Facebook pages, Instagram accounts), anything already connected to this workspace is left out of the list — you can only pick something new. If nothing is left, TryPost says so instead of showing an empty picker.
+</Note>
 
-On TryPost Cloud, each workspace connects one account on every supported network (its social set). To connect a second account on the same network, add another workspace.
+## How many accounts per network
 
-Self-hosted instances have no cap.
+Some platforms have two flavours that count as **one network**:
+
+- LinkedIn profile and LinkedIn Page
+- Instagram Standalone and Instagram (Facebook Business)
+
+**On TryPost Cloud**, each workspace connects one account per network. To manage a second account on the same network, add another workspace.
+
+**On self-hosted instances**, the cap is a setting. See [`ALLOW_MULTIPLE_SOCIAL_ACCOUNTS`](/self-hosting/configuration#multiple-accounts-per-network) — it defaults to whatever `SELF_HOSTED` is, so a standard self-hosted install allows several accounts on the same network out of the box.
+
+When several are allowed, each network's tile grows a **Connect another** card. Every connected account keeps its own card, its own name, and its own toggle in a post's Schedule tab.
+
+<Note>
+  The same account can never be connected twice, even where multiple accounts are allowed — including across the two flavours of one network. Authorizing an Instagram account you already connected through Facebook (or the other way round) is refused rather than duplicated.
+</Note>
 
 ## Active vs. inactive
 
@@ -82,6 +96,24 @@ If any of these detects a disconnected or expired account, the workspace owner r
 - **Password change** — Changing your password on the platform may revoke all OAuth tokens.
 - **Permission revoked** — You manually revoked TryPost's access in the platform's settings.
 - **Platform policy** — The platform may revoke tokens for inactivity or policy changes.
+
+## Reconnecting an account
+
+A card that needs attention shows a **Reconnect** button. Reconnecting refreshes that specific card — it keeps its posts, its scheduling history, and its place in your automations. It never creates a second card.
+
+Because it is tied to one card, you have to authorize **the same account** you are reconnecting:
+
+| What you'll see | What happened | What to do |
+|---|---|---|
+| *That is a different account. Authorize the one you are reconnecting.* | You signed in as someone else during the reconnect | Sign out of the platform, then reconnect and authorize the original account |
+| *Page not found.* | The company page you are reconnecting is not administered by the login you used | Authorize with the account that administers that page |
+| *Every account on this login is already connected.* | Everything this login offers is already connected to the workspace | Nothing to do — the account is already there |
+| *This workspace already has an account for this network. Disconnect it first.* | The network's single slot is taken | Disconnect the existing account, or use another workspace |
+| *Another connection is still finishing. Please try again in a moment.* | Two connections to the same network overlapped | Wait a moment and try again |
+
+<Note>
+  On Telegram, a reconnect must be confirmed **from the same channel or group** the card points at. Posting the `/connect` command somewhere else is rejected — and the code is not consumed, so you can still post it in the right place.
+</Note>
 
 ## Token security
 

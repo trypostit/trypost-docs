@@ -254,7 +254,8 @@
             "pages": [
               "self-hosting/configuration",
               "self-hosting/ai",
-              "self-hosting/production"
+              "self-hosting/production",
+              "self-hosting/upgrading"
             ]
           }
         ]

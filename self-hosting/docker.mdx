@@ -159,6 +159,10 @@ docker compose -f compose.prod.yaml exec app php artisan migrate --force
 docker compose -f compose.prod.yaml down
 ```
 
+<Note>
+  Running `migrate --force` to move an existing instance to a newer version? Back the database up first and check [Upgrading](/self-hosting/upgrading) — some releases rewrite data as well as schema.
+</Note>
+
 ---
 
 ## Local development
