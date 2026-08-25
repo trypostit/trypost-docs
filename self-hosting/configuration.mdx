@@ -135,6 +135,8 @@ Alternatively, set `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in `.env` (P
 
 MCP clients authenticate with OAuth (`mcp:use`), not with an API key Bearer header. API keys are for the REST API only.
 
+The [API reference](/api-reference/introduction) describes your instance too — same routes, same payloads, same MCP tools. Only two things differ: the base URL is your `APP_URL` followed by `/api`, and responses reflect the settings on this page rather than the Cloud plan. The most visible one is [multiple accounts per network](#multiple-accounts-per-network) — where it is on, `GET /social-accounts` can return several accounts sharing one `platform` value, so read it by `id`.
+
 Full install order: [Installation](/self-hosting/installation).
 
 
