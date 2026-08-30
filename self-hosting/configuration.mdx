@@ -108,7 +108,7 @@ Create the database as `utf8mb4` (see [Installation](/self-hosting/installation)
 <Warning>
   **On MySQL you cannot schedule a post past 19 January 2038.**
 
-  MySQL stores timestamps in a format that ends on that date, so a post scheduled beyond it fails to save. PostgreSQL has no such ceiling.
+  TryPost's schema stores dates in MySQL's `TIMESTAMP` columns, and that type ends on 19 January 2038 — a post scheduled beyond it is rejected outright. PostgreSQL's equivalent has no such ceiling, which is why the same schedule saves there.
 
   This only bites if you schedule more than a decade ahead. If that is part of how you work, choose PostgreSQL.
 </Warning>

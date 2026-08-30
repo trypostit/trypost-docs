@@ -287,6 +287,20 @@ docker compose ps
 docker compose -f compose.prod.yaml ps
 ```
 
+### `could not find driver` on MySQL
+
+The image predates the MySQL driver. Check and pull a newer one:
+
+```bash
+docker compose -f compose.prod.yaml exec app php -m | grep pdo_mysql
+```
+
+Images up to and including `v1.0.8` shipped `pdo_pgsql` only — see [above](#which-database-compose-gives-you).
+
+### Boot hangs for a minute on MySQL
+
+Expected. The readiness check is `pg_isready`, so it cannot confirm a MySQL server is up; it gives up after 60 seconds and migrations run normally. Watch it happen with `docker compose -f compose.prod.yaml logs -f app`.
+
 ### API key creation fails with "Personal access client not found"
 
 Seed the Passport client:
