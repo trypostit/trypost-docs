@@ -17,7 +17,7 @@ TryPost ships two Compose files:
 
 Both files bundle **PostgreSQL 16**. That is the packaged path, and the one TryPost Cloud runs.
 
-MySQL is equally supported by the application, but no Compose file ships it. To run TryPost on MySQL with Docker, drop the bundled `pgsql` service and point the app at your own MySQL:
+MySQL is equally supported by the application, but no Compose file ships it. To run TryPost on MySQL with Docker, point the app at your own MySQL and take the bundled Postgres out of the file — **including the `depends_on` entry**, or Compose refuses to start on a service that no longer exists:
 
 ```yaml
 services:
@@ -29,6 +29,11 @@ services:
       DB_DATABASE: trypost
       DB_USERNAME: trypost
       DB_PASSWORD: your_password
+    depends_on:
+      redis:                 # drop the pgsql entry that sat here
+        condition: service_healthy
+
+# and delete the whole `pgsql:` service, plus the `pgdata` volume it used
 ```
 
 <Warning>
