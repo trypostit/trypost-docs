@@ -319,7 +319,7 @@ PGPASSWORD="$DB_PASSWORD" pg_restore -h "$DB_HOST" -U "$DB_USERNAME" -d "$DB_DAT
 
 ```bash
 mysqldump -h "$DB_HOST" -u "$DB_USERNAME" -p"$DB_PASSWORD" \
-  --single-transaction --routines "$DB_DATABASE" > "trypost-$(date +%F).sql"
+  --single-transaction "$DB_DATABASE" > "trypost-$(date +%F).sql"
 
 # restore
 mysql -h "$DB_HOST" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" < "trypost-2026-01-01.sql"
