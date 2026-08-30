@@ -12,7 +12,7 @@ Step-by-step install on a bare-metal server or VM. Prefer containers? Use [Docke
 
 - PHP 8.2+ (with the extensions listed in [Requirements](/self-hosting/requirements))
 - Node.js 20+
-- PostgreSQL 14+ or MySQL 8+
+- PostgreSQL 14+ or MySQL 8+ (either works — see [choosing a database](/self-hosting/configuration#database))
 - Redis 6+
 - Composer 2.x
 
@@ -68,7 +68,7 @@ FILESYSTEM_DISK=public
 | Block | Why |
 |-------|-----|
 | `APP_KEY` | Already set by `key:generate` — encrypts sessions, cookies, encrypted data |
-| Database | Where posts, users, and Passport clients live |
+| Database | Where posts, users, and Passport clients live. The block above is PostgreSQL; for MySQL use `DB_CONNECTION=mysql` on port `3306` — see [Database](/self-hosting/configuration#database) |
 | Redis + queue/cache drivers | Horizon publishes posts and runs automations from Redis queues |
 | `BROADCAST_CONNECTION=reverb` | Live dashboard updates |
 | `FILESYSTEM_DISK=public` | Local media on disk (use `s3` / `r2` / `spaces` for object storage) |

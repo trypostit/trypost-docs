@@ -68,9 +68,18 @@ The same account is never connected twice, whatever the value — reconnecting a
 
 ## Database
 
-TryPost supports PostgreSQL and MySQL.
+TryPost runs on **PostgreSQL** or **MySQL**. Every release runs the full test suite against both, so neither is a second-class path — pick the one you already know how to back up and restore.
 
-### PostgreSQL (recommended)
+| | PostgreSQL | MySQL |
+|---|---|---|
+| Versions covered by our test suite | 16 | 8.4 |
+| Expected to work | 14+ | 8+ |
+| Shipped by our Compose files | Yes | No — [see below](/self-hosting/docker) |
+| Runs TryPost Cloud | Yes | No |
+
+MariaDB is close enough to MySQL that it may well work, but we do not test it and will not be able to help if it breaks.
+
+### PostgreSQL
 
 ```env
 DB_CONNECTION=pgsql
@@ -91,6 +100,22 @@ DB_DATABASE=trypost
 DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
+
+Create the database as `utf8mb4` so emoji in posts survive:
+
+```sql
+CREATE DATABASE trypost CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+MySQL 8 already defaults to `utf8mb4`; this matters on older servers and on MariaDB.
+
+<Warning>
+  **On MySQL you cannot schedule a post past 19 January 2038.**
+
+  MySQL stores timestamps in a format that ends on that date, so a post scheduled beyond it fails to save. PostgreSQL has no such ceiling.
+
+  This only bites if you schedule more than a decade ahead. If that is part of how you work, choose PostgreSQL.
+</Warning>
 
 ## Redis
 
