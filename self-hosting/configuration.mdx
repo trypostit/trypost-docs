@@ -72,14 +72,14 @@ TryPost runs on **PostgreSQL** or **MySQL**. Every change runs the full test sui
 
 | | PostgreSQL | MySQL |
 |---|---|---|
-| Versions covered by our test suite | 16 | 8.4 |
+| Covered by the test suite | 16 | 8.4 |
 | Expected to work | 14+ | 8+ |
-| Shipped by our Compose files | Yes | No — [see below](/self-hosting/docker) |
+| Shipped by the Compose files | Yes | No — [see below](/self-hosting/docker) |
 | Runs TryPost Cloud | Yes | No |
 
-MariaDB is close enough to MySQL that it may well work, but we do not test it and will not be able to help if it breaks.
+MariaDB is close enough to MySQL that it may well work, but it is not tested and not something support can help with.
 
-Pick one before you have data. Moving an existing install from one engine to the other is not a dump-and-load: the two disagree on types, quoting and JSON layout, so it needs a conversion tool and a careful check afterwards. We do not document or support that path.
+Pick one before you have data. Moving an existing install from one engine to the other is not a dump-and-load: the two disagree on types, quoting and JSON layout, so it needs a conversion tool and a careful check afterwards. That path is neither documented nor supported.
 
 ### PostgreSQL
 
