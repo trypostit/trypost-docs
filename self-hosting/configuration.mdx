@@ -68,9 +68,20 @@ The same account is never connected twice, whatever the value — reconnecting a
 
 ## Database
 
-TryPost supports PostgreSQL and MySQL.
+TryPost runs on **PostgreSQL** or **MySQL**. Every change runs the full test suite against both, so the application treats them as equals — pick the one you already know how to back up and restore. What differs is the packaging around them:
 
-### PostgreSQL (recommended)
+| | PostgreSQL | MySQL |
+|---|---|---|
+| Covered by the test suite | 16 | 8.4 |
+| Expected to work | 14+ | 8+ |
+| Shipped by the Compose files | Yes | No — [see below](/self-hosting/docker) |
+| Runs TryPost Cloud | Yes | No |
+
+MariaDB is close enough to MySQL that it may well work, but it is not tested and not something support can help with.
+
+Pick one before you have data. Moving an existing install from one engine to the other is not a dump-and-load: the two disagree on types, quoting and JSON layout, so it needs a conversion tool and a careful check afterwards. That path is neither documented nor supported.
+
+### PostgreSQL
 
 ```env
 DB_CONNECTION=pgsql
@@ -91,6 +102,16 @@ DB_DATABASE=trypost
 DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
+
+Create the database as `utf8mb4` (see [Installation](/self-hosting/installation)) so emoji in posts survive. MySQL 8 already defaults to it; this matters on older servers and on MariaDB.
+
+<Warning>
+  **On MySQL you cannot schedule a post past 19 January 2038.**
+
+  TryPost's schema stores dates in MySQL's `TIMESTAMP` columns, and that type ends on 19 January 2038 — a post scheduled beyond it is rejected outright. PostgreSQL's equivalent has no such ceiling, which is why the same schedule saves there.
+
+  This only bites if you schedule more than a decade ahead. If that is part of how you work, choose PostgreSQL.
+</Warning>
 
 ## Redis
 

@@ -13,6 +13,45 @@ TryPost ships two Compose files:
 | `compose.prod.yaml` | **Self-hosting in production** — pulls `ghcr.io/trypostit/trypost:latest`, Postgres, Redis, Horizon, Reverb, scheduler, optional Caddy TLS |
 | `compose.yaml` | Local development — builds from source, bind-mounts the repo, Mailpit, Vite |
 
+## Which database Compose gives you
+
+Both files bundle **PostgreSQL 16**. That is the packaged path, and the one TryPost Cloud runs.
+
+MySQL is equally supported by the application, but no Compose file ships it. To run TryPost on MySQL with Docker, point the app at your own MySQL and take the bundled Postgres out of the file — **including the `depends_on` entry**, or Compose refuses to start on a service that no longer exists:
+
+```yaml
+services:
+  app:
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: your-mysql-host
+      DB_PORT: "3306"
+      DB_DATABASE: trypost
+      DB_USERNAME: trypost
+      DB_PASSWORD: your_password
+    depends_on:
+      redis:
+        condition: service_healthy
+```
+
+Then delete the `pgsql:` service itself and the `pgdata` volume it declared.
+
+<Warning>
+  **Check the image ships the MySQL driver before you switch.** Images up to and including `v1.0.8` were built with `pdo_pgsql` only, so `DB_CONNECTION=mysql` fails with *could not find driver* before a single query runs. Confirm with:
+
+  ```bash
+  docker compose -f compose.prod.yaml exec app php -m | grep pdo_mysql
+  ```
+
+  No output means you need a newer image.
+</Warning>
+
+<Note>
+  The container's readiness check uses `pg_isready`, so on MySQL it cannot confirm the database is up. It gives up after 60 seconds and continues, and migrations then run normally — so **every boot takes about a minute longer**. Nothing is lost; the container just waits out the check first.
+</Note>
+
+See [Database](/self-hosting/configuration#database) for the trade-offs between the two engines.
+
 ## Requirements
 
 - Docker Desktop (Mac, Windows) or Docker Engine (Linux)
@@ -28,7 +67,7 @@ No local PHP/Node install required. The published image includes the built front
 
 | You (once) | Entrypoint / Supervisor (automatic) |
 |------------|-------------------------------------|
-| Set `APP_KEY`, `APP_URL`, DB passwords, `REVERB_APP_SECRET`, **`PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY`** | Wait for Postgres, run migrations |
+| Set `APP_KEY`, `APP_URL`, DB passwords, `REVERB_APP_SECRET`, **`PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY`** | Wait for the database, run migrations |
 | `docker compose … up -d` | Use Passport keys from env, `storage:link` if missing, ensure Personal Access Client |
 | `db:seed` (plans) + `UserSeeder` | Cache config/routes/views/events |
 | Optional: Caddy TLS profile | Start nginx, php-fpm, **Horizon**, **Reverb**, **schedule:work** |
@@ -73,7 +112,7 @@ docker compose -f compose.prod.yaml up -d
 
 On first boot the entrypoint:
 
-- waits for Postgres
+- waits for the database (PostgreSQL only — see above if you run MySQL)
 - runs migrations
 - creates `storage:link` if missing (unused if you later switch to S3 / R2 / Spaces)
 - loads Passport keys from `PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY` (exits if unset in production)
@@ -247,6 +286,20 @@ docker compose ps
 # or
 docker compose -f compose.prod.yaml ps
 ```
+
+### `could not find driver` on MySQL
+
+The image predates the MySQL driver. Check and pull a newer one:
+
+```bash
+docker compose -f compose.prod.yaml exec app php -m | grep pdo_mysql
+```
+
+Images up to and including `v1.0.8` shipped `pdo_pgsql` only — see [above](#which-database-compose-gives-you).
+
+### Boot hangs for a minute on MySQL
+
+Expected. The readiness check is `pg_isready`, so it cannot confirm a MySQL server is up; it gives up after 60 seconds and migrations run normally. Watch it happen with `docker compose -f compose.prod.yaml logs -f app`.
 
 ### API key creation fails with "Personal access client not found"
 

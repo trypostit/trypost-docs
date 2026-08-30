@@ -299,3 +299,34 @@ Regularly backup:
 - `.env` file
 - Passport keys (`storage/oauth-*.key` or `PASSPORT_*` env) — losing them invalidates API keys and MCP OAuth grants
 - Uploaded media (if using local storage)
+
+[Upgrading](/self-hosting/upgrading) asks for a database dump before every `migrate --force`, so it is worth having the command to hand:
+
+Both read the credentials from the app's own environment, so they work as written wherever `.env` is loaded — no need to remember whether this install calls the user `postgres`, `root` or `trypost`.
+
+**PostgreSQL**
+
+```bash
+PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -U "$DB_USERNAME" -d "$DB_DATABASE" \
+  -Fc -f "trypost-$(date +%F).dump"
+
+# restore
+PGPASSWORD="$DB_PASSWORD" pg_restore -h "$DB_HOST" -U "$DB_USERNAME" -d "$DB_DATABASE" \
+  --clean "trypost-2026-01-01.dump"
+```
+
+**MySQL**
+
+```bash
+mysqldump -h "$DB_HOST" -u "$DB_USERNAME" -p"$DB_PASSWORD" \
+  --single-transaction "$DB_DATABASE" > "trypost-$(date +%F).sql"
+
+# restore
+mysql -h "$DB_HOST" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" < "trypost-2026-01-01.sql"
+```
+
+On the bundled Compose stack the app container carries both clients and already has those variables, so `docker compose -f compose.prod.yaml exec app` runs either one as written — as does `php artisan db` for an interactive session.
+
+<Note>
+  `mysql-client` was added to the image alongside `pdo_mysql`; images up to and including `v1.0.8` carry only the PostgreSQL client. On those, run the MySQL commands from the database host instead.
+</Note>
