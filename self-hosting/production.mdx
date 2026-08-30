@@ -299,3 +299,25 @@ Regularly backup:
 - `.env` file
 - Passport keys (`storage/oauth-*.key` or `PASSPORT_*` env) — losing them invalidates API keys and MCP OAuth grants
 - Uploaded media (if using local storage)
+
+[Upgrading](/self-hosting/upgrading) asks for a database dump before every `migrate --force`, so it is worth having the command to hand:
+
+**PostgreSQL**
+
+```bash
+pg_dump -U postgres -d trypost -Fc -f trypost-$(date +%F).dump
+
+# restore
+pg_restore -U postgres -d trypost --clean trypost-2026-01-01.dump
+```
+
+**MySQL**
+
+```bash
+mysqldump -u root -p --single-transaction --routines trypost > trypost-$(date +%F).sql
+
+# restore
+mysql -u root -p trypost < trypost-2026-01-01.sql
+```
+
+Run these from a host that can reach the database. On the bundled Compose stack, prefix with `docker compose -f compose.prod.yaml exec pgsql`.
