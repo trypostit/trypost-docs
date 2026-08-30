@@ -103,13 +103,7 @@ DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
 
-Create the database as `utf8mb4` so emoji in posts survive:
-
-```sql
-CREATE DATABASE trypost CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-MySQL 8 already defaults to `utf8mb4`; this matters on older servers and on MariaDB.
+Create the database as `utf8mb4` (see [Installation](/self-hosting/installation)) so emoji in posts survive. MySQL 8 already defaults to it; this matters on older servers and on MariaDB.
 
 <Warning>
   **On MySQL you cannot schedule a post past 19 January 2038.**

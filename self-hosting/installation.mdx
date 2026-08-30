@@ -80,7 +80,17 @@ Also configure **mail** (invites / password reset) and optional social OAuth / A
   Prefer a one-liner for deps? `composer setup` runs install + `key:generate` + migrate + npm build, but it migrates **before** you edit `.env`. Safer path for a real server: follow the steps above (configure `.env`, then migrate yourself).
 </Tip>
 
-### 4. Run migrations
+### 4. Create the database and run migrations
+
+Migrations build the schema but not the database itself — create it first, with the name you put in `DB_DATABASE`:
+
+```bash
+# PostgreSQL
+createdb -U postgres trypost
+
+# MySQL — utf8mb4 so emoji in posts survive
+mysql -u root -p -e "CREATE DATABASE trypost CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
 
 ```bash
 php artisan migrate --force
