@@ -320,4 +320,8 @@ mysqldump -u root -p --single-transaction --routines trypost > trypost-$(date +%
 mysql -u root -p trypost < trypost-2026-01-01.sql
 ```
 
-Run these from a host that can reach the database. On the bundled Compose stack, prefix with `docker compose -f compose.prod.yaml exec pgsql`.
+Run these from any host that can reach the database. On the bundled Compose stack the app container carries both clients, so `docker compose -f compose.prod.yaml exec app` works for either engine — as does `php artisan db` for an interactive session.
+
+<Note>
+  `mysql-client` was added to the image alongside `pdo_mysql`; images up to and including `v1.0.8` carry only the PostgreSQL client. On those, run the MySQL commands from the database host instead.
+</Note>

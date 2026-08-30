@@ -22,6 +22,7 @@ This guide covers the requirements for self-hosting TryPost.
 
 - **PHP 8.2+** with extensions:
   - BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
+  - **pdo_pgsql** or **pdo_mysql**, matching the database you chose — without it the app fails at boot with *could not find driver*
   - **pcntl** (required by Horizon)
   - **intl**, **zip**, **exif**, **sockets**
   - GD or Imagick (for image processing)

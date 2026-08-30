@@ -31,6 +31,16 @@ services:
       DB_PASSWORD: your_password
 ```
 
+<Warning>
+  **Check the image ships the MySQL driver before you switch.** Images up to and including `v1.0.8` were built with `pdo_pgsql` only, so `DB_CONNECTION=mysql` fails with *could not find driver* before a single query runs. Confirm with:
+
+  ```bash
+  docker compose -f compose.prod.yaml exec app php -m | grep pdo_mysql
+  ```
+
+  No output means you need a newer image.
+</Warning>
+
 <Note>
   The container's readiness check uses `pg_isready`, so on MySQL it cannot confirm the database is up. It gives up after 60 seconds and continues, and migrations then run normally — so **every boot takes about a minute longer**. Nothing is lost; the container just waits out the check first.
 </Note>

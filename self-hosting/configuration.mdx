@@ -79,6 +79,8 @@ TryPost runs on **PostgreSQL** or **MySQL**. Every release runs the full test su
 
 MariaDB is close enough to MySQL that it may well work, but we do not test it and will not be able to help if it breaks.
 
+Pick one before you have data. Moving an existing install from one engine to the other is not a dump-and-load: the two disagree on types, quoting and JSON layout, so it needs a conversion tool and a careful check afterwards. We do not document or support that path.
+
 ### PostgreSQL
 
 ```env
