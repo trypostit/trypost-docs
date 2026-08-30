@@ -30,11 +30,11 @@ services:
       DB_USERNAME: trypost
       DB_PASSWORD: your_password
     depends_on:
-      redis:                 # drop the pgsql entry that sat here
+      redis:
         condition: service_healthy
-
-# and delete the whole `pgsql:` service, plus the `pgdata` volume it used
 ```
+
+Then delete the `pgsql:` service itself and the `pgdata` volume it declared.
 
 <Warning>
   **Check the image ships the MySQL driver before you switch.** Images up to and including `v1.0.8` were built with `pdo_pgsql` only, so `DB_CONNECTION=mysql` fails with *could not find driver* before a single query runs. Confirm with:
