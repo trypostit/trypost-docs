@@ -19,6 +19,7 @@ description: "Preview how a post will render on each enabled platform — applie
   - **LinkedIn / LinkedIn Page** — Unicode bold/underline substitution if the source contained `<strong>`/`<b>`/`<u>` markers (used by the AI generator).
   - **Mastodon** — a small allow-list of inline HTML is preserved (`p`, `strong`, `em`, `a`, `br`, `span`).
   - **Telegram** — rendered as Telegram's HTML allow-list (`b`, `i`, `u`, `s`, `a`, `code`, `pre`); block elements become line breaks and `@mentions` are kept.
+  - **X** — every URL is rewritten non-clickable (`https://www.example.com/pricing` becomes `example(.)com/pricing`), which is the text that gets published. See [links in posts](/platforms/x-twitter#links-in-posts).
 - `truncated` is `true` only when sanitization actually shortened the byte count (e.g. an HTML entity got decoded). It is **not** a hard-cap signal — over-length content is rejected at publish time, never silently truncated. To detect over-limit content, compare `sanitized_length` against `max_content_length` yourself.
 
 ## Response
