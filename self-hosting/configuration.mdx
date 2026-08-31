@@ -423,6 +423,36 @@ DISCORD_ENABLED=true
 
 Set any platform to `false` to hide it from the UI. All platforms are enabled by default.
 
+### Link defusing on X
+
+X charges much more to deliver a post that carries a link than a plain one, and its algorithm shows link posts to fewer people. With defusing on, every URL in the **X version** of a post is rewritten into a non-clickable form before it is published, so the address still reads normally but X no longer treats the post as a link post.
+
+```env
+X_DEFUSE_LINKS=false
+```
+
+| Value | Behaviour |
+|---|---|
+| `false` (default) | The X version of a post publishes with its URLs untouched |
+| `true` | Every URL in the X version is rewritten: the scheme and `www.` are dropped and every dot of the host becomes `(.)` |
+
+So `https://www.example.com/pricing` publishes as `example(.)com/pricing`, and `https://blog.example.com.br` as `blog(.)example(.)com(.)br`. Every dot has to break — leaving one intact still leaves a domain X can resolve and bill for.
+
+Only X is affected. The same post published to LinkedIn, Bluesky, Telegram or anywhere else keeps its links exactly as they were typed.
+
+What counts as a link:
+
+- Anything carrying `https://`, `http://` or `www.` is rewritten on sight, whatever it ends in.
+- A bare host is rewritten only when its last label is a delegated top-level domain, which is what tells `acme.com` apart from `Node.js`. The list mirrors the full IANA root zone, so `README.md` and `backup.zip` are rewritten too — `.md` and `.zip` are real top-level domains and X links them.
+- Email addresses are left alone.
+- Dots in the path or query string are left alone.
+
+Publishing and the post previews in the app, the API and MCP all show the same rewritten text, and the editor counts characters against it — what is counted is what X receives.
+
+<Note>
+  The default is off. A self-hosted install publishes through its own X app and pays its own X bill, so the saving this buys may not be worth links a reader cannot click. TryPost Cloud runs with it on.
+</Note>
+
 ## Social login
 
 TryPost supports sign in with **Google** and **GitHub**. Both providers are off by default — set the corresponding `*_AUTH_ENABLED` flag and provide credentials to surface the buttons on the login/register pages.
