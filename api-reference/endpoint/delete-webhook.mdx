@@ -14,7 +14,7 @@ Requires **manage webhooks** permission (Owner / Admin). Other-workspace IDs ret
 
 ## Response
 
-Returns `204 No Content` on success. Delivery to that endpoint stops immediately. All delivery logs for the webhook are deleted.
+Returns `204 No Content` on success. Delivery to that endpoint stops immediately. All delivery logs for the webhook are deleted. Queued jobs for that webhook are discarded.
 
 <RequestExample>
 ```bash

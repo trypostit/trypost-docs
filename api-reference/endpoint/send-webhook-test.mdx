@@ -8,6 +8,8 @@ Requires **manage webhooks** permission (Owner / Admin). Other-workspace IDs ret
 
 The ping uses the same envelope and `X-Webhook-Signature` header as real events. `type` is `webhook.test` and `data` is an empty object. The endpoint must return `2xx` within 5 seconds.
 
+The ping runs even if the webhook is `paused` or `disabled`. It does **not** write a delivery log and does not change `status`, `consecutive_failures`, or `last_sent_at`.
+
 Unreachable, private, or non-2xx endpoints return `422` with `errors.endpoint`.
 
 ## Request

@@ -19,7 +19,7 @@ Plain array of webhook objects.
   Public URL that receives signed POSTs.
 </ResponseField>
 <ResponseField name="events" type="array">
-  Subscribed event names. One or more of `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`.
+  Subscribed event names. One or more of `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. There is no `publishing` event.
 </ResponseField>
 <ResponseField name="status" type="string">
   `enabled`, `disabled`, or `paused`.

@@ -175,7 +175,7 @@ This starts `php artisan serve`, a queue listener, log tail, and Vite. Open `htt
 | Process | Command | Purpose |
 |---------|---------|---------|
 | Web (PHP-FPM + Nginx) | see [Production](/self-hosting/production#nginx-configuration) | Serve HTTP |
-| **Horizon** | `php artisan horizon` | Queues — publish posts, notifications, automations |
+| **Horizon** | `php artisan horizon` | Queues — publish posts, notifications, automations, webhooks |
 | **Reverb** | `php artisan reverb:start` | WebSockets |
 | **Scheduler** | cron → `php artisan schedule:run` | Due posts, token refresh, automations |
 

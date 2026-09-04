@@ -11,11 +11,11 @@ Private or local endpoints are rejected with `422` and an `errors.endpoint` arra
 ## Request
 
 <ParamField body="endpoint" type="string" required>
-  Public URL that will receive signed webhook payloads. Maximum 255 characters. Must be a valid URL. Private, loopback, and link-local addresses are rejected.
+  Public `http://` or `https://` URL that will receive signed webhook payloads. Maximum 255 characters. Private, loopback, and link-local addresses are rejected.
 </ParamField>
 
 <ParamField body="events" type="array" required>
-  At least one event. Allowed values: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. Wildcards are not accepted.
+  At least one event. Allowed values: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. There is no `publishing` event and no wildcard.
 </ParamField>
 
 ## Response

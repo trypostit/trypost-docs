@@ -15,11 +15,11 @@ Changing the endpoint to a private or local URL returns `422` with `errors.endpo
 </ParamField>
 
 <ParamField body="endpoint" type="string">
-  New public URL. Maximum 255 characters. Private or local addresses are rejected.
+  New public `http://` or `https://` URL. Maximum 255 characters. Private or local addresses are rejected.
 </ParamField>
 
 <ParamField body="events" type="array">
-  Replacement event list. Must contain at least one allowed event when provided: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`.
+  Replacement event list. Must contain at least one allowed event when provided: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. No `publishing` event and no wildcard.
 </ParamField>
 
 <ParamField body="status" type="string">

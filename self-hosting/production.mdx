@@ -275,7 +275,7 @@ Make sure all of these are in place in production:
 | **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
 | **Redis** | `QUEUE_CONNECTION=redis` + Redis up | Queues, cache, schedule locks |
 | **Mail** | SMTP or SendKit | Invites, password reset, alerts |
-| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, automations |
+| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, automations, and [webhooks](/knowledge-base/webhooks) |
 | **Reverb** | `php artisan reverb:start` (Supervisor) | Real-time WebSocket updates |
 | **Scheduler** | cron → `schedule:run` every minute | Due posts, token refresh, automations |
 

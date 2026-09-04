@@ -157,7 +157,7 @@ Webhook object (list items omit the secret):
 |-------|------|-------------|
 | **id** | string | Webhook UUID. |
 | **endpoint** | string | Public URL that receives signed POSTs. |
-| **events** | array | Subscribed events: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. |
+| **events** | array | Subscribed events: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. No `publishing` event and no wildcard. |
 | **status** | string | `enabled`, `disabled`, or `paused`. |
 | **last_sent_at** | string | ISO 8601 last successful delivery, or `null`. |
 | **paused_at** | string | ISO 8601 when TryPost paused it, or `null`. |
@@ -169,12 +169,12 @@ Webhook object (list items omit the secret):
 |------|-------------|
 | **list-webhooks-tool** | List outgoing webhooks, newest first. Returns `{ webhooks: [...] }` with **no** signing secrets. No input. |
 | **get-webhook-tool** | Get one webhook by `webhook_id`, including `signing_secret`. |
-| **create-webhook-tool** | Create a webhook. Input: `endpoint` (required public URL), `events` (required, at least one allowed event). Returns the webhook **with** `signing_secret`. Private/local URLs are rejected. Creating does **not** ping the endpoint. |
+| **create-webhook-tool** | Create a webhook. Input: `endpoint` (required public `http://` or `https://` URL, max 255), `events` (required, at least one allowed event). Returns the webhook **with** `signing_secret`. Private/local URLs are rejected. Creating does **not** ping the endpoint. |
 | **update-webhook-tool** | Update `endpoint`, `events`, and/or `status` (`enabled` \| `disabled` only — `paused` is rejected). Input includes required `webhook_id`. Omitted fields stay unchanged. Re-enabling a paused webhook resets consecutive failures. Does **not** ping. Response omits the secret. |
-| **send-webhook-test-tool** | POST a signed `webhook.test` ping (`data` is `{}`). Input: `webhook_id`. Returns `{ tested: true }`. Does **not** write a delivery log. Marked `IsOpenWorld`. |
+| **send-webhook-test-tool** | POST a signed `webhook.test` ping (`data` is `{}`). Input: `webhook_id`. Returns `{ tested: true }`. Does **not** write a delivery log and does not change status or failure counters. Runs even if the webhook is paused or disabled. Marked `IsOpenWorld`. |
 | **rotate-webhook-secret-tool** | Rotate the signing secret. Input: `webhook_id`. Previous secret stops working immediately. Returns the webhook with the new `signing_secret`. Marked `IsDestructive`. |
 | **list-webhook-logs-tool** | List delivery logs, newest first. Input: `webhook_id`, optional `limit` (1–100, default **50**). Returns `{ logs: [...] }` with payload and response body. No cursor — only the first `limit` rows. |
-| **replay-webhook-log-tool** | Replay a log. Input: `webhook_id` + `log_id`. Queues a **new** signed delivery with a new log id, using the original `data`, even if the webhook is paused or disabled. Returns `{ replayed: true }`. Marked `IsOpenWorld`. |
+| **replay-webhook-log-tool** | Replay a log. Input: `webhook_id` + `log_id`. Queues a **new** signed delivery with a new log id, using the original `data`, even if the webhook is paused or disabled. Success resets the failure counter but does **not** re-enable a paused webhook. Returns `{ replayed: true }`. Marked `IsOpenWorld`. |
 | **delete-webhook-tool** | Delete a webhook and its logs permanently. Input: `webhook_id`. Returns `{ deleted: true }`. Marked `IsDestructive`. |
 
 ## Per-platform `meta` (MCP)

@@ -6,7 +6,7 @@ description: "List delivery logs for a webhook, newest first, paginated 15 per p
 
 Requires **manage webhooks** permission (Owner / Admin). Other-workspace IDs return `404`.
 
-Each item includes the signed payload and the response body (first 2,000 characters). Logs older than 7 days are pruned daily.
+Each item includes the signed payload and the response body (first 2,000 characters). Logs older than 7 days are pruned daily. Test pings (`webhook.test`) are not logged.
 
 ## Request
 
