@@ -62,7 +62,7 @@ Publish now (dashboard **Post now**, REST `PUT` with `status=publishing`, or `pu
 
 Edits that do **not** change status send nothing: content, media, labels, platforms, or a new `scheduled_at` on a post that is already `scheduled`. [Duplicate](/knowledge-base/posts#duplicating-a-post) is a new post, so it fires `post.created`. A failed or published post cannot be republished in place — duplicate it and you will get a fresh lifecycle.
 
-There are no events for comments, mentions, social-account disconnects, team changes, or AI Create finishing. Those stay in [notifications](/knowledge-base/notifications). Posts created by an [automation](/knowledge-base/automations/introduction) still fire these events (`created_via` is `automation`). Deleting a [workspace](/knowledge-base/workspaces) removes the webhooks with it and does **not** send `post.deleted` for each post.
+There are no events for comments, mentions, social-account disconnects, or team changes — those stay in [notifications](/knowledge-base/notifications). AI Create has no dedicated `post.ready` event; when the draft is saved you get `post.created` (`created_via` is `web`). Posts created by an [automation](/knowledge-base/automations/introduction) still fire these events (`created_via` is `automation`). Deleting a [workspace](/knowledge-base/workspaces) removes the webhooks with it and does **not** send `post.deleted` for each post.
 
 ## Receive a delivery
 
