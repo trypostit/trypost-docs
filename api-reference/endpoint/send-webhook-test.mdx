@@ -1,0 +1,38 @@
+---
+title: "Send webhook test"
+api: "POST /webhooks/{webhook}/send-test"
+description: "Send a signed webhook.test ping to the endpoint. Does not create a delivery log."
+---
+
+Requires **manage webhooks** permission (Owner / Admin). Other-workspace IDs return `404`.
+
+The ping uses the same envelope and `X-Webhook-Signature` header as real events. `type` is `webhook.test` and `data` is an empty object. The endpoint must return `2xx` within 5 seconds.
+
+Unreachable, private, or non-2xx endpoints return `422` with `errors.endpoint`.
+
+## Request
+
+<ParamField path="webhook" type="string" required>
+  The webhook UUID to ping.
+</ParamField>
+
+## Response
+
+```json
+{ "tested": true }
+```
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/webhooks/a1b2c3d4-e5f6-7890-abcd-ef1234567890/send-test \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "tested": true
+}
+```
+</ResponseExample>

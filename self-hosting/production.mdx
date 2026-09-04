@@ -202,6 +202,7 @@ TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler 
 | `social:refresh-expiring-tokens` | every 15 minutes | Refreshes OAuth tokens that are about to expire |
 | `social:recover-stuck-posts` | every 30 minutes | Detects posts stuck in `publishing` and retries or fails them |
 | `social:check-connections` | daily | Verifies every connected social account still has a valid token |
+| `app:prune-webhook-logs` | daily | Deletes [webhook](/knowledge-base/webhooks) delivery logs older than 7 days |
 
 Add the Laravel scheduler to cron:
 

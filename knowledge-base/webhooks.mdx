@@ -1,0 +1,243 @@
+---
+title: "Webhooks"
+description: "Receive signed HTTP notifications when posts are created, scheduled, published, or fail."
+icon: "webhook"
+---
+
+Workspace webhooks POST a signed JSON payload to a URL you control whenever a subscribed post event fires. Use them to sync a CRM, trigger an internal job, or keep another system in step with TryPost.
+
+They are **outgoing** event subscriptions for the workspace. They are not the [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes) (a one-off HTTP call inside a flow), and they are not inbound Telegram/Stripe webhooks.
+
+## Who can manage webhooks
+
+Only the **account owner** and workspace **admins** can create, edit, test, rotate, replay, or delete webhooks. Members and viewers cannot see or manage them.
+
+See [Team & roles](/knowledge-base/team).
+
+## Create a webhook
+
+<Steps>
+  <Step title="Open Webhooks">
+    In the sidebar, click **Webhooks**.
+  </Step>
+  <Step title="Create webhook">
+    Click **Create webhook**.
+  </Step>
+  <Step title="Set the endpoint">
+    Enter a public `https://` URL. Private, loopback, and link-local addresses are rejected.
+  </Step>
+  <Step title="Choose events">
+    Select at least one event. There is no wildcard — you must list the events you want.
+  </Step>
+  <Step title="Copy the signing secret">
+    After create, open the webhook and copy the **signing secret**. You can reveal it again later, or [rotate](#rotate-the-signing-secret) it.
+  </Step>
+</Steps>
+
+Creating a webhook does **not** send a request. Use **Send test event** when you want to ping the URL.
+
+You can also manage webhooks through the [REST API](/api-reference/endpoint/list-webhooks) and [MCP tools](/ai/tools-reference#webhooks).
+
+## Events
+
+| Event | When it fires | `data` |
+|-------|---------------|--------|
+| `post.created` | A post is created | Full [post payload](#post-payload) |
+| `post.scheduled` | A post moves to `scheduled` | Full post payload |
+| `post.unscheduled` | A scheduled post returns to `draft` | Full post payload |
+| `post.published` | A post published on every enabled platform | Full post payload |
+| `post.partially_published` | Some platforms published, others failed | Full post payload |
+| `post.failed` | Publishing failed on the enabled platforms | Full post payload |
+| `post.deleted` | A post is deleted | `{ "id", "workspace_id" }` only |
+
+`post.created` does not fire again when you edit a draft. Status events fire on the transition, not on every save.
+
+## Receive a delivery
+
+Each delivery is `POST` with `Content-Type: application/json`. TryPost does not follow redirects. Respond with `2xx` as soon as you have accepted the payload.
+
+### Headers
+
+| Header | Value |
+|--------|-------|
+| `Content-Type` | `application/json` |
+| `X-Webhook-Signature` | Hex HMAC-SHA256 of the **raw request body** |
+| `User-Agent` | `TryPost.it/1.0 (+https://trypost.it)` |
+
+<Note>
+  Self-hosting? Override the User-Agent with `TRYPOST_USER_AGENT`. Private endpoints stay rejected unless you set `TRYPOST_ALLOW_PRIVATE_NETWORK=true` — see [Configuration](/self-hosting/configuration#advanced).
+</Note>
+
+### Envelope
+
+Every event — including the test ping — uses the same envelope:
+
+```json
+{
+  "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "type": "post.published",
+  "data": {},
+  "created_at": "2026-09-04T15:04:05+00:00"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `id` | Delivery log UUID. Stable across retries of the same attempt; a [replay](#replay-a-delivery) creates a new id |
+| `type` | Event name, or `webhook.test` for a test ping |
+| `data` | Event payload. Empty object for `webhook.test` |
+| `created_at` | ISO 8601 timestamp |
+
+### Verify the signature
+
+Compute HMAC-SHA256 of the **raw body bytes** with the signing secret. Compare the hex digest to `X-Webhook-Signature` with a constant-time comparison. Do not re-serialize the JSON — key order and escaping must match the bytes TryPost signed.
+
+<CodeGroup>
+
+```javascript Node.js
+import crypto from 'node:crypto';
+
+const expected = crypto
+  .createHmac('sha256', process.env.TRYPOST_WEBHOOK_SECRET)
+  .update(rawBody)
+  .digest('hex');
+
+const valid = crypto.timingSafeEqual(
+  Buffer.from(expected, 'utf8'),
+  Buffer.from(req.headers['x-webhook-signature'], 'utf8'),
+);
+```
+
+```php PHP
+$expected = hash_hmac('sha256', $rawBody, $secret);
+$valid = hash_equals($expected, $request->header('X-Webhook-Signature'));
+```
+
+```python Python
+import hmac
+import hashlib
+
+expected = hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
+valid = hmac.compare_digest(expected, signature_header)
+```
+
+</CodeGroup>
+
+<Warning>
+  Frameworks that parse JSON before you see the request often discard the raw body. Read the unparsed body (for example Express `express.raw({ type: 'application/json' })`) and only then `JSON.parse`.
+</Warning>
+
+The secret is stored encrypted. It looks like `whsec_` plus 32 random characters. You can read it from the dashboard, [`GET /webhooks/{id}`](/api-reference/endpoint/get-webhook), or `get-webhook-tool`.
+
+## Post payload
+
+For every post event except `post.deleted`, `data` is the post at the moment of the event:
+
+| Field | Description |
+|-------|-------------|
+| `id` | Post UUID |
+| `workspace_id` | Workspace UUID |
+| `user_id` | Author user UUID |
+| `status` | `draft`, `scheduled`, `publishing`, `published`, `partially_published`, or `failed` |
+| `created_via` | `web`, `api`, `mcp`, or `automation` |
+| `content` | Post body |
+| `scheduled_at` / `published_at` / `created_at` / `updated_at` | ISO 8601, or `null` |
+| `author` | `{ id, name }`, or `null` |
+| `workspace` | `{ id, name }` |
+| `labels` | `{ id, name, color }[]` |
+| `media` | Attached files (`id`, `path`, `url`, `type`, `mime_type`, `original_filename`, `source`, `source_meta`, `meta`) |
+| `platforms` | One entry per targeted account, including `status`, `platform_url`, `error_message`, `meta`, and a nested `social_account` |
+
+`post.deleted` is only `{ "id": "…", "workspace_id": "…" }` — the post is already gone.
+
+## Test event
+
+**Send test event** POSTs a signed `webhook.test` ping with an empty `data` object. A `2xx` response is required. Timeouts, connection errors, and non-2xx statuses fail the test.
+
+The test does **not** write a delivery log. It is a reachability check, not a replay.
+
+## Status
+
+| Status | Meaning |
+|--------|---------|
+| **Enabled** | Subscribed events are delivered |
+| **Disabled** | You turned it off. Events are skipped |
+| **Paused** | TryPost paused it after **5** consecutive failed deliveries. The account owner gets an email |
+
+You can set **enabled** or **disabled**. You cannot set **paused** yourself — only TryPost does that after failures.
+
+Re-enabling a paused webhook clears `consecutive_failures` and `paused_at`. Saving an already-enabled webhook with `status: enabled` does not reset the counter.
+
+## Delivery, retries, and pause
+
+Deliveries run on the `webhooks` queue.
+
+- **Timeout:** 10 seconds
+- **Retries:** 3 attempts, 60 seconds apart
+- **Success:** HTTP `2xx`. `last_sent_at` updates and the failure counter resets
+- **Failure:** After 3 failed attempts, the consecutive-failure count goes up by one
+- **Pause:** At 5 consecutive failed deliveries, the webhook is paused and the account owner is emailed
+
+A replay still delivers if the webhook is paused or disabled. Regular events do not.
+
+Private or local endpoints are rejected at create/update and again at delivery time.
+
+## Delivery logs
+
+Open a webhook to see logs, newest first: event type, HTTP status, attempts, payload, and response body (first 2,000 characters).
+
+Logs older than **7 days** are deleted daily. Deleting a webhook deletes its logs immediately.
+
+<Note>
+  Self-hosting? The prune job is `app:prune-webhook-logs`, scheduled daily. Your cron must run `php artisan schedule:run` every minute — see [Scheduled tasks](/self-hosting/production#scheduled-tasks-cron).
+</Note>
+
+## Replay a delivery
+
+**Replay** queues a new signed POST with the original `data`, a new envelope `id`, and a new log row. Use it after you fix the receiver.
+
+Replay works even when the webhook is paused or disabled.
+
+## Rotate the signing secret
+
+**Rotate signing secret** issues a new `whsec_…` value. The previous secret stops working immediately. Update the receiver before you rotate, or deliveries will fail signature checks.
+
+## Delete a webhook
+
+Delete from the list or the detail page. Delivery to that URL stops at once, and the log history is removed. This cannot be undone.
+
+## Via the API and MCP
+
+| Task | REST | MCP |
+|------|------|-----|
+| List | [`GET /webhooks`](/api-reference/endpoint/list-webhooks) | `list-webhooks-tool` |
+| Create | [`POST /webhooks`](/api-reference/endpoint/create-webhook) | `create-webhook-tool` |
+| Get (includes secret) | [`GET /webhooks/{id}`](/api-reference/endpoint/get-webhook) | `get-webhook-tool` |
+| Update | [`PUT /webhooks/{id}`](/api-reference/endpoint/update-webhook) | `update-webhook-tool` |
+| Test | [`POST /webhooks/{id}/send-test`](/api-reference/endpoint/send-webhook-test) | `send-webhook-test-tool` |
+| Rotate secret | [`POST /webhooks/{id}/rotate-secret`](/api-reference/endpoint/rotate-webhook-secret) | `rotate-webhook-secret-tool` |
+| Logs | [`GET /webhooks/{id}/logs`](/api-reference/endpoint/list-webhook-logs) | `list-webhook-logs-tool` |
+| Replay | [`POST /webhooks/{id}/logs/{log}/replay`](/api-reference/endpoint/replay-webhook-log) | `replay-webhook-log-tool` |
+| Delete | [`DELETE /webhooks/{id}`](/api-reference/endpoint/delete-webhook) | `delete-webhook-tool` |
+
+List and update responses omit `signing_secret`. Create, get, and rotate return it.
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Can I subscribe to every event with a wildcard?">
+    No. Send an explicit `events` array. `*` and unknown names are rejected.
+  </Accordion>
+  <Accordion title="Does creating or updating a webhook ping the URL?">
+    No. Only **Send test event** (or the matching API / MCP call) sends a request.
+  </Accordion>
+  <Accordion title="Why is my webhook paused?">
+    Five deliveries in a row exhausted their retries. Fix the endpoint, then set status back to **enabled**.
+  </Accordion>
+  <Accordion title="How is this different from the automation Webhook node?">
+    Workspace webhooks fire on post lifecycle events and are always signed the same way. The [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes) is an HTTP step inside a flow — you pick the method, headers, and body template.
+  </Accordion>
+  <Accordion title="How long are logs kept?">
+    Seven days. Older rows are pruned daily. Deleting the webhook removes the remaining logs.
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,24 @@
+---
+title: "Delete webhook"
+api: "DELETE /webhooks/{webhook}"
+description: "Delete a webhook and its delivery logs. This cannot be undone."
+---
+
+Requires **manage webhooks** permission (Owner / Admin). Other-workspace IDs return `404`.
+
+## Request
+
+<ParamField path="webhook" type="string" required>
+  The webhook UUID to delete.
+</ParamField>
+
+## Response
+
+Returns `204 No Content` on success. Delivery to that endpoint stops immediately. All delivery logs for the webhook are deleted.
+
+<RequestExample>
+```bash
+curl -X DELETE https://app.trypost.it/api/webhooks/a1b2c3d4-e5f6-7890-abcd-ef1234567890 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>

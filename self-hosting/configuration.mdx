@@ -546,11 +546,13 @@ If not set, Horizon dashboard will be inaccessible in non-local environments.
 
 ```env
 TRYPOST_ALLOW_PRIVATE_NETWORK=false
+TRYPOST_USER_AGENT="TryPost.it/1.0 (+https://trypost.it)"
 ```
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TRYPOST_ALLOW_PRIVATE_NETWORK` | `false` | When `true`, allows HTTP requests from TryPost (RSS, webhooks, URL media fetches, etc.) to private/internal network addresses. Keep `false` unless you intentionally need that for a private network install. |
+| `TRYPOST_ALLOW_PRIVATE_NETWORK` | `false` | When `true`, allows HTTP requests from TryPost (RSS, [workspace webhooks](/knowledge-base/webhooks), URL media fetches, etc.) to private/internal network addresses. Keep `false` unless you intentionally need that for a private network install. |
+| `TRYPOST_USER_AGENT` | `TryPost.it/1.0 (+https://trypost.it)` | `User-Agent` sent on outgoing HTTP, including webhook deliveries and test pings. |
 
 ## Next Steps
 

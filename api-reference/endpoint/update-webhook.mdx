@@ -1,0 +1,59 @@
+---
+title: "Update webhook"
+api: "PUT /webhooks/{webhook}"
+description: "Update a webhook endpoint, events, or status. Omitted fields are left unchanged. Does not send a test request."
+---
+
+Requires **manage webhooks** permission (Owner / Admin). Other-workspace IDs return `404`.
+
+Changing the endpoint to a private or local URL returns `422` with `errors.endpoint`. Updating does **not** ping the URL.
+
+## Request
+
+<ParamField path="webhook" type="string" required>
+  The webhook UUID.
+</ParamField>
+
+<ParamField body="endpoint" type="string">
+  New public URL. Maximum 255 characters. Private or local addresses are rejected.
+</ParamField>
+
+<ParamField body="events" type="array">
+  Replacement event list. Must contain at least one allowed event when provided: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`.
+</ParamField>
+
+<ParamField body="status" type="string">
+  `enabled` or `disabled` only. You cannot set `paused` — TryPost sets that after 5 consecutive failed deliveries. Re-enabling a paused webhook resets `consecutive_failures` and clears `paused_at`. Sending `enabled` on an already-enabled webhook does not reset the counter.
+</ParamField>
+
+## Response
+
+Returns the updated webhook **without** `signing_secret`. Same remaining fields as [`GET /webhooks`](/api-reference/endpoint/list-webhooks).
+
+<RequestExample>
+```bash
+curl -X PUT https://app.trypost.it/api/webhooks/a1b2c3d4-e5f6-7890-abcd-ef1234567890 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "events": ["post.published", "post.partially_published", "post.failed"],
+    "status": "enabled"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "endpoint": "https://example.com/webhooks/trypost",
+  "events": ["post.published", "post.partially_published", "post.failed"],
+  "status": "enabled",
+  "last_sent_at": "2026-09-04T15:04:05+00:00",
+  "paused_at": null,
+  "consecutive_failures": 0,
+  "created_at": "2026-09-01T12:00:00+00:00",
+  "updated_at": "2026-09-04T16:00:00+00:00"
+}
+```
+</ResponseExample>

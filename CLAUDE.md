@@ -98,6 +98,7 @@ The same applies to anything a self-hoster can switch off or raise: platform ava
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
 | Social Accounts | `GET /social-accounts`, `PUT /social-accounts/{account}/toggle`, `GET /social-accounts/{account}/boards` (Pinterest), `GET /social-accounts/{account}/channels` (Discord) |
 | API Keys | `GET /api-keys`, `POST /api-keys`, `DELETE /api-keys/{apiToken}` |
+| Webhooks | `GET /webhooks`, `POST /webhooks`, `GET /webhooks/{webhook}`, `PUT /webhooks/{webhook}`, `DELETE /webhooks/{webhook}`, `POST /webhooks/{webhook}/send-test`, `POST /webhooks/{webhook}/rotate-secret`, `GET /webhooks/{webhook}/logs`, `POST /webhooks/{webhook}/logs/{webhookLog}/replay` |
 
 `PUT /posts/{post}` accepts a `status` of `publishing` to publish immediately (no separate publish endpoint at the REST level).
 
@@ -122,12 +123,12 @@ Do not confuse with `media[].meta.alt_text` (media accessibility, max 2000). Pin
 ### Response shape
 - Resources are returned **unwrapped** (`JsonResource::withoutWrapping()` is set globally). A single resource looks like `{ "id": ..., ... }` — no `data:` envelope.
 - Non-paginated collections return a plain JSON array (`[ {...}, {...} ]`).
-- `GET /posts` and `GET /assets` return the Laravel pagination envelope (`{ data, links, meta }`). Posts are **15** per page (API contract). Assets are **25** per page (`config('app.pagination.default')`).
+- `GET /posts`, `GET /assets`, and `GET /webhooks/{id}/logs` return the Laravel pagination envelope (`{ data, links, meta }`). Posts and webhook logs are **15** per page (API contract). Assets are **25** per page (`config('app.pagination.default')`). `GET /webhooks` is a plain array.
 - `attach-media-from-url`, `metrics`, and `preview` are bespoke — not Resource-shaped (no `data:` wrapper, just the documented fields at top level). The multipart `/media` upload and `POST /posts/{post}/media/from-asset` return a regular Post resource.
 - `POST /api-keys` returns `{ "token": {...}, "plain_token": "..." }`. The plain token is shown ONCE.
 
 ### Pagination
-`GET /posts` paginates at **15** per page. `GET /assets` paginates at **25** per page. All other list endpoints return full results as a plain array.
+`GET /posts` paginates at **15** per page. `GET /assets` paginates at **25** per page. `GET /webhooks/{id}/logs` paginates at **15** per page. All other list endpoints return full results as a plain array.
 
 ### Asset Library (API & MCP)
 
@@ -142,7 +143,7 @@ Do not confuse with `media[].meta.alt_text` (media accessibility, max 2000). Pin
 - Tool names are auto-derived from class basenames as kebab-case + `-tool` suffix (Laravel MCP convention — no `#[Name]` overrides in `TryPostServer`).
 - Post tools: `list-posts-tool`, `get-post-tool`, `create-post-tool`, `update-post-tool`, `publish-post-tool`, `preview-post-tool`, `delete-post-tool`, `attach-media-from-url-tool`, `request-media-upload-tool`, `attach-media-from-upload-tool`, `attach-existing-asset-tool`, `get-post-metrics-tool`.
 - Asset tools: `list-assets-tool`, `get-asset-tool`, `attach-existing-asset-tool`.
-- Plus: `list-content-types-tool` (Platforms), `list-signatures-tool` / `create-signature-tool` / `update-signature-tool` / `delete-signature-tool`, `list-labels-tool` / `create-label-tool` / `update-label-tool` / `delete-label-tool`, `list-social-accounts-tool` / `list-pinterest-boards-tool` / `list-discord-channels-tool` / `toggle-social-account-tool`, `get-workspace-tool`, `list-api-keys-tool` / `create-api-key-tool` / `delete-api-key-tool`.
+- Plus: `list-content-types-tool` (Platforms), `list-signatures-tool` / `create-signature-tool` / `update-signature-tool` / `delete-signature-tool`, `list-labels-tool` / `create-label-tool` / `update-label-tool` / `delete-label-tool`, `list-social-accounts-tool` / `list-pinterest-boards-tool` / `list-discord-channels-tool` / `toggle-social-account-tool`, `get-workspace-tool`, `list-api-keys-tool` / `create-api-key-tool` / `delete-api-key-tool`, `list-webhooks-tool` / `get-webhook-tool` / `create-webhook-tool` / `update-webhook-tool` / `delete-webhook-tool` / `send-webhook-test-tool` / `rotate-webhook-secret-tool` / `list-webhook-logs-tool` / `replay-webhook-log-tool`.
 - `create-post-tool` accepts `platforms[]` (each with `social_account_id`, `content_type`, optional `meta`), `scheduled_at`, `label_ids` — same fields as REST `POST /posts` **except** MCP does **not** accept inline `media[]` (use attach tools). `update-post-tool` uses `platforms[].id` (post_platform UUID), not `social_account_id`.
 - `create-api-key-tool` returns plain secret as `token` (REST create returns `plain_token`).
 - Before publishing Pinterest/Discord, resolve IDs via `list-pinterest-boards-tool` / `list-discord-channels-tool` (REST: `GET /social-accounts/{account}/boards|channels`). Those MCP tools authorize with `createPost` — Viewers get `Not authorized to manage posts.` (Owner / Admin / Member OK).
@@ -208,6 +209,16 @@ There is no `status` enum on tokens. `AccessToken` exposes `revoked` (boolean) a
 
 Allowed MIME types: images = `image/jpeg`, `image/png`, `image/gif`, `image/webp` (PNG/WebP stills are normalized to JPEG q100); videos = `video/mp4`, `video/quicktime`; documents = `application/pdf`. Default size caps: **10 MB** image, **1024 MB** video, **100 MB** document (env: `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB` / `MEDIA_DOCUMENT_MAX_SIZE_MB`). Signed upload URL TTL defaults to **15 minutes** (`MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES`; legacy fallback `MCP_UPLOAD_URL_TTL_MINUTES`). There is **no** separate 50 MB MCP-only cap — MCP signed uploads use the same per-type caps as the REST API.
 
+### Webhook status
+`enabled`, `disabled`, `paused`
+
+`paused` is set by the platform after 5 consecutive failed deliveries — clients cannot PUT/update it.
+
+### Webhook events (7 values)
+`post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`
+
+No wildcard. Test ping type is `webhook.test` (not a subscribeable event).
+
 ### Notification types (9 values)
 `post_published`, `post_failed`, `post_partially_published`, `post_ready`, `account_disconnected`, `invite_received`, `member_joined`, `member_removed`, `mentioned_in_comment`
 
@@ -226,6 +237,7 @@ There is no `owner` role — the workspace owner is the user on `workspaces.owne
 | `PostPublished` | Post published successfully |
 | `PostPublishFailed` | Post failed to publish on one or more platforms |
 | `AccountDisconnected` | A single social account lost authorization |
+| `WebhookPausedMail` | A workspace webhook was paused after 5 consecutive delivery failures |
 | `WorkspaceConnectionsDisconnected` | Daily check found disconnected accounts in a workspace |
 | `WorkspaceInvite` | Team member invited to join a workspace |
 | Email verification | New user registration (Laravel built-in) |
@@ -241,6 +253,7 @@ Default mailer is **SendKit** (`MAIL_MAILER=sendkit`).
 | `social:refresh-expiring-tokens` | Hourly | Proactively refreshes OAuth tokens before they expire |
 | `social:recover-stuck-posts` | Every 30 minutes | Recovers posts stuck in `publishing` (retry or mark failed) |
 | `social:check-connections` | Daily | Verifies all connected social accounts still authenticate |
+| `app:prune-webhook-logs` | Daily | Deletes webhook delivery logs older than 7 days |
 
 ## Self-Hosted Requirements
 

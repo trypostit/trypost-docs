@@ -1,0 +1,45 @@
+---
+title: "Get webhook"
+api: "GET /webhooks/{webhook}"
+description: "Get a webhook by ID, including the signing secret."
+---
+
+Requires **manage webhooks** permission (Owner / Admin). Other-workspace IDs return `404`.
+
+## Request
+
+<ParamField path="webhook" type="string" required>
+  The webhook UUID.
+</ParamField>
+
+## Response
+
+Same fields as one entry in [`GET /webhooks`](/api-reference/endpoint/list-webhooks), plus `signing_secret`.
+
+<ResponseField name="signing_secret" type="string">
+  HMAC secret (`whsec_` plus 32 characters). Verify deliveries with HMAC-SHA256 of the raw JSON body; the hex digest is sent as `X-Webhook-Signature`. See [Verify the signature](/knowledge-base/webhooks#verify-the-signature).
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X GET https://app.trypost.it/api/webhooks/a1b2c3d4-e5f6-7890-abcd-ef1234567890 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "endpoint": "https://example.com/webhooks/trypost",
+  "events": ["post.published", "post.failed"],
+  "status": "enabled",
+  "last_sent_at": "2026-09-04T15:04:05+00:00",
+  "paused_at": null,
+  "consecutive_failures": 0,
+  "signing_secret": "whsec_abcdefghijklmnopqrstuvwxyz012345",
+  "created_at": "2026-09-01T12:00:00+00:00",
+  "updated_at": "2026-09-04T15:04:05+00:00"
+}
+```
+</ResponseExample>

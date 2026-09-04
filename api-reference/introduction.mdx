@@ -1,6 +1,6 @@
 ---
 title: "Introduction"
-description: "The TryPost API lets you manage social media posts, the Asset Library, signatures, labels, and more with a simple REST API."
+description: "The TryPost API lets you manage social media posts, the Asset Library, signatures, labels, webhooks, and more with a simple REST API."
 icon: "book-open"
 ---
 
@@ -49,7 +49,7 @@ The API uses conventional HTTP status codes. All error responses include a `mess
 | `402` | Active subscription required (Cloud only — self-hosted instances skip this check) |
 | `403` | Forbidden — e.g. a Viewer calling a create-post or update endpoint (including listing assets) |
 | `404` | Resource not found, or resource not in the key's workspace |
-| `422` | Validation error |
+| `422` | Validation error — including a rejected webhook `endpoint` (`errors.endpoint`) |
 | `429` | Rate limit exceeded |
 
 ```json
@@ -79,7 +79,7 @@ A non-paginated collection looks like a plain array:
 ]
 ```
 
-The endpoints that wrap in `data:` are the paginated lists: [`GET /posts`](/api-reference/endpoint/list-posts) and [`GET /assets`](/api-reference/endpoint/list-assets).
+The endpoints that wrap in `data:` are the paginated lists: [`GET /posts`](/api-reference/endpoint/list-posts), [`GET /assets`](/api-reference/endpoint/list-assets), and [`GET /webhooks/{id}/logs`](/api-reference/endpoint/list-webhook-logs).
 
 ## Pagination
 
@@ -89,6 +89,7 @@ Two list endpoints paginate. Both use Laravel's standard pagination envelope (`d
 |---|---|---|
 | [`GET /posts`](/api-reference/endpoint/list-posts) | **15** | Posts only |
 | [`GET /assets`](/api-reference/endpoint/list-assets) | **25** | Asset Library. No `per_page` parameter |
+| [`GET /webhooks/{id}/logs`](/api-reference/endpoint/list-webhook-logs) | **15** | Delivery logs for one webhook. No `per_page` parameter |
 
 Example envelope for posts:
 
@@ -118,7 +119,7 @@ Example envelope for posts:
 }
 ```
 
-Use the `page` query parameter to navigate. Other list endpoints (signatures, labels, social accounts, API keys) return all items without pagination, as a plain array.
+Use the `page` query parameter to navigate. Other list endpoints (signatures, labels, social accounts, API keys, webhooks) return all items without pagination, as a plain array.
 
 ## Quick reference
 
@@ -132,3 +133,4 @@ Use the `page` query parameter to navigate. Other list endpoints (signatures, la
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
 | Social accounts | `GET /social-accounts`, `PUT /social-accounts/{id}/toggle`, `GET /social-accounts/{id}/boards` (Pinterest), `GET /social-accounts/{id}/channels` (Discord) |
 | API keys | `GET /api-keys`, `POST /api-keys`, `DELETE /api-keys/{id}` |
+| Webhooks | `GET /webhooks`, `POST /webhooks`, `GET /webhooks/{id}`, `PUT /webhooks/{id}`, `DELETE /webhooks/{id}`, `POST /webhooks/{id}/send-test`, `POST /webhooks/{id}/rotate-secret`, `GET /webhooks/{id}/logs`, `POST /webhooks/{id}/logs/{log}/replay` |
