@@ -9,7 +9,7 @@ Requires **manage webhooks** permission (Owner / Admin).
 - Webhook not in this workspace → `404`
 - Log id that does not belong to the webhook → `404`
 
-The replay is a **new** delivery: new envelope `id`, new log row, same `data` as the original payload. It is queued immediately and still retries up to 3 times. Test pings never create a log, so there is nothing to replay for `webhook.test`.
+The replay is a **new** delivery: new envelope `id`, new log row, same `data` as the original payload. `{ "replayed": true }` means the job was queued — not that the receiver already answered. It still retries up to 3 times. You can replay a successful log as well as a failed one. Test pings never create a log, so there is nothing to replay for `webhook.test`.
 
 A successful replay on a `paused` or `disabled` webhook updates `last_sent_at` and resets `consecutive_failures`. It does **not** change `status` — re-enable separately if you want subscribed events to resume.
 

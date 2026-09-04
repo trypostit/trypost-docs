@@ -89,7 +89,7 @@ These shape the path the run takes.
   <Accordion title="Webhook" icon="arrow-up-right-from-square">
     Sends an HTTP request to an external system. Configure the **URL**, **method**, headers, and a **payload template** where you can inject any `{{ }}` expression.
 
-    This is a one-off call inside the flow — not a workspace [event webhook](/knowledge-base/webhooks). Use workspace webhooks when you want signed `post.published` / `post.failed` deliveries for every matching post.
+    This is a one-off call inside the flow — not a workspace [event webhook](/knowledge-base/webhooks). Posts this flow creates still emit workspace webhook events if you subscribed (`created_via` is `automation`). Use workspace webhooks when you want signed `post.published` / `post.failed` deliveries for every matching post.
   </Accordion>
   <Accordion title="End" icon="circle-stop">
     Stops the automation at that point. Optional — a branch ends on its own when it has no more nodes.

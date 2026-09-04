@@ -6,7 +6,7 @@ description: "Create an outgoing webhook. Returns the signing secret. Does not s
 
 Requires **manage webhooks** permission (Owner / Admin). Members and Viewers get `403`.
 
-Private or local endpoints are rejected with `422` and an `errors.endpoint` array. Creating does **not** ping the URL — use [send test](/api-reference/endpoint/send-webhook-test).
+Private or local endpoints are rejected with `422` and an `errors.endpoint` array. Creating does **not** ping the URL — use [send test](/api-reference/endpoint/send-webhook-test). The webhook is always created `enabled`. There is no `status` field on this request.
 
 ## Request
 

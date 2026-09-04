@@ -34,9 +34,9 @@ See [Team & roles](/knowledge-base/team).
   </Step>
 </Steps>
 
-Creating a webhook does **not** send a request. Use **Send test event** when you want to ping the URL.
+Creating a webhook does **not** send a request. Use **Send test event** when you want to ping the URL. New webhooks start **enabled** — you cannot create them disabled.
 
-There is no cap on how many webhooks a workspace can have. Two rows can share the same URL.
+There is no cap on how many webhooks a workspace can have. Two rows can share the same URL. Webhooks have no name — identify them by URL and events.
 
 You can also manage webhooks through the [REST API](/api-reference/endpoint/list-webhooks) and [MCP tools](/ai/tools-reference#webhooks).
 
@@ -58,9 +58,15 @@ There is **no** event for `publishing`. A post moving into that state is silent.
 
 A new post is always created as `draft`, even if you pass `scheduled_at`. Scheduling is a later status change, so create-then-schedule produces `post.created` and then `post.scheduled`.
 
+Publish now (dashboard **Post now**, REST `PUT` with `status=publishing`, or `publish-post-tool` without `scheduled_at`) goes `draft` → `publishing` (silent) → `published` / `partially_published` / `failed`. You do **not** get `post.scheduled`. A scheduled post that later becomes due follows the same silent `publishing` step, then the outcome event.
+
+Edits that do **not** change status send nothing: content, media, labels, platforms, or a new `scheduled_at` on a post that is already `scheduled`. [Duplicate](/knowledge-base/posts#duplicating-a-post) is a new post, so it fires `post.created`. A failed or published post cannot be republished in place — duplicate it and you will get a fresh lifecycle.
+
+There are no events for comments, mentions, social-account disconnects, team changes, or AI Create finishing. Those stay in [notifications](/knowledge-base/notifications). Posts created by an [automation](/knowledge-base/automations/introduction) still fire these events (`created_via` is `automation`). Deleting a [workspace](/knowledge-base/workspaces) removes the webhooks with it and does **not** send `post.deleted` for each post.
+
 ## Receive a delivery
 
-Each delivery is `POST` with `Content-Type: application/json`. TryPost does not follow redirects — `3xx` counts as a failure. Respond with `2xx` (including `204`) as soon as you have accepted the payload. Dedupe on envelope `id`: retries of the same attempt reuse it.
+Each delivery is `POST` with `Content-Type: application/json`. TryPost does not follow redirects — `3xx` counts as a failure. Respond with `2xx` (including `204`) as soon as you have accepted the payload. Dedupe on envelope `id`: retries of the same attempt reuse it, but they refresh `created_at` and therefore the signature. Do not treat the full body as byte-identical across retries.
 
 ### Headers
 
@@ -92,7 +98,7 @@ Every event — including the test ping — uses the same envelope:
 | `id` | Delivery log UUID. Stable across retries of the same attempt; a [replay](#replay-a-delivery) creates a new id |
 | `type` | Event name, or `webhook.test` for a test ping |
 | `data` | Event payload. Empty object for `webhook.test` |
-| `created_at` | ISO 8601 timestamp |
+| `created_at` | ISO 8601 timestamp of **this attempt**. Retries keep the same `id` and write a new `created_at` |
 
 ### Verify the signature
 
@@ -146,9 +152,9 @@ For every post event except `post.deleted`, `data` is the post at the moment of 
 | `user_id` | Author user UUID |
 | `status` | `draft`, `scheduled`, `publishing`, `published`, `partially_published`, or `failed` |
 | `created_via` | `web`, `api`, `mcp`, `automation`, or `null` |
-| `content` | Post body |
-| `scheduled_at` / `published_at` / `created_at` / `updated_at` | ISO 8601, or `null` |
-| `author` | `{ id, name }`, or `null` |
+| `content` | Post body. May include HTML from the editor (e.g. `<p>…</p>`), or be an empty string |
+| `scheduled_at` / `published_at` / `created_at` / `updated_at` | ISO 8601, or `null` — not the `Y-m-d H:i:s` strings used by [`GET /posts`](/api-reference/endpoint/list-posts) |
+| `author` | `{ id, name }` only — no email — or `null` |
 | `workspace` | `{ id, name }` |
 | `labels` | `{ id, name, color }[]` |
 | `media` | See [Media](#media) |
@@ -190,13 +196,13 @@ One entry per `post_platform` row — including accounts that are **not** enable
 | `error_message` / `error_context` | Present when that platform failed |
 | `display_name` / `display_username` / `display_avatar` | Snapshot of the account at publish time |
 | `meta` | Per-platform settings (same keys as the [REST meta contract](/api-reference/endpoint/update-post#per-platform-meta)) |
-| `social_account` | `{ id, platform, display_name, username, is_active, status }`, or `null` |
+| `social_account` | `{ id, platform, display_name, username, is_active, status }`, or `null`. Never includes tokens |
 
 ## Test event
 
 On the webhook detail page, open the actions menu and click **Send test event**. That POSTs a signed `webhook.test` ping with an empty `data` object. A `2xx` response is required. Timeouts, connection errors, and non-2xx statuses fail the test.
 
-The test does **not** write a delivery log, so you cannot replay it. It does not change `status`, `consecutive_failures`, or `last_sent_at`.
+The test is **synchronous**: the dashboard, API, and MCP wait for the HTTP response (5 second timeout). It does **not** write a delivery log, so you cannot replay it. It does not change `status`, `consecutive_failures`, or `last_sent_at`.
 
 The ping runs even if the webhook is **paused** or **disabled** — status only gates real post events.
 
@@ -206,7 +212,7 @@ The ping runs even if the webhook is **paused** or **disabled** — status only 
 |--------|---------|
 | **Enabled** | Subscribed events are delivered |
 | **Disabled** | You turned it off. Events are skipped |
-| **Paused** | TryPost paused it after **5** consecutive failed deliveries. The account owner gets a transactional email (not an in-app notification — there is no toggle under **Settings → Notifications**) |
+| **Paused** | TryPost paused it after **5** consecutive failed deliveries. The account owner gets a transactional email with a link to the webhook (not an in-app notification — there is no toggle under **Settings → Notifications**) |
 
 You can set **enabled** or **disabled** from the actions menu (**Enable endpoint** / **Disable endpoint**). You cannot set **paused** yourself — only TryPost does that after failures.
 
@@ -244,9 +250,9 @@ Logs older than **7 days** are deleted daily. Deleting a webhook deletes its log
 
 ## Replay a delivery
 
-**Replay** queues a new signed POST with the original `data`, a new envelope `id`, and a new log row. Use it after you fix the receiver.
+**Replay** queues a new signed POST with the original `data`, a new envelope `id`, and a new log row. The dashboard flash, API `{ "replayed": true }`, and MCP result mean the job was queued — not that the receiver already answered. Watch the new log row (it appears live) for the outcome.
 
-Replay works even when the webhook is paused or disabled.
+Replay works even when the webhook is paused or disabled. You can replay a successful log as well as a failed one.
 
 ## Manage from the dashboard
 
@@ -263,7 +269,7 @@ The overview card shows the signing secret (masked). Reveal or copy it at any ti
 
 ## Rotate the signing secret
 
-**Rotate signing secret** issues a new `whsec_…` value. The previous secret stops working immediately. Update the receiver before you rotate, or deliveries will fail signature checks.
+**Rotate signing secret** issues a new `whsec_…` value. The previous secret stops working immediately — including the next retry of an in-flight delivery, which signs with the new secret. Update the receiver before you rotate, or deliveries will fail signature checks.
 
 ## Delete a webhook
 
@@ -314,5 +320,20 @@ List and update responses omit `signing_secret`. Create, get, and rotate return 
   </Accordion>
   <Accordion title="Does a successful replay re-enable a paused webhook?">
     No. It can reset the failure counter, but you still have to set status to **enabled** before subscribed events fire again.
+  </Accordion>
+  <Accordion title="Does Publish now fire post.scheduled?">
+    No. Immediate publish never enters `scheduled`. Subscribe to `post.created` plus the outcome events (`post.published`, `post.partially_published`, `post.failed`).
+  </Accordion>
+  <Accordion title="Does changing the schedule time fire post.scheduled again?">
+    No. `post.scheduled` only fires when status becomes `scheduled`. Editing `scheduled_at` on an already-scheduled post is silent.
+  </Accordion>
+  <Accordion title="Can I add custom headers or pick the HTTP method?">
+    No. Workspace webhooks are always `POST` with `Content-Type`, `User-Agent`, and `X-Webhook-Signature`. For a custom request, use the [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes).
+  </Accordion>
+  <Accordion title="Is there a webhook for comments or a disconnected account?">
+    No. Only the seven post lifecycle events. Comments, mentions, and account disconnects stay in [notifications](/knowledge-base/notifications).
+  </Accordion>
+  <Accordion title="Does an automation-created post fire workspace webhooks?">
+    Yes. Create, schedule, publish, and delete still emit the matching events. `created_via` is `automation`. That is separate from the [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes).
   </Accordion>
 </AccordionGroup>

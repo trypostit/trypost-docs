@@ -41,6 +41,8 @@ When a post becomes due:
 3. Each platform publishes independently
 4. When all platforms finish, the post status updates to the final outcome
 
+Workspace [webhooks](/knowledge-base/webhooks) fire on those status changes (`post.scheduled`, `post.published`, `post.partially_published`, `post.failed`). `publishing` itself does not send an event.
+
 <Note>
   Posts can only be scheduled in the future. The validator rejects past dates.
 </Note>
@@ -87,7 +89,7 @@ See [Notifications](/knowledge-base/notifications).
 
 ## Duplicating a post
 
-From the post list (or any post's "..." menu) pick **Duplicate** to copy a post into a new draft. The duplicate gets a fresh ID and `draft` status; the original is untouched. The copy preserves content, media, labels, and platform entries — adjust the schedule and platforms before publishing.
+From the post list (or any post's "..." menu) pick **Duplicate** to copy a post into a new draft. The duplicate gets a fresh ID and `draft` status; the original is untouched. The copy preserves content, media, labels, and platform entries — adjust the schedule and platforms before publishing. Subscribed webhooks receive `post.created` for the copy.
 
 The duplicate action is gated by the same workspace policies as "create post" — anyone with create-post permission can duplicate.
 
@@ -116,7 +118,7 @@ Each platform entry on a post exposes:
 
 ## Deleting posts
 
-You can delete any post at any time. Deleting removes the post and all its platform entries.
+You can delete any post at any time. Deleting removes the post and all its platform entries. Subscribed webhooks receive `post.deleted` with only `{ id, workspace_id }`.
 
 <Warning>
   Already-published posts can't be "unpublished" from the social platforms — deletion in TryPost only removes our local record. Edit or delete on the platform itself if you need to take it down.

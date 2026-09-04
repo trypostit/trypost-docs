@@ -28,7 +28,7 @@ Plain array of webhook objects.
   ISO 8601 timestamp of the last successful delivery. `null` if none.
 </ResponseField>
 <ResponseField name="paused_at" type="string">
-  ISO 8601 timestamp when TryPost paused the webhook after repeated failures. `null` unless `status` is `paused`.
+  ISO 8601 timestamp when TryPost last paused the webhook. `null` until the first pause, and cleared when you set `status` back to `enabled`. Disabling a paused webhook leaves this value set.
 </ResponseField>
 <ResponseField name="consecutive_failures" type="integer">
   Failed deliveries since the last success. Pauses at `5`.
