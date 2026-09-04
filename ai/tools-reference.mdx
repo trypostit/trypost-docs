@@ -145,6 +145,38 @@ Attach a library file to a post. Does **not** upload a new file. REST: [`POST /p
 | **create-api-key-tool** | Create a Personal Access Token. Input: `name` (required, max 255), optional `expires_at` (YYYY-MM-DD or ISO 8601; omit for non-expiring). Requires **manageTeam** (Owner / Admin). Response includes key metadata plus **`token`** (plain secret once) — note: REST create returns `plain_token`; MCP returns `token`. Store it immediately. |
 | **delete-api-key-tool** | Revoke a Personal Access Token. Input: `api_key_id` (required). The current OAuth session token cannot be revoked through this tool. Marked `IsDestructive`. Requires manageTeam. |
 
+## Webhooks
+
+Outgoing workspace webhooks. Requires **manage webhooks** (Owner / Admin) — Members and Viewers get `Not authorized to manage webhooks.` Other-workspace IDs return `Webhook not found.` / `Webhook log not found.` Conceptual guide: [Webhooks](/knowledge-base/webhooks). REST: [`GET /webhooks`](/api-reference/endpoint/list-webhooks).
+
+Signing: HMAC-SHA256 of the raw JSON body; hex digest in `X-Webhook-Signature`. Secret format `whsec_` + 32 characters.
+
+Webhook object (list items omit the secret):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| **id** | string | Webhook UUID. |
+| **endpoint** | string | Public URL that receives signed POSTs. |
+| **events** | array | Subscribed events: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. No `publishing` event and no wildcard. |
+| **status** | string | `enabled`, `disabled`, or `paused`. |
+| **last_sent_at** | string | ISO 8601 last successful delivery, or `null`. |
+| **paused_at** | string | ISO 8601 when TryPost paused it, or `null`. |
+| **consecutive_failures** | integer | Failed deliveries since last success. Pauses at 5. |
+| **signing_secret** | string | Present on get / create / rotate only. |
+| **created_at** / **updated_at** | string | ISO 8601. |
+
+| Tool | Description |
+|------|-------------|
+| **list-webhooks-tool** | List outgoing webhooks, newest first. Returns `{ webhooks: [...] }` with **no** signing secrets. No input. |
+| **get-webhook-tool** | Get one webhook by `webhook_id`, including `signing_secret`. |
+| **create-webhook-tool** | Create a webhook. Input: `endpoint` (required public `http://` or `https://` URL, max 255), `events` (required, at least one allowed event). Always created `enabled` — there is no `status` input. Returns the webhook **with** `signing_secret`. Private/local URLs are rejected. Creating does **not** ping the endpoint. |
+| **update-webhook-tool** | Update `endpoint`, `events`, and/or `status` (`enabled` \| `disabled` only — `paused` is rejected). Input includes required `webhook_id`. Omitted fields stay unchanged. Re-enabling a paused webhook resets consecutive failures. Does **not** ping. Response omits the secret. |
+| **send-webhook-test-tool** | POST a signed `webhook.test` ping (`data` is `{}`). Input: `webhook_id`. **Synchronous** — waits for the HTTP response, then returns `{ tested: true }`. Does **not** write a delivery log and does not change status or failure counters. Runs even if the webhook is paused or disabled. Marked `IsOpenWorld`. |
+| **rotate-webhook-secret-tool** | Rotate the signing secret. Input: `webhook_id`. Previous secret stops working immediately — the next attempt, including an in-flight retry, signs with the new secret. Returns the webhook with the new `signing_secret`. Marked `IsDestructive`. |
+| **list-webhook-logs-tool** | List delivery logs, newest first. Input: `webhook_id`, optional `limit` (1–100, default **50**). Returns `{ logs: [...] }` with payload and response body. No cursor — only the first `limit` rows. |
+| **replay-webhook-log-tool** | Replay a log. Input: `webhook_id` + `log_id`. Queues a **new** signed delivery with a new log id, using the original `data`, even if the webhook is paused or disabled. `{ replayed: true }` means queued, not delivered. Success resets the failure counter but does **not** re-enable a paused webhook. Marked `IsOpenWorld`. |
+| **delete-webhook-tool** | Delete a webhook and its logs permanently. Input: `webhook_id`. Returns `{ deleted: true }`. Marked `IsDestructive`. |
+
 ## Per-platform `meta` (MCP)
 
 `platforms[].meta` uses the **same keys** as the REST API. Full tables, limits, and examples: [Per-platform meta](/api-reference/endpoint/update-post#per-platform-meta).
@@ -166,9 +198,9 @@ Quick checklist for agents:
 ## Notes
 
 - **Workspace scoping** — every tool operates on the user's currently-selected workspace. To act on a different workspace, switch it in the TryPost UI (or, for personal API tokens, create a new key in that workspace).
-- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, list or get assets (`Not authorized to view assets.`), or call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. See [Team](/knowledge-base/team).
+- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, list or get assets (`Not authorized to view assets.`), or call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. Webhook tools require **manage webhooks** (Owner / Admin only) — Members and Viewers get `Not authorized to manage webhooks.` See [Team](/knowledge-base/team).
 - **Cross validation** — `create-post-tool` and `update-post-tool` reject mismatched combos (e.g. `content_type=x_post` on a LinkedIn account). Inactive social accounts are also rejected at validation time.
-- **Destructive tools** — operations that delete data or publish to the world (`publish-post-tool`, `delete-*`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
+- **Destructive tools** — operations that delete data, rotate secrets, or publish to the world (`publish-post-tool`, `delete-*`, `rotate-webhook-secret-tool`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
 - **Local-file uploads** — `request-media-upload-tool` returns a single-use signed URL (default TTL 15 minutes). `max_bytes` is the video ceiling (default 1 GB); per-type caps are in `max_bytes_by_type` (image / video / document). POST the file as multipart field `media`, then call `attach-media-from-upload-tool` with the same `upload_token` (optional `alt` for images). See [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload).
 - **Media alt text** — image accessibility text lives on `media[].meta.alt_text`, not on `platforms[].meta`. Via MCP, set it with `attach-media-from-url-tool` (`urls[].alt`), `attach-media-from-upload-tool` (`alt`), or `attach-existing-asset-tool` (`alt`). On `attach-existing-asset-tool`, omitting `alt` **keeps** the library item's existing `alt_text`. The REST create/update endpoints also accept `media[].meta.alt_text` when hosting from URL.
 - **No inline `media[]` on MCP create/update** — unlike REST `POST`/`PUT /posts`, the MCP create/update tools do not accept a `media` array. Always use the attach tools after create (`attach-existing-asset-tool`, `attach-media-from-url-tool`, or the signed-upload pair).

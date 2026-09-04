@@ -137,6 +137,20 @@
               "api-reference/endpoint/create-api-key",
               "api-reference/endpoint/delete-api-key"
             ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/endpoint/list-webhooks",
+              "api-reference/endpoint/get-webhook",
+              "api-reference/endpoint/create-webhook",
+              "api-reference/endpoint/update-webhook",
+              "api-reference/endpoint/delete-webhook",
+              "api-reference/endpoint/send-webhook-test",
+              "api-reference/endpoint/rotate-webhook-secret",
+              "api-reference/endpoint/list-webhook-logs",
+              "api-reference/endpoint/replay-webhook-log"
+            ]
           }
         ]
       },
@@ -226,6 +240,7 @@
               "knowledge-base/account-and-security",
               "knowledge-base/plans-and-billing",
               "knowledge-base/api-keys",
+              "knowledge-base/webhooks",
               "knowledge-base/notifications"
             ]
           }

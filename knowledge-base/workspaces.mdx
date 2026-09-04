@@ -80,7 +80,7 @@ To manage multiple workspaces via API, create a separate API key for each.
 Go to **Settings > Workspace** and scroll to the danger zone.
 
 <Warning>
-  Deleting a workspace permanently removes all posts, disconnects all social accounts, and removes all team members. This cannot be undone.
+  Deleting a workspace permanently removes all posts, [webhooks](/knowledge-base/webhooks) and their logs, disconnects all social accounts, and removes all team members. This cannot be undone. It does not send `post.deleted` for each post — the webhooks are removed with the workspace.
 </Warning>
 
 ## FAQ
