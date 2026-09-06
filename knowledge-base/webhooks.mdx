@@ -6,7 +6,7 @@ icon: "webhook"
 
 Workspace webhooks POST a signed JSON payload to a URL you control whenever a subscribed post event fires. Use them to sync a CRM, trigger an internal job, or keep another system in step with TryPost.
 
-They are **outgoing** event subscriptions for the workspace. They are not the [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes) (a one-off HTTP call inside a flow), and they are not inbound Telegram/Stripe webhooks.
+They are **outgoing** event subscriptions for the workspace — not inbound Telegram/Stripe webhooks.
 
 ## Who can manage webhooks
 
@@ -62,7 +62,7 @@ Publish now (dashboard **Post now**, REST `PUT` with `status=publishing`, or `pu
 
 Edits that do **not** change status send nothing: content, media, labels, platforms, or a new `scheduled_at` on a post that is already `scheduled`. [Duplicate](/knowledge-base/posts#duplicating-a-post) is a new post, so it fires `post.created`. A failed or published post cannot be republished in place — duplicate it and you will get a fresh lifecycle.
 
-There are no events for comments, mentions, social-account disconnects, or team changes — those stay in [notifications](/knowledge-base/notifications). AI Create has no dedicated `post.ready` event; when the draft is saved you get `post.created` (`created_via` is `web`). Posts created by an [automation](/knowledge-base/automations/introduction) still fire these events (`created_via` is `automation`). Deleting a [workspace](/knowledge-base/workspaces) removes the webhooks with it and does **not** send `post.deleted` for each post.
+There are no events for comments, mentions, social-account disconnects, or team changes — those stay in [notifications](/knowledge-base/notifications). AI Create has no dedicated `post.ready` event; when the draft is saved you get `post.created` (`created_via` is `web`). Deleting a [workspace](/knowledge-base/workspaces) removes the webhooks with it and does **not** send `post.deleted` for each post.
 
 ## Receive a delivery
 
@@ -151,7 +151,7 @@ For every post event except `post.deleted`, `data` is the post at the moment of 
 | `workspace_id` | Workspace UUID |
 | `user_id` | Author user UUID |
 | `status` | `draft`, `scheduled`, `publishing`, `published`, `partially_published`, or `failed` |
-| `created_via` | `web`, `api`, `mcp`, `automation`, or `null` |
+| `created_via` | `web`, `api`, `mcp`, or `null` |
 | `content` | Post body. May include HTML from the editor (e.g. `<p>…</p>`), or be an empty string |
 | `scheduled_at` / `published_at` / `created_at` / `updated_at` | ISO 8601, or `null` — not the `Y-m-d H:i:s` strings used by [`GET /posts`](/api-reference/endpoint/list-posts) |
 | `author` | `{ id, name }` only — no email — or `null` |
@@ -303,9 +303,6 @@ List and update responses omit `signing_secret`. Create, get, and rotate return 
   <Accordion title="Why is my webhook paused?">
     Five deliveries in a row exhausted their retries. Fix the endpoint, then set status back to **enabled**.
   </Accordion>
-  <Accordion title="How is this different from the automation Webhook node?">
-    Workspace webhooks fire on post lifecycle events and are always signed the same way. The [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes) is an HTTP step inside a flow — you pick the method, headers, and body template.
-  </Accordion>
   <Accordion title="How long are logs kept?">
     Seven days. Older rows are pruned daily. Deleting the webhook removes the remaining logs.
   </Accordion>
@@ -328,12 +325,9 @@ List and update responses omit `signing_secret`. Create, get, and rotate return 
     No. `post.scheduled` only fires when status becomes `scheduled`. Editing `scheduled_at` on an already-scheduled post is silent.
   </Accordion>
   <Accordion title="Can I add custom headers or pick the HTTP method?">
-    No. Workspace webhooks are always `POST` with `Content-Type`, `User-Agent`, and `X-Webhook-Signature`. For a custom request, use the [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes).
+    No. Workspace webhooks are always `POST` with `Content-Type`, `User-Agent`, and `X-Webhook-Signature`.
   </Accordion>
   <Accordion title="Is there a webhook for comments or a disconnected account?">
     No. Only the seven post lifecycle events. Comments, mentions, and account disconnects stay in [notifications](/knowledge-base/notifications).
-  </Accordion>
-  <Accordion title="Does an automation-created post fire workspace webhooks?">
-    Yes. Create, schedule, publish, and delete still emit the matching events. `created_via` is `automation`. That is separate from the [automation Webhook node](/knowledge-base/automations/triggers-and-nodes#output-nodes).
   </Accordion>
 </AccordionGroup>

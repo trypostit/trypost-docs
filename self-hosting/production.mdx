@@ -61,7 +61,6 @@ TryPost uses queues for critical background processing:
 - **Sending notifications** (email and in-app)
 - **Verifying social account connections**
 - **Processing analytics events**
-- **Running automations**
 
 Without a running queue worker, scheduled posts will not be published. Use Supervisor to keep Horizon running.
 
@@ -190,15 +189,11 @@ sudo certbot --nginx -d your-domain.com
 
 ## Scheduled Tasks (Cron)
 
-TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler **must** run every minute or scheduled posts won't publish, automations won't fire, expiring tokens won't refresh, and stuck posts won't recover.
+TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler **must** run every minute or scheduled posts won't publish, expiring tokens won't refresh, and stuck posts won't recover.
 
 | Command | Schedule | Purpose |
 |---------|----------|---------|
 | `posts:process-scheduled` | every minute | Dispatches `PublishPost` jobs for posts that are due |
-| `automation:fire-schedule` | every minute | Fires time-based automation triggers |
-| `automation:process-delays` | every minute | Advances automation runs waiting on delay nodes |
-| `automation:recover-stuck-runs` | every 5 minutes | Recovers automation runs stuck mid-flight |
-| `automation:prune-dry-runs` | every 10 minutes | Prunes dry-run automation history |
 | `social:refresh-expiring-tokens` | every 15 minutes | Refreshes OAuth tokens that are about to expire |
 | `social:recover-stuck-posts` | every 30 minutes | Detects posts stuck in `publishing` and retries or fails them |
 | `social:check-connections` | daily | Verifies every connected social account still has a valid token |
@@ -217,7 +212,7 @@ Add this line:
 ```
 
 <Warning>
-  This is required. Without the cron job, scheduled posts will not be published automatically, automations will stall, and social tokens will expire silently.
+  This is required. Without the cron job, scheduled posts will not be published automatically and social tokens will expire silently.
 </Warning>
 
 ## WebSocket Server (Reverb)
@@ -275,9 +270,9 @@ Make sure all of these are in place in production:
 | **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
 | **Redis** | `QUEUE_CONNECTION=redis` + Redis up | Queues, cache, schedule locks |
 | **Mail** | SMTP or SendKit | Invites, password reset, alerts |
-| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, automations, and [webhooks](/knowledge-base/webhooks) |
+| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, and [webhooks](/knowledge-base/webhooks) |
 | **Reverb** | `php artisan reverb:start` (Supervisor) | Real-time WebSocket updates |
-| **Scheduler** | cron → `schedule:run` every minute | Due posts, token refresh, automations |
+| **Scheduler** | cron → `schedule:run` every minute | Due posts, token refresh, stuck-post recovery |
 
 <Warning>
   If Horizon, Reverb, or the scheduler are not running, TryPost will not function correctly. Scheduled posts won't publish, notifications won't send, and the dashboard won't update in real time.

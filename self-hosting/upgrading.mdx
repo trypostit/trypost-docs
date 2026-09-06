@@ -27,7 +27,7 @@ This release adds a database constraint that a workspace cannot hold the same id
 
 **Why it matters:** earlier versions could store the same account more than once — the per-network guard was skipped on self-hosted installs, and Pinterest created a fresh row on every connect. Duplicates like that would block the new constraint, so the migration merges them first.
 
-For each duplicated identity it keeps the **most recently created** account, moves that account's scheduled posts and automation targets onto the survivor, and deletes the rest.
+For each duplicated identity it keeps the **most recently created** account, moves that account's scheduled posts onto the survivor, and deletes the rest.
 
 Merging can leave a post aimed at the same account twice, which would publish it twice. Those repeats are collapsed:
 

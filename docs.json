@@ -218,15 +218,6 @@
             ]
           },
           {
-            "group": "Automations",
-            "pages": [
-              "knowledge-base/automations/introduction",
-              "knowledge-base/automations/triggers-and-nodes",
-              "knowledge-base/automations/variables",
-              "knowledge-base/automations/monitoring"
-            ]
-          },
-          {
             "group": "Accounts",
             "pages": [
               "knowledge-base/social-accounts",
