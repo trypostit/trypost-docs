@@ -69,7 +69,7 @@ FILESYSTEM_DISK=public
 |-------|-----|
 | `APP_KEY` | Already set by `key:generate` — encrypts sessions, cookies, encrypted data |
 | Database | Where posts, users, and Passport clients live. The block above is PostgreSQL; for MySQL use `DB_CONNECTION=mysql` on port `3306` — see [Database](/self-hosting/configuration#database) |
-| Redis + queue/cache drivers | Horizon publishes posts and runs automations from Redis queues |
+| Redis + queue/cache drivers | Horizon publishes posts and processes background jobs from Redis queues |
 | `BROADCAST_CONNECTION=reverb` | Live dashboard updates |
 | `FILESYSTEM_DISK=public` | Local media on disk (use `s3` / `r2` / `spaces` for object storage) |
 | `SELF_HOSTED=true` | Disables Stripe billing and public `/register` |
@@ -175,9 +175,9 @@ This starts `php artisan serve`, a queue listener, log tail, and Vite. Open `htt
 | Process | Command | Purpose |
 |---------|---------|---------|
 | Web (PHP-FPM + Nginx) | see [Production](/self-hosting/production#nginx-configuration) | Serve HTTP |
-| **Horizon** | `php artisan horizon` | Queues — publish posts, notifications, automations, webhooks |
+| **Horizon** | `php artisan horizon` | Queues — publish posts, notifications, webhooks |
 | **Reverb** | `php artisan reverb:start` | WebSockets |
-| **Scheduler** | cron → `php artisan schedule:run` | Due posts, token refresh, automations |
+| **Scheduler** | cron → `php artisan schedule:run` | Due posts, token refresh, stuck-post recovery |
 
 Full Supervisor configs, Nginx (including Reverb `/app/` + `/apps/`), SSL, and caches: [Production setup](/self-hosting/production).
 

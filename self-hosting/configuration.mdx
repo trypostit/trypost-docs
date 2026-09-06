@@ -136,7 +136,7 @@ BROADCAST_CONNECTION=reverb
 
 | Variable | Recommended | Why |
 |----------|-------------|-----|
-| `QUEUE_CONNECTION` | `redis` | Horizon processes Redis queues (publishing, notifications, automations) |
+| `QUEUE_CONNECTION` | `redis` | Horizon processes Redis queues (publishing, notifications, webhooks) |
 | `CACHE_STORE` | `redis` | Cache + `onOneServer()` schedule locks across instances |
 | `SESSION_DRIVER` | `database` | Durable sessions behind multiple app workers |
 | `BROADCAST_CONNECTION` | `reverb` | Real-time dashboard updates |
@@ -551,7 +551,7 @@ TRYPOST_USER_AGENT="TryPost.it/1.0 (+https://trypost.it)"
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TRYPOST_ALLOW_PRIVATE_NETWORK` | `false` | When `true`, allows HTTP requests from TryPost (RSS, [workspace webhooks](/knowledge-base/webhooks), URL media fetches, etc.) to private/internal network addresses. Keep `false` unless you intentionally need that for a private network install. |
+| `TRYPOST_ALLOW_PRIVATE_NETWORK` | `false` | When `true`, allows HTTP requests from TryPost ([workspace webhooks](/knowledge-base/webhooks), URL media fetches, brand autofill, etc.) to private/internal network addresses. Keep `false` unless you intentionally need that for a private network install. |
 | `TRYPOST_USER_AGENT` | `TryPost.it/1.0 (+https://trypost.it)` | `User-Agent` sent on outgoing HTTP, including webhook deliveries and test pings. |
 
 ## Next Steps
