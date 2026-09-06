@@ -61,6 +61,7 @@ TryPost uses queues for critical background processing:
 - **Sending notifications** (email and in-app)
 - **Verifying social account connections**
 - **Processing analytics events**
+- **Delivering [webhooks](/knowledge-base/webhooks)** and their retries
 
 Without a running queue worker, scheduled posts will not be published. Use Supervisor to keep Horizon running.
 
