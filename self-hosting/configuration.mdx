@@ -37,34 +37,23 @@ SELF_HOSTED=true
 - **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Seed default data and create the admin user](/self-hosting/installation#6-seed-passport-client-and-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
 - No Stripe, Cashier, or `CASHIER_TRIAL_DAYS` configuration required
 - The `LoadWorkspaceFromToken` middleware skips the `402 Payment Required` gate
-- Subscription gating is not enforced, so workspaces, social accounts, members, and AI credits are unlimited per account
-- AI calls go straight to your configured provider; you pay the provider directly (no credit accounting)
+- Subscription gating is not enforced, so workspaces, social accounts, and members are unlimited per account
+- AI calls go straight to your configured provider; you pay the provider directly (no Cloud metering)
 
 There's no reason to flip this to `false` on a self-hosted install. The Cloud SaaS deployment is the only place that runs with billing enabled.
 
 ## Multiple accounts per network
 
-```env
-ALLOW_MULTIPLE_SOCIAL_ACCOUNTS=true
-```
+A workspace can connect as many accounts as you want on the same network — two LinkedIns, two Instagrams, and so on. There is no env flag for this.
 
-Controls whether a workspace can connect more than one account on the same social network — two LinkedIns, two Instagrams, and so on. `.env.example` and the Docker compose file ship with it set to `true`.
-
-Two flavours of the same platform count as **one network**, so they share the slot:
+Two flavours of the same platform still collapse to **one identity**:
 
 - LinkedIn profile + LinkedIn Page
 - Instagram Standalone + Instagram (Facebook Business)
 
-| Value | Behaviour |
-|---|---|
-| `true` | A workspace may connect several accounts on the same network. Each network's tile gains a **Connect another** card |
-| `false` | One account per network. A second one is refused with *This workspace already has an account for this network* |
+The same identity cannot sit twice. Reconnecting an account that already has a card updates that card instead of adding another.
 
-<Note>
-  When the variable is unset it falls back to `SELF_HOSTED`, so instances that upgrade without touching `.env` keep allowing multiple accounts. This is deliberately independent of `SELF_HOSTED` so it can be flipped on its own.
-</Note>
-
-The same account is never connected twice, whatever the value — reconnecting an identity that already has a card updates that card instead of adding another, including across the two flavours of one network.
+`ALLOW_MULTIPLE_SOCIAL_ACCOUNTS` was removed. If it is still in your `.env`, you can delete it — it is ignored.
 
 ## Database
 
@@ -156,7 +145,7 @@ Alternatively, set `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY` in `.env` (P
 
 MCP clients authenticate with OAuth (`mcp:use`), not with an API key Bearer header. API keys are for the REST API only.
 
-The [API reference](/api-reference/introduction) describes your instance too — same routes, same payloads, same MCP tools. Only two things differ: the base URL is your `APP_URL` followed by `/api`, and responses reflect the settings on this page rather than the Cloud plan. The most visible one is [multiple accounts per network](#multiple-accounts-per-network) — where it is on, `GET /social-accounts` can return several accounts sharing one `platform` value, so read it by `id`.
+The [API reference](/api-reference/introduction) describes your instance too — same routes, same payloads, same MCP tools. Only two things differ: the base URL is your `APP_URL` followed by `/api`, and responses reflect the settings on this page rather than the Cloud plan. `GET /social-accounts` can return several accounts sharing one `platform` value, so read it by `id`. See [multiple accounts per network](#multiple-accounts-per-network).
 
 Full install order: [Installation](/self-hosting/installation).
 
@@ -452,6 +441,22 @@ Publishing and the post previews in the app, the API and MCP all show the same r
 <Note>
   The default is off. A self-hosted install publishes through its own X app and pays its own X bill, so the saving this buys may not be worth links a reader cannot click. TryPost Cloud runs with it on.
 </Note>
+
+## Repurpose
+
+Active [repurposes](/knowledge-base/repurposes) poll Instagram and Facebook for videos published outside TryPost. The scheduler runs `repurpose:poll` every five minutes; each source is checked when it is due.
+
+```env
+REPURPOSE_POLL_INTERVAL_MINUTES=15
+REPURPOSE_BACKOFF_MINUTES=60
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `REPURPOSE_POLL_INTERVAL_MINUTES` | `15` | Minutes between successful polls of one source |
+| `REPURPOSE_BACKOFF_MINUTES` | `60` | Minutes to wait after a rate-limit (or other transient) error from the source |
+
+Raise the interval if you are close to Meta's app-wide quota. Horizon and the scheduler must both be running or nothing is replicated.
 
 ## Social login
 

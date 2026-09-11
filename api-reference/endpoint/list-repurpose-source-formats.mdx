@@ -1,0 +1,30 @@
+---
+title: "List repurpose source formats"
+api: "GET /repurpose-source-formats"
+description: "List the video formats a repurpose can watch on a source account."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`.
+
+Use these `value`s as `source_format` on [create](/api-reference/endpoint/create-repurpose) and [update](/api-reference/endpoint/update-repurpose). Labels follow the caller's locale.
+
+Wrapped in `{ "data": [...] }` (not a pagination envelope).
+
+<RequestExample>
+```bash
+curl -X GET https://app.trypost.it/api/repurpose-source-formats \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "data": [
+    { "value": "reel", "label": "Reels" },
+    { "value": "video", "label": "Videos" },
+    { "value": "story", "label": "Stories" }
+  ]
+}
+```
+</ResponseExample>

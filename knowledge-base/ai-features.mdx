@@ -56,11 +56,9 @@ Reels, Shorts, TikTok video, Facebook Story, and similar video-only formats are 
 
 Each AI call is wrapped with your workspace's [brand profile](/knowledge-base/brand-profile): website, description, tone, voice notes, and content language. The prompt the model actually sees is your input plus those guardrails — that's why generated posts read in your voice and language without you having to spell it out every time.
 
-## Credits
+## Cloud access
 
-Every AI call deducts from your workspace's monthly credit balance. See [Plans &amp; billing](/knowledge-base/plans-and-billing#ai-credits) for the per-action cost and how the monthly quota resets.
-
-When the workspace runs out of credits, the API and dashboard respond with `402 Payment Required`. Wait for the next monthly reset, or add another workspace for more pooled credits.
+There is no monthly AI quota. Copilot, Generate, Review, and Create stay available on both Cloud plans. You still need an [active subscription](/knowledge-base/plans-and-billing) on Cloud — without one, those actions return `402 Payment Required`.
 
 ## Self-hosted
 
@@ -72,4 +70,4 @@ OPENAI_API_KEY=sk-...
 AI_TEXT_MODEL=gpt-5.4
 ```
 
-Without those, the AI buttons stay disabled. Self-hosted instances skip the credit check entirely (`SELF_HOSTED=true` in `.env`).
+Without those, the AI buttons stay disabled. Self-hosted instances skip the Cloud subscription check (`SELF_HOSTED=true` in `.env`).

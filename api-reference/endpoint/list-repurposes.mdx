@@ -1,0 +1,82 @@
+---
+title: "List repurposes"
+api: "GET /repurposes"
+description: "List repurposes for the current workspace, newest first. Paginated."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`.
+
+Returns the Laravel pagination envelope (`data`, `links`, `meta`). Page size is `config('app.pagination.default')` (**25**). There is no `per_page` parameter.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+## Request
+
+<ParamField query="page" type="integer">
+  Page number. Defaults to `1`.
+</ParamField>
+
+## Response
+
+Each item matches [`GET /repurposes/{repurpose}`](/api-reference/endpoint/get-repurpose), plus:
+
+<ResponseField name="source_account" type="object">
+  Nested social account (`id`, `platform`, `display_name`, `username`, `is_active`, `status`). `null` if the source was removed.
+</ResponseField>
+<ResponseField name="published_items_count" type="integer">
+  Activity items with status `published` (replicas that were scheduled).
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X GET https://app.trypost.it/api/repurposes \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "data": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "source_social_account_id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+      "source_account": {
+        "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+        "platform": "instagram",
+        "display_name": "Acme",
+        "username": "acme",
+        "is_active": true,
+        "status": "connected"
+      },
+      "source_format": "reel",
+      "publish_mode": "publish",
+      "destinations": [],
+      "status": "draft",
+      "paused_reason": null,
+      "activated_at": null,
+      "last_polled_at": null,
+      "next_poll_at": null,
+      "last_error": null,
+      "published_items_count": 0,
+      "created_at": "2026-09-10T11:55:00+00:00",
+      "updated_at": "2026-09-10T11:55:00+00:00"
+    }
+  ],
+  "links": {
+    "first": "https://app.trypost.it/api/repurposes?page=1",
+    "last": "https://app.trypost.it/api/repurposes?page=1",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "to": 1,
+    "last_page": 1,
+    "per_page": 25,
+    "total": 1
+  }
+}
+```
+</ResponseExample>

@@ -1,0 +1,171 @@
+---
+title: "Repurpose"
+description: "Watch an Instagram or Facebook account and republish every new video to your other networks."
+icon: "arrows-rotate"
+---
+
+A repurpose watches one [social account](/knowledge-base/social-accounts) for new videos posted **outside** TryPost, downloads them, and republishes each one to the destinations you pick. Use it when you publish a Reel on Instagram and want the same video on TikTok, YouTube Shorts, and the rest without pasting it by hand.
+
+Only Instagram and Facebook can be a source — they are the only networks that let TryPost download the video. Destinations can be any connected account whose format accepts video.
+
+You can also manage repurposes through the [REST API](/api-reference/endpoint/list-repurposes) and [MCP tools](/ai/tools-reference#repurpose).
+
+## Who can manage repurposes
+
+Owner, Admin, and Member can create, edit, activate, pause, resume, disable, and delete repurposes. Viewers do not see **Repurpose** in the sidebar.
+
+See [Team & roles](/knowledge-base/team).
+
+## Create a repurpose
+
+<Steps>
+  <Step title="Open Repurpose">
+    In the sidebar, click **Repurpose**.
+  </Step>
+  <Step title="New repurpose">
+    Click **New repurpose**.
+  </Step>
+  <Step title="Pick the source">
+    Choose the Instagram or Facebook account TryPost should watch. Connect one first if the list is empty.
+  </Step>
+  <Step title="Configure and activate">
+    On the next screen, pick the format to watch, the destinations, and whether each new video should publish automatically or land as a draft. Then click **Activate**.
+  </Step>
+</Steps>
+
+A new repurpose starts as a **draft**. Nothing is replicated until you activate it. Only videos published **after** activation are picked up.
+
+<Note>
+  One source account can feed several repurposes — one per format (Reels, Videos, Stories). The same account plus the same format cannot feed two rows in one workspace.
+</Note>
+
+## Source
+
+| | |
+|---|---|
+| **Networks** | Instagram (Standalone or Facebook Business) and Facebook Pages |
+| **Formats** | `reel`, `video`, `story` |
+| **Health** | The source must stay **connected** and switched **on**. A dead source pauses the flow |
+
+TryPost cannot watch TikTok, YouTube, LinkedIn, or any other network as a source — those APIs do not give us a downloadable file.
+
+## Destinations
+
+Each destination is a connected account plus the format it should publish as. A Story on Instagram can land as a Reel on TikTok or a Short on YouTube — the source format and the destination format do not have to match.
+
+The destination's `content_type` must accept video. A Pinterest pin (image) is rejected.
+
+Required per-platform settings (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, …) are the same keys as on a regular post. You can save a draft without them; **Activate** and **Resume** refuse until every usable destination has what it needs to publish. See [per-platform meta](/api-reference/endpoint/update-post#per-platform-meta).
+
+Captions are copied from the original. TryPost only rewrites a caption when it exceeds that network's limit (AI shortener when available, otherwise a hard trim).
+
+A destination you switch **off** is skipped for that item, not an error. Keep at least one usable destination or the flow cannot activate.
+
+The source account cannot also be a destination on the same repurpose.
+
+## Publishing mode
+
+| Mode | What happens when a new video is found |
+|---|---|
+| **Publish automatically** (`publish`) | TryPost creates the posts and schedules them immediately |
+| **Create as draft** (`draft`) | The posts land in your calendar as drafts for you to review |
+
+## Status
+
+| Status | Meaning |
+|---|---|
+| **Draft** | Configured, not watching yet |
+| **Active** | TryPost checks the source regularly and replicates new videos |
+| **Paused** | Checks are on hold. Resume continues from where it stopped |
+| **Disabled** | Turned off. Activating again starts fresh — whatever you posted while it was off is not backfilled |
+
+### Pause vs disable
+
+**Pause** keeps the watermark. Videos published while it is paused are still picked up after **Resume**.
+
+**Disable** clears the watermark. The next **Activate** only watches from that moment on.
+
+A user pause (you clicked **Pause**) resumes from the same place. A system pause (the source died, or every destination disappeared) stamps a new watermark on resume, so the backlog from the outage is not replayed.
+
+### Changing the source
+
+Editing the source account or the watched format on an already-activated row resets the watermark. Only videos published after that change are replicated.
+
+## How polling works
+
+On Cloud, and on a self-hosted install with the [scheduler](/self-hosting/production#scheduled-tasks-cron) running:
+
+1. `repurpose:poll` runs every five minutes and queues a check for every **active** source that is due
+2. Each source is polled about every **15 minutes** (`REPURPOSE_POLL_INTERVAL_MINUTES`)
+3. A rate-limit from Instagram or Facebook backs the next check off to **60 minutes** (`REPURPOSE_BACKOFF_MINUTES`)
+4. New videos after the watermark become activity items; each one is downloaded and turned into posts
+
+Videos you already published **through TryPost** are listed as skipped. They are never cloned back onto the other networks.
+
+## Activity
+
+Open a repurpose and switch to **Activity** to see every source video TryPost has seen.
+
+| Status | Meaning |
+|---|---|
+| Queued / Processing | Download or post creation is in progress |
+| Replicated | Destinations were created and scheduled (`publish` mode) |
+| Drafted | Destinations were created as drafts (`draft` mode) |
+| Skipped | Intentionally not replicated — see the reason |
+| Failed | Download or post creation failed — see the reason |
+
+| Reason | What it means |
+|---|---|
+| Already published through TryPost | The original was posted from this workspace. It is not cloned |
+| The network did not share a downloadable file | Usually copyrighted audio on the original |
+| The video could not be downloaded | Transient download failure after retries |
+| Could not create the posts | Post creation failed |
+| No destination was available | Every destination was missing or switched off |
+
+Deleting a repurpose stops checks immediately. Posts it already created stay in the [calendar](/knowledge-base/posts#the-calendar).
+
+## Account health
+
+Source and destination are treated differently on purpose:
+
+- A **dead source** (disconnected, token expired, or deleted) pauses the repurpose. Reconnect it, then **Resume**. The daily connection check is what marks an account healthy again — a successful token refresh is not enough.
+- A **dead destination** does not stop the flow. That item still creates posts for the accounts that work; the broken one fails on publish so you can retry it after reconnecting. Skipping it at job time would drop that video forever.
+
+Banners on the list come from current account health, not from stored copy. When the cause is fixed they say the flow is ready to resume — click **Resume**.
+
+No email is sent when a repurpose pauses. You already get account-level mail when a connection dies.
+
+## Webhooks
+
+Replicated posts are ordinary [posts](/knowledge-base/posts). They fire the same [webhook](/knowledge-base/webhooks) events (`post.created`, then `post.scheduled` in publish mode, then the publish outcome). `created_via` is `repurpose`.
+
+## Self-hosting
+
+Repurpose needs Horizon (or another queue worker) **and** the scheduler. `repurpose:poll` is already on the default schedule (every five minutes). Tune how often each source is checked:
+
+```env
+REPURPOSE_POLL_INTERVAL_MINUTES=15
+REPURPOSE_BACKOFF_MINUTES=60
+```
+
+See [Configuration](/self-hosting/configuration#repurpose) and [Scheduled tasks](/self-hosting/production#scheduled-tasks-cron).
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Why can't I watch TikTok or YouTube?">
+    TryPost has to download the original video. Instagram and Facebook expose a file URL; the other networks do not. Those accounts can still be **destinations**.
+  </Accordion>
+  <Accordion title="Will it copy old videos?">
+    No. Activation stamps a watermark. Only videos published after that moment are replicated. Disable-then-activate does the same — the gap stays empty.
+  </Accordion>
+  <Accordion title="What if I already posted the same video through TryPost?">
+    It is skipped (`published_via_trypost`). The activity row still appears so you can see why nothing new showed up.
+  </Accordion>
+  <Accordion title="A destination is switched off. Does the whole flow stop?">
+    No. That account is skipped for each new item. The others still receive the video. Activate and Resume only need **one** usable destination.
+  </Accordion>
+  <Accordion title="The original used copyrighted audio and nothing arrived">
+    Instagram often withholds the download URL in that case. The activity row says the network did not share a downloadable file.
+  </Accordion>
+</AccordionGroup>

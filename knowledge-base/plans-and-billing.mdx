@@ -1,100 +1,103 @@
 ---
 title: "Plans & billing"
-description: "How TryPost Cloud pricing, AI credits, and billing work."
+description: "How TryPost Cloud pricing, plans, and billing work."
 icon: "credit-card"
 ---
 
 <Note>
-  Everything on this page applies to **TryPost Cloud**. Self-hosted instances skip subscription and credit checks entirely (set `SELF_HOSTED=true` in `.env`).
+  Everything on this page applies to **TryPost Cloud**. Self-hosted instances skip subscription checks entirely (set `SELF_HOSTED=true` in `.env`).
 </Note>
 
-## The plan
+## The plans
 
-TryPost Cloud has one plan, priced per workspace. Every feature is included on every workspace, with no tiers and no per-seat fees.
+TryPost Cloud has two flat plans. Both include every feature — the difference is how many [workspaces](/knowledge-base/workspaces) you can run. There are no per-seat fees and no AI credit cap.
 
-| | Per workspace |
-|---|---|
-| Price | **$12 / month**, or **$10 / month** billed yearly (**$120 / year**) |
-| Social accounts | One account on each network (your social set) |
-| Team members | Unlimited, with roles and approvals |
-| AI credits | 2,500 per month, pooled across your account |
-| Included | Calendar, AI Copilot, MCP server, REST API, analytics, signatures, labels |
+| | **Socials** | **Workspaces** |
+|---|---|---|
+| Best for | Creators and small brands | Agencies and larger businesses |
+| Monthly | **$19 / month** | **$99 / month** |
+| Yearly | **$15.83 / month** billed yearly (**$190 / year**, 2 months free) | **$82.50 / month** billed yearly (**$990 / year**, 2 months free) |
+| Workspaces | 1 | Unlimited |
+| Social accounts | Unlimited, including several on the same network | Unlimited, including several on the same network |
+| Team members | Unlimited | Unlimited |
+| Included | Calendar, Copilot, MCP, REST API, analytics, [repurpose](/knowledge-base/repurposes), signatures, labels | Same |
 
-Pricing is localized in some regions (for example, **R$60 / month** in Brazil). See the [pricing page](https://trypost.it/pricing) for current rates.
+Pricing is localized in some regions (for example, Brazil). See the [pricing page](https://trypost.it/pricing) for current rates.
 
-### One workspace, one social set
+A workspace is one brand or client, kept separate from the rest: its own social accounts, signatures, labels, analytics, members, and MCP connection. Need another brand? [Add a workspace](/knowledge-base/workspaces#creating-a-workspace) — Socials can hold one; Workspaces can hold as many as you need.
 
-Each workspace connects one account on every supported network (Instagram, Facebook, LinkedIn, X, TikTok, YouTube, Pinterest, Threads, Bluesky, Mastodon, Telegram, Discord) and runs them from a single calendar.
+## Trial and first month
 
-A LinkedIn profile and a LinkedIn Page count as **one** network between them, as do Instagram Standalone and Instagram (Facebook Business) — see [connection limits](/knowledge-base/social-accounts#connection-limits).
+New accounts pick a plan during welcome. Checkout is **monthly** there. A card is required.
 
-To manage another brand or client, or a second account on the same network, add another workspace. Each workspace is billed at the same per-workspace price, and AI credits from every workspace are pooled across your account.
+First-time subscribers either start with an **8-day free trial** or a **$1 first month**, depending on the current offer. You are not charged the regular price during a trial, and you can cancel before it ends to avoid billing. A $1 first month is billed up front; the regular monthly price starts on the next cycle.
 
-## Trial
+Re-subscribers do not get the trial or the first-month offer. Yearly billing is available later on the billing page — it is not part of welcome checkout.
 
-New accounts start with a **7-day free trial** with full access to the product. A card is required to start the trial. You are not charged during the 7 days, and you can cancel any time before the trial ends to avoid billing. The countdown is visible at **Settings &gt; Account &gt; Billing**.
+The trial countdown, when you have one, is visible at **Settings &gt; Account &gt; Billing**.
 
-When the trial ends, your subscription begins unless you cancel before then. If you let the trial lapse without subscribing, AI and credit-gated actions return `402 Payment Required` until you subscribe.
+When the trial ends, your subscription begins unless you cancel before then. If you let access lapse without an active subscription, the app and API return `402 Payment Required` until you subscribe.
 
 ## Subscribing
 
-1. Go to **Settings &gt; Account &gt; Billing**
-2. Pick **Monthly** or **Yearly** at the top of the plan picker
-3. Choose how many workspaces to bill
-4. Complete payment in Stripe Checkout
+1. During welcome, pick **Socials** or **Workspaces** and complete Stripe Checkout
+2. After you have a subscription, go to **Settings &gt; Account &gt; Billing** to switch plan or interval
+3. Pick **Monthly** or **Yearly** at the top of the plan picker
+4. Choose **Upgrade**, **Downgrade**, or switch interval
 
-Yearly billing costs less per month than monthly. The exact saving is shown in Checkout.
+Yearly billing costs less per month than monthly (2 months free). Stripe prorates the difference when you change plan or interval.
 
-## Adding or removing workspaces
+## Changing plan
 
-Use the same **Settings &gt; Account &gt; Billing** page to add or remove workspaces. New workspaces take effect immediately, and Stripe prorates the difference for the remainder of the billing period. Removing a workspace takes effect at the end of the current period, so you keep access until then.
+Use **Settings &gt; Account &gt; Billing**. Only the account owner can change the plan.
+
+- **Socials → Workspaces** — upgrade. You can add more workspaces right away.
+- **Workspaces → Socials** — downgrade. You must be down to **one** workspace first. If you still have extras, delete them before switching — the picker blocks Socials until you do.
+- **Monthly ↔ yearly** on the same plan — switch interval from the same picker.
+
+Adding a workspace on Workspaces does not change what you pay.
 
 ## Updating payment method &amp; invoices
 
-Click **Manage subscription** on the Billing page to open the Stripe Customer Portal in a new tab. From there you can:
+Click **Manage on Stripe** on the Billing page to open the Stripe Customer Portal in a new tab. From there you can:
 
 - Update card / payment method
 - Download invoices and receipts
 - Change billing email
 - Cancel the subscription
 
-## AI credits
-
-Each workspace includes 2,500 AI credits per month. Credits are pooled across your account, so all of your workspaces draw from the same balance. The balance resets at the start of each billing cycle.
-
-| Action | Cost |
-|--------|------|
-| Text generation (Generate, Review, Create caption) | 1 credit per ~150 tokens (input + output combined) |
-| Image generation | 15 credits per image (current default model, OpenAI `gpt-image-2` at low quality) |
-| Video generation | 500 credits per video |
-
-Track usage at **Settings &gt; Account &gt; Usage**. The page shows how many credits are used, the monthly limit, and live counts for your connected accounts and members.
-
-When credits hit zero, AI calls return `402 Payment Required` until the next reset.
-
 ## Limit behavior
 
-When you reach a limit, the dashboard shows a dialog and the API/MCP layer returns `402 Payment Required` with a `message` explaining what was hit (for example, `Monthly AI credits exhausted`). The limits that apply are your pooled AI credits and one account per network in each workspace. Need more capacity on a network? Add another workspace.
+The Cloud limits that still apply:
+
+- **No active subscription** — the dashboard, API, and MCP return `402 Payment Required`
+- **Socials workspace cap** — you cannot create a second workspace until you upgrade. The create page still opens; submitting it shows the upgrade dialog
+- **Downgrade with too many workspaces** — blocked until extras are deleted
+
+There is **no** monthly AI credit ceiling. Copilot and the other AI tools stay available on both plans.
 
 ## FAQ
 
 <AccordionGroup>
   <Accordion title="How much does TryPost cost?">
-    One price per workspace: $12/month, or $10/month billed yearly ($120/year). Every feature is included, with no tiers and no per-seat fees.
+    Two plans: Socials at $19/month or $190/year, and Workspaces at $99/month or $990/year. Both include every feature. The only difference is one workspace vs unlimited workspaces.
   </Accordion>
   <Accordion title="Can I manage more than one brand?">
-    Yes. Add a workspace per brand or client. Each is billed at the same per-workspace price, and AI credits are pooled across your account.
+    Yes. Create a workspace per brand or client. Socials includes one workspace; Workspaces includes as many as you need, at the same flat price.
   </Accordion>
-  <Accordion title="Do unused credits roll over?">
-    No. The credit balance resets at the start of each billing cycle.
+  <Accordion title="Do I pay per team member?">
+    No. Members are unlimited on both plans.
+  </Accordion>
+  <Accordion title="Are AI features metered?">
+    No. There is no credit cap and nothing is deducted from a monthly quota. You need an active subscription (Cloud) or a configured AI provider (self-hosted).
   </Accordion>
   <Accordion title="What happens if my card fails?">
-    Stripe retries automatically. After the grace period set in your account, the subscription enters `past_due` and the dashboard shows a banner. New AI and credit-gated actions return `402` until billing recovers.
+    Stripe retries automatically. After the grace period, the subscription enters `past_due` and the dashboard shows a banner. New actions that require app access return `402` until billing recovers.
   </Accordion>
   <Accordion title="Can I cancel any time?">
     Yes. Cancel from the Stripe Customer Portal. The subscription stays active until the end of the current billing period, then expires.
   </Accordion>
   <Accordion title="Does self-hosted have plans?">
-    No. Self-hosted instances bypass all subscription and credit checks. You manage your own infrastructure costs.
+    No. Self-hosted instances bypass all subscription checks. You manage your own infrastructure costs.
   </Accordion>
 </AccordionGroup>

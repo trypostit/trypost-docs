@@ -139,6 +139,22 @@
             ]
           },
           {
+            "group": "Repurpose",
+            "pages": [
+              "api-reference/endpoint/list-repurposes",
+              "api-reference/endpoint/create-repurpose",
+              "api-reference/endpoint/get-repurpose",
+              "api-reference/endpoint/update-repurpose",
+              "api-reference/endpoint/list-repurpose-items",
+              "api-reference/endpoint/activate-repurpose",
+              "api-reference/endpoint/pause-repurpose",
+              "api-reference/endpoint/resume-repurpose",
+              "api-reference/endpoint/disable-repurpose",
+              "api-reference/endpoint/delete-repurpose",
+              "api-reference/endpoint/list-repurpose-source-formats"
+            ]
+          },
+          {
             "group": "Webhooks",
             "pages": [
               "api-reference/endpoint/list-webhooks",
@@ -202,6 +218,7 @@
             "group": "Content",
             "pages": [
               "knowledge-base/posts",
+              "knowledge-base/repurposes",
               "knowledge-base/media",
               "knowledge-base/assets",
               "knowledge-base/signatures",

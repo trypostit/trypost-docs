@@ -1,0 +1,16 @@
+---
+title: "Delete a repurpose"
+api: "DELETE /repurposes/{repurpose}"
+description: "Delete a repurpose. Polling stops immediately. Posts it already created stay in the calendar."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Returns `204` with an empty body. Activity items go with the row. Calendar posts created from those items are **not** deleted.
+
+<RequestExample>
+```bash
+curl -X DELETE https://app.trypost.it/api/repurposes/a1b2c3d4-e5f6-7890-abcd-ef1234567890 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
