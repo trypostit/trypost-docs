@@ -150,6 +150,8 @@
               "ai/claude-code",
               "ai/claude-desktop",
               "ai/chatgpt",
+              "ai/muse",
+              "ai/muse-code",
               "ai/perplexity",
               "ai/cursor",
               "ai/windsurf",
