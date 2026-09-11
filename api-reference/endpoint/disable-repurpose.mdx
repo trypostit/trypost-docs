@@ -4,7 +4,9 @@ api: "POST /repurposes/{repurpose}/disable"
 description: "Turn off a running repurpose and clear its watermark."
 ---
 
-Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`.
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
 
 Only an **active** or **paused** row can be disabled (`422` otherwise). Clears `activated_at`, `paused_reason`, and `next_poll_at`. The next [activate](/api-reference/endpoint/activate-repurpose) starts fresh — videos published while it was off are not backfilled.
 

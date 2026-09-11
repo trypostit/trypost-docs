@@ -151,7 +151,7 @@ For every post event except `post.deleted`, `data` is the post at the moment of 
 | `workspace_id` | Workspace UUID |
 | `user_id` | Author user UUID |
 | `status` | `draft`, `scheduled`, `publishing`, `published`, `partially_published`, or `failed` |
-| `created_via` | `web`, `api`, `mcp`, or `null` |
+| `created_via` | `web`, `api`, `mcp`, `repurpose`, or `null` |
 | `content` | Post body. May include HTML from the editor (e.g. `<p>…</p>`), or be an empty string |
 | `scheduled_at` / `published_at` / `created_at` / `updated_at` | ISO 8601, or `null` — not the `Y-m-d H:i:s` strings used by [`GET /posts`](/api-reference/endpoint/list-posts) |
 | `author` | `{ id, name }` only — no email — or `null` |

@@ -4,7 +4,9 @@ api: "POST /repurposes/{repurpose}/activate"
 description: "Start watching the source. Only a draft or disabled row can be activated."
 ---
 
-Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`.
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
 
 Stamps `activated_at` to now, clears `paused_reason` / `last_error`, and sets `status` to `active`. Videos published before this instant are not backfilled.
 

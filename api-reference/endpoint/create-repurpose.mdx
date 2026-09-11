@@ -4,9 +4,13 @@ api: "POST /repurposes"
 description: "Create a draft repurpose. It does not watch the source until you activate it."
 ---
 
-Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`.
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace source or destination IDs return `422`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
 
 The row is always created as `draft`. Only videos published **after** [activate](/api-reference/endpoint/activate-repurpose) are replicated.
+
+The dashboard create dialog only sends `source_social_account_id`. If a `reel` row already exists for that source, the app opens it instead of creating another. This endpoint does not do that — you get `422`.
 
 The source must be an Instagram (`instagram` / `instagram-facebook`) or Facebook account in this workspace, switched on. Each workspace may have only one row per `source_social_account_id` + `source_format` pair — a collision returns `422` on `source_social_account_id`.
 

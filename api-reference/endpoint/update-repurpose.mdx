@@ -6,6 +6,8 @@ description: "Update the source, format, publish mode, or destinations of a repu
 
 Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
 
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
 Omitted fields stay unchanged. Changing `source_social_account_id` or `source_format` on a row that already has `activated_at` **resets the watermark** to now — only videos published after the change are replicated.
 
 An **active** row cannot drop its last usable destination (`422` on `destinations`). Required publish meta is enforced when the row is already running.

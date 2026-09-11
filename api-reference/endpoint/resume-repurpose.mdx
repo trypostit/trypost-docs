@@ -4,7 +4,9 @@ api: "POST /repurposes/{repurpose}/resume"
 description: "Resume a paused repurpose. Only a paused row can be resumed."
 ---
 
-Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`.
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
 
 Same health checks as [activate](/api-reference/endpoint/activate-repurpose): usable source, at least one usable destination, required meta present.
 

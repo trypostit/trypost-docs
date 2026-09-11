@@ -6,6 +6,8 @@ description: "List every source video a repurpose has seen, newest first. Pagina
 
 Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
 
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
 Returns the Laravel pagination envelope (`data`, `links`, `meta`). Page size is `config('app.pagination.default')` (**25**). There is no `per_page` parameter. Ordered by `source_created_at` (falling back to `created_at`).
 
 This is where to look when a video was not replicated.

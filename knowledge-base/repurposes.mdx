@@ -12,7 +12,7 @@ You can also manage repurposes through the [REST API](/api-reference/endpoint/li
 
 ## Who can manage repurposes
 
-Owner, Admin, and Member can create, edit, activate, pause, resume, disable, and delete repurposes. Viewers do not see **Repurpose** in the sidebar.
+Owner, Admin, and Member can create, edit, activate, pause, resume, disable, and delete repurposes. Viewers do not see **Repurpose** in the sidebar. The sidebar item is labeled **Beta**.
 
 See [Team & roles](/knowledge-base/team).
 
@@ -35,15 +35,19 @@ See [Team & roles](/knowledge-base/team).
 
 A new repurpose starts as a **draft**. Nothing is replicated until you activate it. Only videos published **after** activation are picked up.
 
+The create dialog only picks the source. Format, destinations, and publish mode are on the next screen (defaults: watch Reels, publish automatically, no destinations).
+
 <Note>
   One source account can feed several repurposes — one per format (Reels, Videos, Stories). The same account plus the same format cannot feed two rows in one workspace.
+
+  In the dashboard, creating a second row for the same source with the default format (**Reels**) opens the existing one. The [API](/api-reference/endpoint/create-repurpose) and [MCP](/ai/tools-reference#repurpose) return `422` instead.
 </Note>
 
 ## Source
 
 | | |
 |---|---|
-| **Networks** | Instagram (Standalone or Facebook Business) and Facebook Pages |
+| **Networks** | [Instagram](/platforms/instagram) (Standalone or Facebook Business) and [Facebook](/platforms/facebook) Pages |
 | **Formats** | `reel`, `video`, `story` |
 | **Health** | The source must stay **connected** and switched **on**. A dead source pauses the flow |
 
@@ -59,7 +63,7 @@ Required per-platform settings (TikTok `privacy_level`, Pinterest `board_id`, Di
 
 Captions are copied from the original. TryPost only rewrites a caption when it exceeds that network's limit (AI shortener when available, otherwise a hard trim).
 
-A destination you switch **off** is skipped for that item, not an error. Keep at least one usable destination or the flow cannot activate.
+A destination you switch **off** stays in the list and is skipped for that item — the flow keeps running. A destination you **delete** is removed from the list; if it was the last one, the flow pauses (`paused_reason` `no_destinations`). An **active** row cannot drop its last usable destination on save.
 
 The source account cannot also be a destination on the same repurpose.
 
@@ -106,34 +110,55 @@ Videos you already published **through TryPost** are listed as skipped. They are
 
 Open a repurpose and switch to **Activity** to see every source video TryPost has seen.
 
-| Status | Meaning |
-|---|---|
-| Queued / Processing | Download or post creation is in progress |
-| Replicated | Destinations were created and scheduled (`publish` mode) |
-| Drafted | Destinations were created as drafts (`draft` mode) |
-| Skipped | Intentionally not replicated — see the reason |
-| Failed | Download or post creation failed — see the reason |
+| In the app | API `status` | Meaning |
+|---|---|---|
+| Queued | `pending` | Waiting to download |
+| Processing | `processing` | Download or post creation in progress |
+| Replicated | `published` | Destinations created and scheduled (`publish` mode) |
+| Drafted | `drafted` | Destinations created as drafts (`draft` mode) |
+| Skipped | `skipped` | Intentionally not replicated — see the reason |
+| Failed | `failed` | Download or post creation failed — see the reason |
 
-| Reason | What it means |
-|---|---|
-| Already published through TryPost | The original was posted from this workspace. It is not cloned |
-| The network did not share a downloadable file | Usually copyrighted audio on the original |
-| The video could not be downloaded | Transient download failure after retries |
-| Could not create the posts | Post creation failed |
-| No destination was available | Every destination was missing or switched off |
+| In the app | API `reason` | What it means |
+|---|---|---|
+| Already published through TryPost | `published_via_trypost` | The original was posted from this workspace. It is not cloned |
+| The network did not share a downloadable file | `media_url_missing` | Usually copyrighted audio on the original |
+| The video could not be downloaded | `download_failed` | Transient download failure after retries |
+| Could not create the posts | `post_creation_failed` | Post creation failed |
+| No destination was available | `no_usable_destinations` | Every destination was missing or switched off |
 
 Deleting a repurpose stops checks immediately. Posts it already created stay in the [calendar](/knowledge-base/posts#the-calendar).
 
 ## Account health
 
-Source and destination are treated differently on purpose:
+Source and destination are treated differently on purpose.
 
-- A **dead source** (disconnected, token expired, or deleted) pauses the repurpose. Reconnect it, then **Resume**. The daily connection check is what marks an account healthy again — a successful token refresh is not enough.
-- A **dead destination** does not stop the flow. That item still creates posts for the accounts that work; the broken one fails on publish so you can retry it after reconnecting. Skipping it at job time would drop that video forever.
+A **dead source** (disconnected, token expired, or switched off) pauses an active flow with `paused_reason` `source_unavailable`. When that account is connected and switched on again, TryPost **resumes it for you** — you do not click Resume. A user pause (`paused_reason` is `null`) is never auto-resumed.
 
-Banners on the list come from current account health, not from stored copy. When the cause is fixed they say the flow is ready to resume — click **Resume**.
+If the source account is **deleted**, the flow pauses with `source_removed` and the source field is cleared. Pick a new source, then **Resume**. That is not auto-resumed.
+
+A **dead destination** does not stop the flow:
+
+- Switched off — skipped at job time; the others still get the video
+- Disconnected but still listed — a post is still created so you can retry after reconnecting
+- Deleted — removed from the destination list; if none remain, the flow pauses (`no_destinations`)
+
+The list shows an amber warning when a system pause is in effect. Open the row to see why. When the cause is fixed and the flow did not auto-resume, the banner says it is ready — click **Resume**.
 
 No email is sent when a repurpose pauses. You already get account-level mail when a connection dies.
+
+## REST and MCP
+
+| Task | REST | MCP |
+|------|------|-----|
+| List formats | [`GET /repurpose-source-formats`](/api-reference/endpoint/list-repurpose-source-formats) | `list-repurpose-source-formats-tool` |
+| List / get | [`GET /repurposes`](/api-reference/endpoint/list-repurposes), [`GET /repurposes/{id}`](/api-reference/endpoint/get-repurpose) | `list-repurposes-tool`, `get-repurpose-tool` |
+| Create / update | [`POST /repurposes`](/api-reference/endpoint/create-repurpose), [`PUT /repurposes/{id}`](/api-reference/endpoint/update-repurpose) | `create-repurpose-tool`, `update-repurpose-tool` |
+| Activity | [`GET /repurposes/{id}/items`](/api-reference/endpoint/list-repurpose-items) | `list-repurpose-items-tool` |
+| Lifecycle | [`activate`](/api-reference/endpoint/activate-repurpose), [`pause`](/api-reference/endpoint/pause-repurpose), [`resume`](/api-reference/endpoint/resume-repurpose), [`disable`](/api-reference/endpoint/disable-repurpose) | matching `*-repurpose-tool` |
+| Delete | [`DELETE /repurposes/{id}`](/api-reference/endpoint/delete-repurpose) (`204`) | `delete-repurpose-tool` (`{ deleted: true }`) |
+
+MCP lists return `{ repurposes \| items, total, per_page, current_page, last_page }` instead of the Laravel `data` / `links` / `meta` envelope. `list-repurpose-source-formats-tool` returns `{ source_formats: [...] }`.
 
 ## Webhooks
 
@@ -163,7 +188,10 @@ See [Configuration](/self-hosting/configuration#repurpose) and [Scheduled tasks]
     It is skipped (`published_via_trypost`). The activity row still appears so you can see why nothing new showed up.
   </Accordion>
   <Accordion title="A destination is switched off. Does the whole flow stop?">
-    No. That account is skipped for each new item. The others still receive the video. Activate and Resume only need **one** usable destination.
+    No. That account is skipped for each new item. The others still receive the video. Activate and Resume only need **one** usable destination. Deleting the last destination does pause the flow.
+  </Accordion>
+  <Accordion title="I reconnected the source. Do I have to click Resume?">
+    Not if TryPost paused it because the source died (`source_unavailable`). Reconnect (or switch the account back on) and the flow resumes by itself. A pause you started, or a deleted source (`source_removed`), still needs **Resume**.
   </Accordion>
   <Accordion title="The original used copyrighted audio and nothing arrived">
     Instagram often withholds the download URL in that case. The activity row says the network did not share a downloadable file.
