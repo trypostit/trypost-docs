@@ -18,6 +18,8 @@ Posts are the core content unit in TryPost. A post represents a piece of content
 
 When you create a post, TryPost creates one platform entry per chosen social account. The post text is shared across all of them — there is no separate "synced/custom" toggle.
 
+Posts created by [Repurpose](/knowledge-base/repurposes) also land in the calendar (`created_via` is `repurpose`).
+
 ## The calendar
 
 The calendar view is the primary way to see your content schedule:
@@ -40,6 +42,8 @@ When a post becomes due:
 2. A background job is dispatched per enabled platform entry
 3. Each platform publishes independently
 4. When all platforms finish, the post status updates to the final outcome
+
+Workspace [webhooks](/knowledge-base/webhooks) fire on those status changes (`post.scheduled`, `post.published`, `post.partially_published`, `post.failed`). `publishing` itself does not send an event.
 
 <Note>
   Posts can only be scheduled in the future. The validator rejects past dates.
@@ -87,7 +91,7 @@ See [Notifications](/knowledge-base/notifications).
 
 ## Duplicating a post
 
-From the post list (or any post's "..." menu) pick **Duplicate** to copy a post into a new draft. The duplicate gets a fresh ID and `draft` status; the original is untouched. The copy preserves content, media, labels, and platform entries — adjust the schedule and platforms before publishing.
+From the post list (or any post's "..." menu) pick **Duplicate** to copy a post into a new draft. The duplicate gets a fresh ID and `draft` status; the original is untouched. The copy preserves content, media, labels, and platform entries — adjust the schedule and platforms before publishing. Subscribed webhooks receive `post.created` for the copy.
 
 The duplicate action is gated by the same workspace policies as "create post" — anyone with create-post permission can duplicate.
 
@@ -116,7 +120,7 @@ Each platform entry on a post exposes:
 
 ## Deleting posts
 
-You can delete any post at any time. Deleting removes the post and all its platform entries.
+You can delete any post at any time. Deleting removes the post and all its platform entries. Subscribed webhooks receive `post.deleted` with only `{ id, workspace_id }`.
 
 <Warning>
   Already-published posts can't be "unpublished" from the social platforms — deletion in TryPost only removes our local record. Edit or delete on the platform itself if you need to take it down.
@@ -139,5 +143,8 @@ You can delete any post at any time. Deleting removes the post and all its platf
   </Accordion>
   <Accordion title="How quickly are scheduled posts published?">
     The scheduler runs every minute. A post scheduled for `10:00` will typically be picked up between `10:00` and `10:01`, then dispatched per platform.
+  </Accordion>
+  <Accordion title="Why does my link read example(.)com on X?">
+    X charges much more to deliver a post that carries a link and shows it to fewer people, so the X version of a post is published with its links written non-clickable. Only X is affected, and your draft is untouched. See [links in posts](/platforms/x-twitter#links-in-posts).
   </Accordion>
 </AccordionGroup>

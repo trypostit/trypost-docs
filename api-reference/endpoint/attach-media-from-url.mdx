@@ -4,7 +4,7 @@ api: "POST /posts/{post}/media/from-url"
 description: "Download images, videos, or PDF documents from public URLs and attach them to a post."
 ---
 
-For uploading a file directly from your machine instead of fetching a URL, use [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media). MCP agents use the same contract via [`attach-media-from-url-tool`](/ai/tools-reference#posts).
+For uploading a file directly from your machine instead of fetching a URL, use [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media). To reuse a file already in the Asset Library, use [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset). MCP agents use the same contract via [`attach-media-from-url-tool`](/ai/tools-reference#posts).
 
 ## Path parameters
 

@@ -1,12 +1,12 @@
 ---
 title: "Asset library"
-description: "Reusable images and videos stored in your workspace, plus on-demand search via Unsplash and Giphy."
+description: "Reusable images, videos, and PDFs stored in your workspace, plus on-demand search via Unsplash and Giphy."
 icon: "photo-film"
 ---
 
 ## What it is
 
-The **Assets** page (sidebar → Assets) is your workspace's media library — a place to upload, search, and reuse images and videos across multiple posts without re-uploading every time. It's also the picker that opens from the post editor when you click "Add media".
+The **Assets** page (sidebar → Assets) is your workspace's media library — a place to upload, search, and reuse images, videos, and PDFs across multiple posts without re-uploading every time. It's also the picker that opens from the post editor when you click "Add media".
 
 ## Sources
 
@@ -28,8 +28,9 @@ Click **Upload** to add files from your machine. Supported formats:
 |------|-------------------------------|
 | Image | `image/jpeg`, `image/png`, `image/gif`, `image/webp` |
 | Video | `video/mp4`, `video/quicktime` (MOV) |
+| Document | `application/pdf` |
 
-Max file size: **10 MB for images, 1 GB for videos**. Files larger than ~1 MB are sent in chunks via `Content-Range` for reliability on flaky connections.
+Max file size: **10 MB for images, 1 GB for videos, 100 MB for PDFs**. Files larger than ~1 MB are sent in chunks via `Content-Range` for reliability on flaky connections.
 
 ## Importing from URL
 
@@ -47,9 +48,22 @@ Pick an asset in the gallery and it's attached to the active post. The **same** 
 
 From the Library tab, click any asset → trash icon. Deletion removes the file from storage and detaches it from the workspace. Posts that referenced the asset will lose the attachment; published posts on social platforms are unaffected.
 
-## API access
+## API and MCP
 
-There's no public API for the asset library yet. The closest equivalents are post-scoped: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) for direct file uploads and [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url) for URL-based attachments. Both upload to workspace storage and append to the post's `media[]` array in one shot.
+You can list the library and attach an existing file to a post without uploading again.
+
+| | List | Get one | Attach to a post |
+|---|---|---|---|
+| **REST** | [`GET /assets`](/api-reference/endpoint/list-assets) | [`GET /assets/{media}`](/api-reference/endpoint/get-asset) | [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) |
+| **MCP** | [`list-assets-tool`](/ai/tools-reference#list-assets-tool) | [`get-asset-tool`](/ai/tools-reference#get-asset-tool) | [`attach-existing-asset-tool`](/ai/tools-reference#attach-existing-asset-tool) |
+
+Only this workspace's library is visible. Viewers cannot list, get, or attach.
+
+REST list: **25** per page (`page`). MCP list: first `limit` items (default **50**, max 100) and `has_more` — no next page.
+
+When you attach, send `asset_id`. Optional `alt` replaces image alt text; if you omit `alt`, the library's existing alt is kept. Attaching the same file twice does not duplicate it.
+
+To add a **new** file, upload or fetch a URL instead — see [Media](/knowledge-base/media).
 
 ## Self-hosted
 

@@ -4,7 +4,7 @@ description: "Connect AI coding assistants to your TryPost account using the Mod
 icon: "book-open"
 ---
 
-TryPost provides a built-in [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that lets AI coding assistants manage your social media scheduling directly. Your AI assistant can create and publish posts, manage signatures and labels, fetch metrics, and more — all through natural language.
+TryPost provides a built-in [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that lets AI coding assistants manage your social media scheduling directly. Your AI assistant can create and publish posts, manage signatures, labels, webhooks, and repurposes, fetch metrics, and more — all through natural language.
 
 ## What is MCP?
 
@@ -17,17 +17,20 @@ TryPost exposes a full set of MCP tools for end-to-end content workflows. See th
 | Category | Tools | Description |
 |----------|-------|-------------|
 | **Posts** | List, Get, Create, Update, Publish, Delete, Attach Media from URL, Request Media Upload, Attach Media from Upload, Preview, Get Metrics | Create, schedule, publish, and analyze posts across all connected platforms — including local-file uploads via signed URLs |
+| **Assets** | List, Get, Attach Existing | Browse the workspace Asset Library and attach an existing item to a draft or scheduled post |
 | **Platforms** | List Content Types | Discover valid `content_type` values and per-platform limits |
 | **Signatures** | List, Create, Update, Delete | Manage reusable text blocks (hashtag sets, CTAs, link callouts) |
 | **Labels** | List, Create, Update, Delete | Manage color-coded labels for organizing posts |
 | **Social Accounts** | List, List Pinterest Boards, List Discord Channels, Toggle | View connected accounts, resolve Pinterest `board_id` / Discord `channel_id`, toggle active/inactive |
 | **Workspace** | Get | Get current workspace details |
 | **API Keys** | List, Create, Delete | Manage API keys |
+| **Webhooks** | List, Get, Create, Update, Delete, Send Test, Rotate Secret, List Logs, Replay | Subscribe to post events and inspect signed deliveries |
+| **Repurpose** | List, Get, Create, Update, Activate, Pause, Resume, Disable, Delete, List Items, List Source Formats | Watch Instagram or Facebook and republish new videos to other networks |
 
 ## How it works
 
 <Note>
-  MCP access on **TryPost Cloud** requires an active trial or subscription. New accounts get a 7-day trial automatically. See [Plans & billing](/knowledge-base/plans-and-billing) for details. Self-hosted instances skip this check.
+  MCP access on **TryPost Cloud** requires an active subscription. New accounts pay **$1 for the first month** during welcome. See [Plans & billing](/knowledge-base/plans-and-billing) for details. Self-hosted instances skip this check.
 </Note>
 
 <Steps>
@@ -60,7 +63,7 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
 
 <AccordionGroup>
   <Accordion title="HTTP 402 — Active subscription required">
-    Your OAuth grant is valid and the config is correct — the account behind it just doesn't have an active trial or subscription. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan (7-day free trial), then reconnect the MCP server. Self-hosted instances skip this check.
+    Your OAuth grant is valid and the config is correct — the account behind it just doesn't have an active subscription. Open [app.trypost.it](https://app.trypost.it), pick a plan, then reconnect the MCP server. Self-hosted instances skip this check.
   </Accordion>
   <Accordion title="HTTP 401 — Unauthenticated">
     The OAuth session expired and refresh failed, or the access token is missing/malformed/revoked. Re-run the assistant's connect flow to sign in again.
@@ -69,7 +72,7 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
     The request used a Personal Access Token (API key) or an OAuth token without the `mcp:use` scope. Remove any `Authorization: Bearer …` API key from the MCP config and connect with OAuth instead. For scripts and CI, call the [REST API](/api-reference/introduction) with an API key — not the MCP endpoint.
   </Accordion>
   <Accordion title="Server shows as “Failed to connect”">
-    Run the connection probe your assistant exposes (for example `claude mcp list`). The HTTP status from the probe tells you which case you're in: `402` → see above; `401` → re-authenticate; `403` → use OAuth (not an API key); anything else → open an issue on [GitHub](https://github.com/trypostit/trypost/issues).
+    Run the connection probe your assistant exposes (for example `claude mcp list` or `devin mcp list`). The HTTP status from the probe tells you which case you're in: `402` → see above; `401` → re-authenticate; `403` → use OAuth (not an API key); anything else → open an issue on [GitHub](https://github.com/trypostit/trypost/issues).
   </Accordion>
   <Accordion title="Browser doesn't open during sign-in">
     Some clients print the authorize URL to the terminal instead of launching the browser when running over SSH or inside a container. Copy the URL into a local browser, complete the flow, and the assistant will pick up the callback automatically. If the callback port is blocked, use a client that can finish OAuth locally, or drive TryPost through the [REST API](/api-reference/introduction) with an API key.
@@ -78,7 +81,12 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
 
 ## Next steps
 
-<Columns cols={3}>
+Every Build with AI page is linked here — the tools reference plus all 16 setup guides.
+
+<CardGroup cols={3}>
+  <Card title="Tools reference" icon="wrench" href="/ai/tools-reference">
+    Every MCP tool, parameters, and the publish workflow.
+  </Card>
   <Card title="Claude web" icon="/images/ai/claude.svg" href="/ai/claude">
     Claude on the web (claude.ai).
   </Card>
@@ -100,11 +108,14 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
   <Card title="Perplexity" icon="/images/ai/perplexity.svg" href="/ai/perplexity">
     Perplexity chat and Computer.
   </Card>
+  <Card title="Grok" icon="/images/ai/grok.svg" href="/ai/grok">
+    Grok on the web, iOS, and Android.
+  </Card>
   <Card title="Cursor" icon="/images/ai/cursor.svg" href="/ai/cursor">
     AI-powered code editor.
   </Card>
-  <Card title="Windsurf" icon="/images/ai/windsurf.svg" href="/ai/windsurf">
-    Editor with Cascade AI.
+  <Card title="Devin" icon="/images/ai/devin.svg" href="/ai/devin">
+    AI software engineer by Cognition.
   </Card>
   <Card title="VS Code" icon="/images/ai/vscode.svg" href="/ai/vs-code">
     Native MCP support in Copilot Chat.
@@ -121,10 +132,13 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
   <Card title="OpenClaw" icon="/images/ai/openclaw.svg" href="/ai/openclaw">
     Personal AI assistant gateway.
   </Card>
+  <Card title="Hermes" icon="/images/ai/hermes.png" href="/ai/hermes">
+    Hermes Agent by Nous Research.
+  </Card>
   <Card title="Codex" icon="/images/ai/codex.svg" href="/ai/codex">
     CLI agent by OpenAI.
   </Card>
   <Card title="Antigravity" icon="/images/ai/antigravity.svg" href="/ai/antigravity">
     AI agent by Google.
   </Card>
-</Columns>
+</CardGroup>

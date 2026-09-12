@@ -1,0 +1,45 @@
+---
+title: "Replay webhook log"
+api: "POST /webhooks/{webhook}/logs/{webhookLog}/replay"
+description: "Queue a new signed delivery using the original payload data. Works even if the webhook is paused or disabled."
+---
+
+Requires **manage webhooks** permission (Owner / Admin).
+
+- Webhook not in this workspace → `404`
+- Log id that does not belong to the webhook → `404`
+
+The replay is a **new** delivery: new envelope `id`, new log row, same `data` as the original payload. `{ "replayed": true }` means the job was queued — not that the receiver already answered. It still retries up to 3 times. You can replay a successful log as well as a failed one. Test pings never create a log, so there is nothing to replay for `webhook.test`.
+
+A successful replay on a `paused` or `disabled` webhook updates `last_sent_at` and resets `consecutive_failures`. It does **not** change `status` — re-enable separately if you want subscribed events to resume.
+
+## Request
+
+<ParamField path="webhook" type="string" required>
+  The webhook UUID.
+</ParamField>
+
+<ParamField path="webhookLog" type="string" required>
+  The delivery log UUID to replay.
+</ParamField>
+
+## Response
+
+```json
+{ "replayed": true }
+```
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/webhooks/a1b2c3d4-e5f6-7890-abcd-ef1234567890/logs/b2c3d4e5-f6a7-8901-bcde-f12345678901/replay \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "replayed": true
+}
+```
+</ResponseExample>

@@ -1,6 +1,6 @@
 ---
 title: "Introduction"
-description: "The TryPost API lets you manage social media posts, signatures, labels, and more with a simple REST API."
+description: "The TryPost API lets you manage social media posts, the Asset Library, signatures, labels, repurposes, webhooks, and more with a simple REST API."
 icon: "book-open"
 ---
 
@@ -47,8 +47,9 @@ The API uses conventional HTTP status codes. All error responses include a `mess
 | `204` | No content (successful deletion) |
 | `401` | Missing or invalid API key |
 | `402` | Active subscription required (Cloud only — self-hosted instances skip this check) |
+| `403` | Forbidden — e.g. a Viewer calling a create-post or update endpoint (including listing assets) |
 | `404` | Resource not found, or resource not in the key's workspace |
-| `422` | Validation error |
+| `422` | Validation error — including a rejected webhook `endpoint` (`errors.endpoint`) |
 | `429` | Rate limit exceeded |
 
 ```json
@@ -78,11 +79,21 @@ A non-paginated collection looks like a plain array:
 ]
 ```
 
-The only endpoint that wraps in `data:` is `GET /posts`, because it's paginated.
+The endpoints that wrap in `data:` are the paginated lists: [`GET /posts`](/api-reference/endpoint/list-posts), [`GET /assets`](/api-reference/endpoint/list-assets), [`GET /repurposes`](/api-reference/endpoint/list-repurposes), [`GET /repurposes/{id}/items`](/api-reference/endpoint/list-repurpose-items), and [`GET /webhooks/{id}/logs`](/api-reference/endpoint/list-webhook-logs). [`GET /repurpose-source-formats`](/api-reference/endpoint/list-repurpose-source-formats) wraps in `data:` but is not paginated.
 
 ## Pagination
 
-The [`GET /posts`](/api-reference/endpoint/list-posts) endpoint returns 15 posts per page. The response uses Laravel's standard pagination envelope:
+These list endpoints paginate. They use Laravel's standard pagination envelope (`data`, `links`, `meta`) and the `page` query parameter:
+
+| Endpoint | Per page | Notes |
+|---|---|---|
+| [`GET /posts`](/api-reference/endpoint/list-posts) | **15** | Posts only |
+| [`GET /assets`](/api-reference/endpoint/list-assets) | **25** | Asset Library. No `per_page` parameter |
+| [`GET /webhooks/{id}/logs`](/api-reference/endpoint/list-webhook-logs) | **15** | Delivery logs for one webhook. No `per_page` parameter |
+| [`GET /repurposes`](/api-reference/endpoint/list-repurposes) | **25** | Workspace repurposes. No `per_page` parameter |
+| [`GET /repurposes/{id}/items`](/api-reference/endpoint/list-repurpose-items) | **25** | Activity for one repurpose. No `per_page` parameter |
+
+Example envelope for posts:
 
 ```json
 {
@@ -110,16 +121,19 @@ The [`GET /posts`](/api-reference/endpoint/list-posts) endpoint returns 15 posts
 }
 ```
 
-Use the `page` query parameter to navigate. Other list endpoints (signatures, labels, social accounts, API keys) return all items without pagination, as a plain array.
+Use the `page` query parameter to navigate. Other list endpoints (signatures, labels, social accounts, API keys, webhooks) return all items without pagination, as a plain array.
 
 ## Quick reference
 
 | Resource | Endpoints |
 |---|---|
-| Posts | `GET /posts`, `POST /posts`, `GET /posts/{id}`, `PUT /posts/{id}`, `DELETE /posts/{id}`, `POST /posts/{id}/media`, `POST /posts/{id}/media/from-url`, `GET /posts/{id}/metrics`, `GET /posts/{id}/preview` |
+| Posts | `GET /posts`, `POST /posts`, `GET /posts/{id}`, `PUT /posts/{id}`, `DELETE /posts/{id}`, `POST /posts/{id}/media`, `POST /posts/{id}/media/from-url`, `POST /posts/{id}/media/from-asset`, `GET /posts/{id}/metrics`, `GET /posts/{id}/preview` |
 | Platforms | `GET /content-types` |
 | Workspace | `GET /workspace` |
+| Assets | `GET /assets`, `GET /assets/{id}` |
 | Signatures | `GET /signatures`, `POST /signatures`, `PUT /signatures/{id}`, `DELETE /signatures/{id}` |
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}` |
 | Social accounts | `GET /social-accounts`, `PUT /social-accounts/{id}/toggle`, `GET /social-accounts/{id}/boards` (Pinterest), `GET /social-accounts/{id}/channels` (Discord) |
 | API keys | `GET /api-keys`, `POST /api-keys`, `DELETE /api-keys/{id}` |
+| Repurpose | `GET /repurposes`, `POST /repurposes`, `GET /repurposes/{id}`, `PUT /repurposes/{id}`, `GET /repurposes/{id}/items`, `POST /repurposes/{id}/activate`, `POST /repurposes/{id}/pause`, `POST /repurposes/{id}/resume`, `POST /repurposes/{id}/disable`, `DELETE /repurposes/{id}`, `GET /repurpose-source-formats` |
+| Webhooks | `GET /webhooks`, `POST /webhooks`, `GET /webhooks/{id}`, `PUT /webhooks/{id}`, `DELETE /webhooks/{id}`, `POST /webhooks/{id}/send-test`, `POST /webhooks/{id}/rotate-secret`, `GET /webhooks/{id}/logs`, `POST /webhooks/{id}/logs/{log}/replay` |

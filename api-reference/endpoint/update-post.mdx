@@ -27,7 +27,7 @@ description: "Update a post's content, schedule, enabled platforms, or labels �
 <ParamField body="media" type="array">
   Replace the post's media set. Each item must include a public `url` — the API downloads and hosts it (same shape as [`POST /posts`](/api-reference/endpoint/create-post)). Nested `meta.alt_text` (string, max **2000**) is allowed for accessibility — that is **media** meta, not `platforms[].meta`.
 
-  Prefer dedicated endpoints when practical: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (multipart file) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
+  Prefer dedicated endpoints when practical: [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) (multipart file), [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url), or [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) to reuse a library item.
 </ParamField>
 
 <ParamField body="platforms" type="array">

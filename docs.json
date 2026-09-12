@@ -78,6 +78,7 @@
               "api-reference/endpoint/delete-post",
               "api-reference/endpoint/upload-media",
               "api-reference/endpoint/attach-media-from-url",
+              "api-reference/endpoint/attach-existing-asset",
               "api-reference/endpoint/request-media-upload",
               "api-reference/endpoint/get-post-metrics",
               "api-reference/endpoint/get-post-preview"
@@ -93,6 +94,13 @@
             "group": "Workspace",
             "pages": [
               "api-reference/endpoint/get-workspace"
+            ]
+          },
+          {
+            "group": "Assets",
+            "pages": [
+              "api-reference/endpoint/list-assets",
+              "api-reference/endpoint/get-asset"
             ]
           },
           {
@@ -129,6 +137,36 @@
               "api-reference/endpoint/create-api-key",
               "api-reference/endpoint/delete-api-key"
             ]
+          },
+          {
+            "group": "Repurpose",
+            "pages": [
+              "api-reference/endpoint/list-repurposes",
+              "api-reference/endpoint/create-repurpose",
+              "api-reference/endpoint/get-repurpose",
+              "api-reference/endpoint/update-repurpose",
+              "api-reference/endpoint/list-repurpose-items",
+              "api-reference/endpoint/activate-repurpose",
+              "api-reference/endpoint/pause-repurpose",
+              "api-reference/endpoint/resume-repurpose",
+              "api-reference/endpoint/disable-repurpose",
+              "api-reference/endpoint/delete-repurpose",
+              "api-reference/endpoint/list-repurpose-source-formats"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/endpoint/list-webhooks",
+              "api-reference/endpoint/get-webhook",
+              "api-reference/endpoint/create-webhook",
+              "api-reference/endpoint/update-webhook",
+              "api-reference/endpoint/delete-webhook",
+              "api-reference/endpoint/send-webhook-test",
+              "api-reference/endpoint/rotate-webhook-secret",
+              "api-reference/endpoint/list-webhook-logs",
+              "api-reference/endpoint/replay-webhook-log"
+            ]
           }
         ]
       },
@@ -153,13 +191,15 @@
               "ai/muse",
               "ai/muse-code",
               "ai/perplexity",
+              "ai/grok",
               "ai/cursor",
-              "ai/windsurf",
+              "ai/devin",
               "ai/vs-code",
               "ai/github-copilot",
               "ai/gemini-cli",
               "ai/opencode",
               "ai/openclaw",
+              "ai/hermes",
               "ai/codex",
               "ai/antigravity"
             ]
@@ -180,6 +220,7 @@
             "group": "Content",
             "pages": [
               "knowledge-base/posts",
+              "knowledge-base/repurposes",
               "knowledge-base/media",
               "knowledge-base/assets",
               "knowledge-base/signatures",
@@ -196,15 +237,6 @@
             ]
           },
           {
-            "group": "Automations",
-            "pages": [
-              "knowledge-base/automations/introduction",
-              "knowledge-base/automations/triggers-and-nodes",
-              "knowledge-base/automations/variables",
-              "knowledge-base/automations/monitoring"
-            ]
-          },
-          {
             "group": "Accounts",
             "pages": [
               "knowledge-base/social-accounts",
@@ -218,6 +250,7 @@
               "knowledge-base/account-and-security",
               "knowledge-base/plans-and-billing",
               "knowledge-base/api-keys",
+              "knowledge-base/webhooks",
               "knowledge-base/notifications"
             ]
           }
@@ -246,7 +279,8 @@
             "pages": [
               "self-hosting/configuration",
               "self-hosting/ai",
-              "self-hosting/production"
+              "self-hosting/production",
+              "self-hosting/upgrading"
             ]
           }
         ]

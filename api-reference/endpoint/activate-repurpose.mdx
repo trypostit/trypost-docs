@@ -1,0 +1,29 @@
+---
+title: "Activate a repurpose"
+api: "POST /repurposes/{repurpose}/activate"
+description: "Start watching the source. Only a draft or disabled row can be activated."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+Stamps `activated_at` to now, clears `paused_reason` / `last_error`, and sets `status` to `active`. Videos published before this instant are not backfilled.
+
+Refuses with `422` when:
+
+- The row is not `draft` or `disabled` (`only_idle_activates`)
+- The source is missing, switched off, or not `connected`
+- There is no destination, or none of them is switched on
+- A usable destination is missing required publish meta (e.g. TikTok `privacy_level`)
+
+## Response
+
+Same shape as [`GET /repurposes/{repurpose}`](/api-reference/endpoint/get-repurpose), with `status` `active`.
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/repurposes/a1b2c3d4-e5f6-7890-abcd-ef1234567890/activate \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>

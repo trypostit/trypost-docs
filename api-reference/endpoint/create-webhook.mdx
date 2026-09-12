@@ -1,0 +1,65 @@
+---
+title: "Create webhook"
+api: "POST /webhooks"
+description: "Create an outgoing webhook. Returns the signing secret. Does not send a test request."
+---
+
+Requires **manage webhooks** permission (Owner / Admin). Members and Viewers get `403`.
+
+Private or local endpoints are rejected with `422` and an `errors.endpoint` array. Creating does **not** ping the URL — use [send test](/api-reference/endpoint/send-webhook-test). The webhook is always created `enabled`. There is no `status` field on this request.
+
+## Request
+
+<ParamField body="endpoint" type="string" required>
+  Public `http://` or `https://` URL that will receive signed webhook payloads. Maximum 255 characters. Private, loopback, and link-local addresses are rejected.
+</ParamField>
+
+<ParamField body="events" type="array" required>
+  At least one event. Allowed values: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. There is no `publishing` event and no wildcard.
+</ParamField>
+
+## Response
+
+Returns `201` with the created webhook, including `signing_secret`. Store the secret — you can also read it later with [`GET /webhooks/{webhook}`](/api-reference/endpoint/get-webhook).
+
+Same shape as [`GET /webhooks/{webhook}`](/api-reference/endpoint/get-webhook).
+
+Private, loopback, or otherwise blocked URLs return `422`:
+
+```json
+{
+  "message": "This endpoint is not allowed.",
+  "errors": {
+    "endpoint": ["This endpoint is not allowed."]
+  }
+}
+```
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/webhooks \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "endpoint": "https://example.com/webhooks/trypost",
+    "events": ["post.published", "post.failed"]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "endpoint": "https://example.com/webhooks/trypost",
+  "events": ["post.published", "post.failed"],
+  "status": "enabled",
+  "last_sent_at": null,
+  "paused_at": null,
+  "consecutive_failures": 0,
+  "signing_secret": "whsec_abcdefghijklmnopqrstuvwxyz012345",
+  "created_at": "2026-09-04T12:00:00+00:00",
+  "updated_at": "2026-09-04T12:00:00+00:00"
+}
+```
+</ResponseExample>

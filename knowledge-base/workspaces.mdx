@@ -43,9 +43,9 @@ All scheduling times are stored and displayed in UTC.
 
 ## Pricing (Cloud only)
 
-On TryPost Cloud, each workspace is billed separately at one flat price, with every feature included: one account on each network, unlimited team members, and 2,500 AI credits per month (pooled across your account). To run more brands or clients, add more workspaces.
+On TryPost Cloud, the plan — not the workspace count — sets the price. **Socials** ($19/month) includes one workspace. **Workspaces** ($99/month) includes as many as you need. Both include unlimited social accounts, unlimited members, and unmetered AI.
 
-If you exhaust your pooled AI credits, the API and dashboard return `402 Payment Required` until the next reset. See [Plans & billing](/knowledge-base/plans-and-billing) for full pricing, trial, and credit details. Self-hosted instances skip these checks.
+If you are on Socials and try to create a second workspace, the upgrade dialog opens. See [Plans & billing](/knowledge-base/plans-and-billing) for full pricing, the $1 first month, and plan-change details. Self-hosted instances skip these checks.
 
 ## Use cases
 
@@ -80,14 +80,14 @@ To manage multiple workspaces via API, create a separate API key for each.
 Go to **Settings > Workspace** and scroll to the danger zone.
 
 <Warning>
-  Deleting a workspace permanently removes all posts, disconnects all social accounts, and removes all team members. This cannot be undone.
+  Deleting a workspace permanently removes all posts, [webhooks](/knowledge-base/webhooks) and their logs, disconnects all social accounts, and removes all team members. This cannot be undone. It does not send `post.deleted` for each post — the webhooks are removed with the workspace.
 </Warning>
 
 ## FAQ
 
 <AccordionGroup>
   <Accordion title="How many workspaces can I create?">
-    As many as you need. On TryPost Cloud each workspace is billed separately, so you add one per brand or client. Self-hosted instances have no limit.
+    On TryPost Cloud, Socials includes one workspace and Workspaces includes unlimited workspaces. Self-hosted instances have no limit.
   </Accordion>
   <Accordion title="Can I transfer a workspace to another user?">
     Not directly. The workspace owner cannot be changed. You would need to create a new workspace under the other user and reconnect the accounts.

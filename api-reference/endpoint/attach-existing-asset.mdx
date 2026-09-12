@@ -1,0 +1,96 @@
+---
+title: "Attach existing asset"
+api: "POST /posts/{post}/media/from-asset"
+description: "Attach an Asset Library file to a draft or scheduled post."
+---
+
+Reuses a file already in the Asset Library. Nothing is uploaded. For a new file, use [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
+
+Owner, Admin, and Member can call this. Viewers get `403`.
+
+Find IDs with [`GET /assets`](/api-reference/endpoint/list-assets). MCP: [`attach-existing-asset-tool`](/ai/tools-reference#attach-existing-asset-tool).
+
+## Path parameters
+
+<ParamField path="post" type="string" required>
+  Post UUID. Must belong to this workspace. Otherwise `404`.
+</ParamField>
+
+## Body parameters
+
+<ParamField body="asset_id" type="string" required>
+  Asset UUID from [`GET /assets`](/api-reference/endpoint/list-assets). Must be a UUID. Missing, other-workspace, logo, or avatar IDs return `422` on `asset_id`: `Asset not found.`
+</ParamField>
+
+<ParamField body="alt" type="string">
+  Optional image alt text. Max **2000** characters. Ignored for video and PDF.
+
+  - Send a non-empty `alt` to replace the library `alt_text` on this attachment.
+  - Omit `alt`, or send `null` / `""`, to **keep** the library item's existing `alt_text`.
+</ParamField>
+
+## Behaviour
+
+- The post must be `draft` or `scheduled`.
+- The file type must be allowed by **every** enabled platform on the post. If no platform is enabled, any type is allowed. Example: a post that only targets TikTok video rejects an image (`422` on `asset_id`: `This file type is not supported by the platforms enabled on the post.`).
+- Calling again with the same `asset_id` does nothing: no duplicate, and `alt` is not updated.
+- The post stores a copy of the library fields (`id`, `path`, `url`, `type`, `mime_type`, `original_filename`, `size`, and `meta` when the library had any). If the library `meta` is empty, the post item has no `meta` key. The file on disk is shared — the same path as the library item.
+
+## Errors
+
+| Status | When |
+|--------|------|
+| `403` | Viewer (or no permission to update the post) |
+| `404` | Post not in this workspace |
+| `422` | `asset_id` missing / not a UUID / not in this library (`Asset not found.`) |
+| `422` | `alt` longer than 2000 characters |
+| `422` | File type not allowed by the enabled platforms |
+| `422` | Post is `published`, `partially_published`, `failed`, or `publishing` — `{ "message": "This post has already been processed and cannot be re-published. Duplicate it to try again." }` |
+
+## Response
+
+The updated post, same shape as [`GET /posts/{post}`](/api-reference/endpoint/get-post). The library item is now in `media[]`.
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/posts/9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c/media/from-asset \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "asset_id": "2681a1bf-131f-41b1-9866-755c1cb51f97",
+    "alt": "Product hero shot"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "content": "Launch day!",
+  "media": [
+    {
+      "id": "2681a1bf-131f-41b1-9866-755c1cb51f97",
+      "path": "medias/2681a1bf-131f-41b1-9866-755c1cb51f97.jpg",
+      "url": "https://media.trypost.it/medias/2681a1bf-131f-41b1-9866-755c1cb51f97.jpg",
+      "type": "image",
+      "mime_type": "image/jpeg",
+      "original_filename": "hero.jpg",
+      "size": 245760,
+      "meta": {
+        "width": 1920,
+        "height": 1080,
+        "alt_text": "Product hero shot"
+      }
+    }
+  ],
+  "status": "draft",
+  "scheduled_at": null,
+  "published_at": null,
+  "platforms": [],
+  "labels": [],
+  "created_at": "2025-01-14 09:00:00",
+  "updated_at": "2025-01-14 09:30:00"
+}
+```
+</ResponseExample>

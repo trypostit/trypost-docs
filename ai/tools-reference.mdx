@@ -15,11 +15,12 @@ To create and publish a post end-to-end:
 3. **`list-pinterest-boards-tool`** *(if targeting Pinterest)* — resolve `platforms[].meta.board_id`
 4. **`list-discord-channels-tool`** *(if targeting Discord)* — resolve `platforms[].meta.channel_id`
 5. **`create-post-tool`** — create the draft with content + chosen platforms + `meta`
-6. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
-7. **`request-media-upload-tool`** + **`attach-media-from-upload-tool`** *(optional)* — upload a **local** file when no public URL exists
-8. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
-9. **`publish-post-tool`** — publish immediately or schedule for a future time
-10. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
+6. **`list-assets-tool`** + **`attach-existing-asset-tool`** *(optional)* — reuse an item already in the Asset Library
+7. **`attach-media-from-url-tool`** *(optional)* — attach images or videos from public URLs
+8. **`request-media-upload-tool`** + **`attach-media-from-upload-tool`** *(optional)* — upload a **local** file when no public URL exists
+9. **`preview-post-tool`** *(optional)* — see how each platform will render before publishing
+10. **`publish-post-tool`** — publish immediately or schedule for a future time
+11. **`get-post-metrics-tool`** *(after published)* — fetch engagement metrics
 
 ## Posts
 
@@ -27,15 +28,75 @@ To create and publish a post end-to-end:
 |------|-------------|
 | **list-posts-tool** | List posts for the current workspace, ordered by scheduled date (newest first). Supports filters: `status` (draft \| scheduled \| published \| failed), `search` (case-insensitive substring on content), `limit` (1–100, default 50). |
 | **get-post-tool** | Get a specific post by ID with all its platform entries (including `meta`), media, and labels. |
-| **create-post-tool** | Create a draft post. Accepts `content` (max 10 000), `scheduled_at` (ISO 8601; stored on the draft but **does not** schedule by itself — still `status=draft`), `label_ids[]`, and `platforms[]` — each entry has `social_account_id` + `content_type` and optional `meta`. **No `media[]` on this tool** — attach media with `attach-media-from-url-tool` or `request-media-upload-tool` + `attach-media-from-upload-tool`. Same `meta` contract as the REST API ([full reference](/api-reference/endpoint/update-post#per-platform-meta)). Cross-validates that the content_type matches the account's platform. |
-| **update-post-tool** | Update a draft: `post_id`, `content`, `scheduled_at`, `status` (`draft` \| `scheduled` only — immediate publish is `publish-post-tool`), `label_ids[]`, and `platforms[]`. Each platform entry uses **`id`** (the `post_platform` UUID from `get-post-tool` / `list-posts-tool`), optional `content_type`, optional `meta` (merged; send `null` to clear a key). Platforms **not listed are disabled**. **No `media[]`** — use the attach tools. Cannot edit a finalized post. |
+| **create-post-tool** | Create a draft post. Accepts `content` (max 10 000), `scheduled_at` (ISO 8601; stored on the draft but **does not** schedule by itself — still `status=draft`), `label_ids[]`, and `platforms[]` — each entry has `social_account_id` + `content_type` and optional `meta`. **No `media[]` on this tool** — attach media with `attach-existing-asset-tool`, `attach-media-from-url-tool`, or `request-media-upload-tool` + `attach-media-from-upload-tool`. Same `meta` contract as the REST API ([full reference](/api-reference/endpoint/update-post#per-platform-meta)). Cross-validates that the content_type matches the account's platform. |
+| **update-post-tool** | Update a draft: `post_id`, `content`, `scheduled_at`, `status` (`draft` \| `scheduled` only — immediate publish is `publish-post-tool`), `label_ids[]`, and `platforms[]`. Each platform entry uses **`id`** (the `post_platform` UUID from `get-post-tool` / `list-posts-tool`), optional `content_type`, optional `meta` (merged; send `null` to clear a key). Platforms **not listed are disabled**. **No `media[]`** — use `attach-existing-asset-tool`, `attach-media-from-url-tool`, or `request-media-upload-tool` + `attach-media-from-upload-tool`. Cannot edit a finalized post. |
 | **publish-post-tool** | Publish a draft. Input: `post_id` (required) + optional `scheduled_at` (ISO 8601 future). **Omit `scheduled_at` → publish immediately**; provide it → schedule. Requires at least one enabled platform; validates **stored** required meta (Pinterest `board_id`, TikTok `privacy_level`, Discord `channel_id`) and that media matches each platform's content_type. Marked `IsDestructive` so the AI confirms with you first. |
-| **preview-post-tool** | Preview how the post will render on each enabled platform — applies platform-specific sanitization (length truncation, etc.) without publishing. |
+| **preview-post-tool** | Preview how the post will render on each enabled platform — applies the same sanitization publishing does (LinkedIn Unicode bold, Telegram HTML, X [link defusing](/platforms/x-twitter#links-in-posts)) without publishing. Nothing is truncated: compare `sanitized_length` against `max_content_length` to spot over-limit content. |
 | **attach-media-from-url-tool** | Download images, videos, or **PDF** documents from public URLs and attach them to a post. Input: `post_id` + `urls` (array of `{ "url": string, "alt"?: string }`, max **10**). Per-type size caps match config (defaults: image **10 MB**, video **1 GB**, document **100 MB**). Allowed MIME types: jpeg/png/gif/webp, mp4/MOV, `application/pdf`. Types are intersected with the enabled platforms on the post. Returns `post`, `attached_count`, `failed_urls`. Requires update permission on the post. |
 | **request-media-upload-tool** | Issue a one-shot signed POST URL so the user can upload a **local** file (image, video, or PDF) to their workspace. No input — workspace is resolved from the MCP session. Requires create-post permission. Returns `upload_token`, `upload_url`, `expires_at` (ISO 8601; default TTL **15 minutes**, via `MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES`), `max_bytes` (overall ceiling = video cap, default **1 GB**), `max_bytes_by_type` (`image` / `video` / `document`, defaults 10 MB / 1 GB / 100 MB), and `field_name` (`media`). Hand the URL to the user (e.g. `curl -F media=@path/to/file '{upload_url}'`) or to the MCP client. Then call `attach-media-from-upload-tool`. Prefer `attach-media-from-url-tool` when a public URL already exists. |
 | **attach-media-from-upload-tool** | Attach a Media uploaded via `request-media-upload-tool` to a post. Takes `post_id` + `upload_token`, optional `alt` (image alt text). The Media is resolved by the token within the current workspace, then appended to the post. Rejects if the media type isn't accepted by any enabled platform. |
 | **delete-post-tool** | Delete a post permanently. Input: `post_id`. Marked `IsDestructive`. |
 | **get-post-metrics-tool** | Fetch engagement metrics (likes, comments, shares, etc.) for a published post across every platform. Returns `unsupported` entries for platforms that don't expose post-level metrics. |
+
+## Assets
+
+These tools use the workspace **Asset Library** (the Library tab) — not logos or avatars, and not other workspaces. Viewers cannot use them (`Not authorized to view assets.` / `Not authorized to update this post.`).
+
+Asset object (list items and get). There is no `path`.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| **id** | string | Asset UUID. Use as `asset_id` when attaching. |
+| **original_filename** | string | Filename as uploaded or imported. |
+| **type** | string | `image`, `video`, or `document`. |
+| **mime_type** | string | Stored MIME type. |
+| **size** | integer | File size in bytes. |
+| **url** | string | Public URL of the stored file. |
+| **meta** | object | Extra file data when present (`width`, `height`, `duration`, `alt_text`, plus any other stored keys). `null` or `[]` when empty. |
+| **created_at** | string | Creation time in `Y-m-d H:i:s`. |
+
+### list-assets-tool
+
+List library files, newest first. REST: [`GET /assets`](/api-reference/endpoint/list-assets).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| **search** | No | Case-insensitive substring of `original_filename` only. Max **255** characters (longer is rejected). Omit to skip this filter. |
+| **type** | No | `image`, `video`, or `document`. Omit to return all three. Other values (e.g. `audio`) are rejected. |
+| **limit** | No | How many items to return. Integer **1–100** (`0` and `101+` are rejected). Defaults to **50**. There is no `page`, cursor, or offset — you only get the first `limit` matches. |
+
+| Returns | Type | Description |
+|---------|------|-------------|
+| **assets** | array | Asset objects (fields above), newest first. At most `limit` items. |
+| **has_more** | boolean | `true` when more matches exist beyond this `limit`. |
+
+### get-asset-tool
+
+Get one library file. REST: [`GET /assets/{media}`](/api-reference/endpoint/get-asset).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| **asset_id** | Yes | UUID from `list-assets-tool`. Not a UUID is rejected. Missing IDs, other workspaces, logos, and avatars return `Asset not found.` |
+
+Returns the asset object (fields above) at the top level — no wrapper.
+
+### attach-existing-asset-tool
+
+Attach a library file to a post. Does **not** upload a new file. REST: [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset).
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| **post_id** | Yes | Post UUID in this workspace. Not a UUID is rejected. Post must be `draft` or `scheduled`. Other workspaces return `Post not found.` |
+| **asset_id** | Yes | Library UUID from `list-assets-tool` or `get-asset-tool`. Not a UUID is rejected. Missing / other-workspace / non-library IDs return `Asset not found.` |
+| **alt** | No | Image alt text, max **2000** characters (longer is rejected). Ignored for video and PDF. A non-empty value **replaces** the library `alt_text`. Omit (or empty) to **keep** the library `alt_text`. |
+
+| Returns | Type | Description |
+|---------|------|-------------|
+| **post** | object | Updated post (same fields as `get-post-tool`). Wrapped in `post` — `get-post-tool` returns the post at the top level. The library item is now in `media[]` (includes `path` and `size`). |
+
+- File type must be allowed by **every** enabled platform on the post. If none are enabled, any type is allowed. Example: TikTok video only + image → `This file type is not supported by the platforms enabled on the post.`
+- `published` / `partially_published` / `failed` / `publishing` posts are rejected (`This post has already been processed and cannot be re-published. Duplicate it to try again.`).
+- Same `post_id` + `asset_id` again does not duplicate the media and does not change `alt`.
 
 ## Platforms (read-only)
 
@@ -84,6 +145,58 @@ To create and publish a post end-to-end:
 | **create-api-key-tool** | Create a Personal Access Token. Input: `name` (required, max 255), optional `expires_at` (YYYY-MM-DD or ISO 8601; omit for non-expiring). Requires **manageTeam** (Owner / Admin). Response includes key metadata plus **`token`** (plain secret once) — note: REST create returns `plain_token`; MCP returns `token`. Store it immediately. |
 | **delete-api-key-tool** | Revoke a Personal Access Token. Input: `api_key_id` (required). The current OAuth session token cannot be revoked through this tool. Marked `IsDestructive`. Requires manageTeam. |
 
+## Repurpose
+
+Watches one Instagram or Facebook account for videos posted outside TryPost and republishes them. Requires **manage repurposes** (Owner / Admin / Member) — Viewers get `Not authorized to manage repurposes.` Other-workspace IDs return `Repurpose not found.` Conceptual guide: [Repurpose](/knowledge-base/repurposes). REST: [`GET /repurposes`](/api-reference/endpoint/list-repurposes).
+
+A new row starts as a **draft**. Only videos published after **activate** are replicated. Videos already published through TryPost are skipped. Destination `content_type` must accept video; `meta` uses the same keys as a regular post.
+
+| Tool | Description |
+|------|-------------|
+| **list-repurpose-source-formats-tool** | List watchable formats (`reel`, `video`, `story`) with localized labels. No input. Returns `{ source_formats: [...] }` — REST wraps the same rows in `{ data: [...] }`. |
+| **list-repurposes-tool** | List workspace repurposes, newest first. Optional `page`. Returns `{ repurposes, total, per_page, current_page, last_page }` (`per_page` is **25**). |
+| **get-repurpose-tool** | Read one row by `repurpose_id` (source, destinations, status, last poll error). |
+| **create-repurpose-tool** | Create a draft. Input: `source_social_account_id` (required Instagram/Facebook), optional `source_format` (default `reel`), `publish_mode` (`publish` \| `draft`, default `publish`), `destinations[]` (`social_account_id`, `content_type`, optional `meta`). One source + format per workspace. |
+| **update-repurpose-tool** | Update `source_social_account_id`, `source_format`, `publish_mode`, and/or `destinations`. Required `repurpose_id`. Changing the source or format resets the watermark. |
+| **list-repurpose-items-tool** | Activity for one row. Input: `repurpose_id`, optional `page`. Returns `{ items, total, per_page, current_page, last_page }`. Look here when a video was not replicated. |
+| **activate-repurpose-tool** | Start watching. Draft or disabled only. Needs a usable source, one usable destination, and required destination meta. Stamps the watermark to now. |
+| **pause-repurpose-tool** | Pause an active row. Watermark kept. Input: `repurpose_id`. |
+| **resume-repurpose-tool** | Resume a paused row. User pause keeps the watermark; a system pause (`paused_reason` set) starts from now. |
+| **disable-repurpose-tool** | Turn off an active or paused row and clear the watermark. Input: `repurpose_id`. |
+| **delete-repurpose-tool** | Delete the row. Polling stops; calendar posts stay. Input: `repurpose_id`. Returns `{ deleted: true }`. |
+
+## Webhooks
+
+Outgoing workspace webhooks. Requires **manage webhooks** (Owner / Admin) — Members and Viewers get `Not authorized to manage webhooks.` Other-workspace IDs return `Webhook not found.` / `Webhook log not found.` Conceptual guide: [Webhooks](/knowledge-base/webhooks). REST: [`GET /webhooks`](/api-reference/endpoint/list-webhooks).
+
+Signing: HMAC-SHA256 of the raw JSON body; hex digest in `X-Webhook-Signature`. Secret format `whsec_` + 32 characters.
+
+Webhook object (list items omit the secret):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| **id** | string | Webhook UUID. |
+| **endpoint** | string | Public URL that receives signed POSTs. |
+| **events** | array | Subscribed events: `post.created`, `post.scheduled`, `post.unscheduled`, `post.published`, `post.partially_published`, `post.failed`, `post.deleted`. No `publishing` event and no wildcard. |
+| **status** | string | `enabled`, `disabled`, or `paused`. |
+| **last_sent_at** | string | ISO 8601 last successful delivery, or `null`. |
+| **paused_at** | string | ISO 8601 when TryPost paused it, or `null`. |
+| **consecutive_failures** | integer | Failed deliveries since last success. Pauses at 5. |
+| **signing_secret** | string | Present on get / create / rotate only. |
+| **created_at** / **updated_at** | string | ISO 8601. |
+
+| Tool | Description |
+|------|-------------|
+| **list-webhooks-tool** | List outgoing webhooks, newest first. Returns `{ webhooks: [...] }` with **no** signing secrets. No input. |
+| **get-webhook-tool** | Get one webhook by `webhook_id`, including `signing_secret`. |
+| **create-webhook-tool** | Create a webhook. Input: `endpoint` (required public `http://` or `https://` URL, max 255), `events` (required, at least one allowed event). Always created `enabled` — there is no `status` input. Returns the webhook **with** `signing_secret`. Private/local URLs are rejected. Creating does **not** ping the endpoint. |
+| **update-webhook-tool** | Update `endpoint`, `events`, and/or `status` (`enabled` \| `disabled` only — `paused` is rejected). Input includes required `webhook_id`. Omitted fields stay unchanged. Re-enabling a paused webhook resets consecutive failures. Does **not** ping. Response omits the secret. |
+| **send-webhook-test-tool** | POST a signed `webhook.test` ping (`data` is `{}`). Input: `webhook_id`. **Synchronous** — waits for the HTTP response, then returns `{ tested: true }`. Does **not** write a delivery log and does not change status or failure counters. Runs even if the webhook is paused or disabled. Marked `IsOpenWorld`. |
+| **rotate-webhook-secret-tool** | Rotate the signing secret. Input: `webhook_id`. Previous secret stops working immediately — the next attempt, including an in-flight retry, signs with the new secret. Returns the webhook with the new `signing_secret`. Marked `IsDestructive`. |
+| **list-webhook-logs-tool** | List delivery logs, newest first. Input: `webhook_id`, optional `limit` (1–100, default **50**). Returns `{ logs: [...] }` with payload and response body. No cursor — only the first `limit` rows. |
+| **replay-webhook-log-tool** | Replay a log. Input: `webhook_id` + `log_id`. Queues a **new** signed delivery with a new log id, using the original `data`, even if the webhook is paused or disabled. `{ replayed: true }` means queued, not delivered. Success resets the failure counter but does **not** re-enable a paused webhook. Marked `IsOpenWorld`. |
+| **delete-webhook-tool** | Delete a webhook and its logs permanently. Input: `webhook_id`. Returns `{ deleted: true }`. Marked `IsDestructive`. |
+
 ## Per-platform `meta` (MCP)
 
 `platforms[].meta` uses the **same keys** as the REST API. Full tables, limits, and examples: [Per-platform meta](/api-reference/endpoint/update-post#per-platform-meta).
@@ -105,9 +218,10 @@ Quick checklist for agents:
 ## Notes
 
 - **Workspace scoping** — every tool operates on the user's currently-selected workspace. To act on a different workspace, switch it in the TryPost UI (or, for personal API tokens, create a new key in that workspace).
-- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, and they also cannot call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. See [Team](/knowledge-base/team).
+- **Roles** — **Viewers** are read-only. They cannot create/update/publish posts, list or get assets (`Not authorized to view assets.`), or call compose helpers that gate on create-post permission — including `list-pinterest-boards-tool` and `list-discord-channels-tool` (error: `Not authorized to manage posts.`). Owner, Admin, and Member can. Repurpose tools require **manage repurposes** (same people: Owner / Admin / Member) — Viewers get `Not authorized to manage repurposes.` Webhook tools require **manage webhooks** (Owner / Admin only) — Members and Viewers get `Not authorized to manage webhooks.` See [Team](/knowledge-base/team).
 - **Cross validation** — `create-post-tool` and `update-post-tool` reject mismatched combos (e.g. `content_type=x_post` on a LinkedIn account). Inactive social accounts are also rejected at validation time.
-- **Destructive tools** — operations that delete data or publish to the world (`publish-post-tool`, `delete-*`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
+- **Destructive tools** — operations that delete data, rotate secrets, or publish to the world (`publish-post-tool`, `delete-*`, `rotate-webhook-secret-tool`) are marked `IsDestructive`, which lets the AI client (ChatGPT, Claude Desktop, etc.) prompt you for confirmation before executing.
 - **Local-file uploads** — `request-media-upload-tool` returns a single-use signed URL (default TTL 15 minutes). `max_bytes` is the video ceiling (default 1 GB); per-type caps are in `max_bytes_by_type` (image / video / document). POST the file as multipart field `media`, then call `attach-media-from-upload-tool` with the same `upload_token` (optional `alt` for images). See [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload).
-- **Media alt text** — image accessibility text lives on `media[].meta.alt_text`, not on `platforms[].meta`. Via MCP, set it with `attach-media-from-url-tool` (`urls[].alt`) or `attach-media-from-upload-tool` (`alt`). The REST create/update endpoints also accept `media[].meta.alt_text` when hosting from URL.
-- **No inline `media[]` on MCP create/update** — unlike REST `POST`/`PUT /posts`, the MCP create/update tools do not accept a `media` array. Always use the attach tools after create.
+- **Media alt text** — image accessibility text lives on `media[].meta.alt_text`, not on `platforms[].meta`. Via MCP, set it with `attach-media-from-url-tool` (`urls[].alt`), `attach-media-from-upload-tool` (`alt`), or `attach-existing-asset-tool` (`alt`). On `attach-existing-asset-tool`, omitting `alt` **keeps** the library item's existing `alt_text`. The REST create/update endpoints also accept `media[].meta.alt_text` when hosting from URL.
+- **No inline `media[]` on MCP create/update** — unlike REST `POST`/`PUT /posts`, the MCP create/update tools do not accept a `media` array. Always use the attach tools after create (`attach-existing-asset-tool`, `attach-media-from-url-tool`, or the signed-upload pair).
+- **Asset Library reuse** — prefer `list-assets-tool` + `attach-existing-asset-tool` when the file is already in the workspace library. That path does not copy bytes; the post snapshot shares the library file path. Use the URL / signed-upload tools only for **new** files.

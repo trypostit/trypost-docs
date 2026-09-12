@@ -61,7 +61,7 @@ TryPost uses queues for critical background processing:
 - **Sending notifications** (email and in-app)
 - **Verifying social account connections**
 - **Processing analytics events**
-- **Running automations**
+- **Delivering [webhooks](/knowledge-base/webhooks)** and their retries
 
 Without a running queue worker, scheduled posts will not be published. Use Supervisor to keep Horizon running.
 
@@ -190,18 +190,16 @@ sudo certbot --nginx -d your-domain.com
 
 ## Scheduled Tasks (Cron)
 
-TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler **must** run every minute or scheduled posts won't publish, automations won't fire, expiring tokens won't refresh, and stuck posts won't recover.
+TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler **must** run every minute or scheduled posts won't publish, expiring tokens won't refresh, and stuck posts won't recover.
 
 | Command | Schedule | Purpose |
 |---------|----------|---------|
 | `posts:process-scheduled` | every minute | Dispatches `PublishPost` jobs for posts that are due |
-| `automation:fire-schedule` | every minute | Fires time-based automation triggers |
-| `automation:process-delays` | every minute | Advances automation runs waiting on delay nodes |
-| `automation:recover-stuck-runs` | every 5 minutes | Recovers automation runs stuck mid-flight |
-| `automation:prune-dry-runs` | every 10 minutes | Prunes dry-run automation history |
 | `social:refresh-expiring-tokens` | every 15 minutes | Refreshes OAuth tokens that are about to expire |
 | `social:recover-stuck-posts` | every 30 minutes | Detects posts stuck in `publishing` and retries or fails them |
 | `social:check-connections` | daily | Verifies every connected social account still has a valid token |
+| `app:prune-webhook-logs` | daily | Deletes [webhook](/knowledge-base/webhooks) delivery logs older than 7 days |
+| `repurpose:poll` | every 5 minutes | Queues a check for each [repurpose](/knowledge-base/repurposes) source that is due |
 
 Add the Laravel scheduler to cron:
 
@@ -216,7 +214,7 @@ Add this line:
 ```
 
 <Warning>
-  This is required. Without the cron job, scheduled posts will not be published automatically, automations will stall, and social tokens will expire silently.
+  This is required. Without the cron job, scheduled posts will not be published automatically and social tokens will expire silently.
 </Warning>
 
 ## WebSocket Server (Reverb)
@@ -274,9 +272,9 @@ Make sure all of these are in place in production:
 | **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
 | **Redis** | `QUEUE_CONNECTION=redis` + Redis up | Queues, cache, schedule locks |
 | **Mail** | SMTP or SendKit | Invites, password reset, alerts |
-| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, automations |
+| **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, notifications, and [webhooks](/knowledge-base/webhooks) |
 | **Reverb** | `php artisan reverb:start` (Supervisor) | Real-time WebSocket updates |
-| **Scheduler** | cron → `schedule:run` every minute | Due posts, token refresh, automations |
+| **Scheduler** | cron → `schedule:run` every minute | Due posts, token refresh, stuck-post recovery |
 
 <Warning>
   If Horizon, Reverb, or the scheduler are not running, TryPost will not function correctly. Scheduled posts won't publish, notifications won't send, and the dashboard won't update in real time.
@@ -299,3 +297,34 @@ Regularly backup:
 - `.env` file
 - Passport keys (`storage/oauth-*.key` or `PASSPORT_*` env) — losing them invalidates API keys and MCP OAuth grants
 - Uploaded media (if using local storage)
+
+[Upgrading](/self-hosting/upgrading) asks for a database dump before every `migrate --force`, so it is worth having the command to hand:
+
+Both read the credentials from the app's own environment, so they work as written wherever `.env` is loaded — no need to remember whether this install calls the user `postgres`, `root` or `trypost`.
+
+**PostgreSQL**
+
+```bash
+PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -U "$DB_USERNAME" -d "$DB_DATABASE" \
+  -Fc -f "trypost-$(date +%F).dump"
+
+# restore
+PGPASSWORD="$DB_PASSWORD" pg_restore -h "$DB_HOST" -U "$DB_USERNAME" -d "$DB_DATABASE" \
+  --clean "trypost-2026-01-01.dump"
+```
+
+**MySQL**
+
+```bash
+mysqldump -h "$DB_HOST" -u "$DB_USERNAME" -p"$DB_PASSWORD" \
+  --single-transaction "$DB_DATABASE" > "trypost-$(date +%F).sql"
+
+# restore
+mysql -h "$DB_HOST" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" < "trypost-2026-01-01.sql"
+```
+
+On the bundled Compose stack the app container carries both clients and already has those variables, so `docker compose -f compose.prod.yaml exec app` runs either one as written — as does `php artisan db` for an interactive session.
+
+<Note>
+  `mysql-client` was added to the image alongside `pdo_mysql`; images up to and including `v1.0.8` carry only the PostgreSQL client. On those, run the MySQL commands from the database host instead.
+</Note>

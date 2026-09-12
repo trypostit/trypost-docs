@@ -20,7 +20,7 @@ Returns `{ "platforms": [ ... ] }` — one object per social platform.
 |---|---|
 | `platform` | Identifier used in `social_accounts.platform` (e.g. `linkedin`, `linkedin-page`, `x`, `instagram`). |
 | `label` | Human-readable name. |
-| `max_content_length` | Hard caption cap enforced at schedule/publish. Exceeding it rejects — it is not truncated. |
+| `max_content_length` | Hard caption cap enforced at schedule/publish. Exceeding it rejects — it is not truncated. Measured against the text the platform receives, which on X is the [defused](/platforms/x-twitter#links-in-posts) form rather than the draft. |
 | `recommended_content_length` | Soft target for AI generation. |
 | `allowed_media_types` | Platform-level media kinds (`image`, `video`, `document`). Prefer the per–content-type `accept_*` flags for what a specific format allows. |
 | `default_content_type` | Value to use when the caller does not pick one. |

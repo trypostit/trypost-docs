@@ -1,0 +1,84 @@
+---
+title: "List repurpose activity"
+api: "GET /repurposes/{repurpose}/items"
+description: "List every source video a repurpose has seen, newest first. Paginated."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+Returns the Laravel pagination envelope (`data`, `links`, `meta`). Page size is `config('app.pagination.default')` (**25**). There is no `per_page` parameter. Ordered by `source_created_at` (falling back to `created_at`).
+
+This is where to look when a video was not replicated.
+
+## Request
+
+<ParamField query="page" type="integer">
+  Page number. Defaults to `1`.
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="array">
+  <Expandable>
+    <ResponseField name="id" type="string">Activity item UUID.</ResponseField>
+    <ResponseField name="repurpose_id" type="string">Parent repurpose UUID.</ResponseField>
+    <ResponseField name="source_media_id" type="string">Id of the video on the source network.</ResponseField>
+    <ResponseField name="source_permalink" type="string">Public URL of the original, when the network shared one.</ResponseField>
+    <ResponseField name="source_created_at" type="string">ISO 8601 when the original was published.</ResponseField>
+    <ResponseField name="status" type="string">
+      `pending`, `processing`, `published`, `drafted`, `skipped`, or `failed`.
+    </ResponseField>
+    <ResponseField name="reason" type="string">
+      Why it was skipped or failed: `published_via_trypost`, `media_url_missing`, `download_failed`, `post_creation_failed`, `no_usable_destinations`. `null` on success.
+    </ResponseField>
+    <ResponseField name="error" type="string">Redacted error text on a failed download or create. `null` otherwise.</ResponseField>
+    <ResponseField name="posts" type="array">
+      Replicas created in this workspace. Each has `id` and `platforms[]` (`platform`, `status`) for enabled platform entries.
+    </ResponseField>
+    <ResponseField name="created_at" type="string">ISO 8601.</ResponseField>
+    <ResponseField name="updated_at" type="string">ISO 8601.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X GET https://app.trypost.it/api/repurposes/a1b2c3d4-e5f6-7890-abcd-ef1234567890/items \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "data": [
+    {
+      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "repurpose_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "source_media_id": "178956",
+      "source_permalink": "https://www.instagram.com/reel/abc/",
+      "source_created_at": "2026-09-10T12:05:00+00:00",
+      "status": "published",
+      "reason": null,
+      "error": null,
+      "posts": [
+        {
+          "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
+          "platforms": [
+            { "platform": "tiktok", "status": "published" }
+          ]
+        }
+      ],
+      "created_at": "2026-09-10T12:16:00+00:00",
+      "updated_at": "2026-09-10T12:17:00+00:00"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 25,
+    "total": 1
+  }
+}
+```
+</ResponseExample>

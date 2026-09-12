@@ -26,7 +26,7 @@ AI_IMAGE_PROVIDER=openai
 | `AI_IMAGE_PROVIDER` | Provider used for AI image generation in the Create wizard. Defaults to `openai`. Only `openai`, `gemini`, `xai`, `bedrock`, and `openrouter` support image generation — picking any other provider here leaves the Create wizard's image step non-functional. |
 | Provider API keys | Each provider reads its own env: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `XAI_API_KEY`, `DEEPSEEK_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`. Ollama uses `OLLAMA_URL` (defaults to `http://localhost:11434`, no key needed). Bedrock uses AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BEDROCK_REGION`) instead of a single API key. `openai-compatible` needs `OPENAI_COMPATIBLE_URL` plus a pinned model (see below) — it has no built-in default since it can point at any endpoint. |
 
-Self-hosted instances skip the credit/quota check entirely (`SELF_HOSTED=true`), so AI calls go straight to the configured provider — you pay the provider directly.
+Self-hosted instances skip the Cloud subscription check (`SELF_HOSTED=true`), so AI calls go straight to the configured provider — you pay the provider directly.
 
 ## Pinning a specific model
 

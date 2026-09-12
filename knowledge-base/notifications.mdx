@@ -80,6 +80,8 @@ The notification center (bell icon) shows all your in-app notifications:
 
 Email notifications require a working mail configuration. TryPost uses [SendKit](https://sendkit.dev?utm_source=trypost&utm_medium=docs&utm_campaign=notifications) as the default mailer with a free plan of 3,000 emails/month — more than enough for notification emails.
 
+A [paused webhook](/knowledge-base/webhooks#status) also emails the account owner. That message is transactional — it is not an in-app notification and has no toggle on this page.
+
 <Note>
   **Self-hosting?** See the [Configuration guide](/self-hosting/configuration) to set up email delivery.
 </Note>

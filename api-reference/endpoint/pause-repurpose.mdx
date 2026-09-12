@@ -1,0 +1,22 @@
+---
+title: "Pause a repurpose"
+api: "POST /repurposes/{repurpose}/pause"
+description: "Stop polling. The watermark is kept so resume continues from where it left off."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+Only an **active** row can be paused (`422` otherwise). This is a user pause: `paused_reason` stays `null`. Videos published while paused are still picked up after [resume](/api-reference/endpoint/resume-repurpose).
+
+## Response
+
+Same shape as [`GET /repurposes/{repurpose}`](/api-reference/endpoint/get-repurpose), with `status` `paused`.
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/repurposes/a1b2c3d4-e5f6-7890-abcd-ef1234567890/pause \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>

@@ -1,0 +1,79 @@
+---
+title: "Get asset"
+api: "GET /assets/{media}"
+description: "Get one Asset Library file by ID from the current workspace."
+---
+
+Returns one file from this workspace's Asset Library. Logos, avatars, missing IDs, and other workspaces return `404`.
+
+Owner, Admin, and Member can call this. Viewers get `403`.
+
+MCP: [`get-asset-tool`](/ai/tools-reference#get-asset-tool). To find IDs, use [`GET /assets`](/api-reference/endpoint/list-assets).
+
+## Path parameters
+
+<ParamField path="media" type="string" required>
+  Asset UUID (the `id` from [`GET /assets`](/api-reference/endpoint/list-assets)).
+</ParamField>
+
+## Errors
+
+| Status | When |
+|--------|------|
+| `403` | Viewer |
+| `404` | ID is missing, a logo, an avatar, or belongs to another workspace |
+
+## Response
+
+Same fields as one item in [`GET /assets`](/api-reference/endpoint/list-assets). No `data:` wrapper. No storage `path`.
+
+<ResponseField name="id" type="string">
+  Asset UUID.
+</ResponseField>
+<ResponseField name="original_filename" type="string">
+  Filename as uploaded or imported.
+</ResponseField>
+<ResponseField name="type" type="string">
+  `image`, `video`, or `document`.
+</ResponseField>
+<ResponseField name="mime_type" type="string">
+  Stored MIME type (e.g. `image/jpeg`, `video/mp4`, `application/pdf`).
+</ResponseField>
+<ResponseField name="size" type="integer">
+  File size in bytes.
+</ResponseField>
+<ResponseField name="url" type="string">
+  Public URL of the stored file.
+</ResponseField>
+<ResponseField name="meta" type="object">
+  Extra file data when present (`width`, `height`, `duration`, `alt_text`, plus any other stored keys). `null` or `[]` when nothing was stored.
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  Creation time in `Y-m-d H:i:s`.
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X GET https://app.trypost.it/api/assets/2681a1bf-131f-41b1-9866-755c1cb51f97 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "2681a1bf-131f-41b1-9866-755c1cb51f97",
+  "original_filename": "hero.jpg",
+  "type": "image",
+  "mime_type": "image/jpeg",
+  "size": 245760,
+  "url": "https://media.trypost.it/medias/2681a1bf-131f-41b1-9866-755c1cb51f97.jpg",
+  "meta": {
+    "width": 1920,
+    "height": 1080,
+    "alt_text": "Product hero shot"
+  },
+  "created_at": "2025-01-14 09:00:00"
+}
+```
+</ResponseExample>

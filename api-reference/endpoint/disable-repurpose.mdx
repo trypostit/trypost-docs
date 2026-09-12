@@ -1,0 +1,22 @@
+---
+title: "Disable a repurpose"
+api: "POST /repurposes/{repurpose}/disable"
+description: "Turn off a running repurpose and clear its watermark."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+Only an **active** or **paused** row can be disabled (`422` otherwise). Clears `activated_at`, `paused_reason`, and `next_poll_at`. The next [activate](/api-reference/endpoint/activate-repurpose) starts fresh — videos published while it was off are not backfilled.
+
+## Response
+
+Same shape as [`GET /repurposes/{repurpose}`](/api-reference/endpoint/get-repurpose), with `status` `disabled`.
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/repurposes/a1b2c3d4-e5f6-7890-abcd-ef1234567890/disable \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>
