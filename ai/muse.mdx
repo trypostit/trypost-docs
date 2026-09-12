@@ -1,0 +1,48 @@
+---
+title: "Muse"
+sidebarTitle: "Muse AI Agent"
+description: "Connect TryPost to Muse AI Agent — Meta's personal agent — and to Muse Code in the terminal"
+icon: "/images/ai/muse.svg"
+---
+
+[Muse AI Agent](https://muse.ai) is Meta's personal agent (the character in the Muse app). [Muse Code](https://dev.meta.ai/docs/muse-code) is the same model family in the terminal. They are two products.
+
+The MCP connection we verified is **[Muse Code](/ai/muse-code)**: you give it the TryPost URL, it writes the server as `trypost`, and you run `muse mcp login trypost`.
+
+```
+https://app.trypost.it/mcp/trypost
+```
+
+## Muse AI Agent
+
+Muse AI Agent is the personal agent on [muse.ai](https://muse.ai), iOS, and Android. The consumer app launched in the US (18+). Ask the agent to connect TryPost the same way you ask it to connect Gmail — for example:
+
+```
+Connect TryPost using https://app.trypost.it/mcp/trypost
+```
+
+Meta's own **Connectors** list (Settings → Connectors) is Gmail, Google Calendar / Workspace, Ticketmaster, OpenTable, Spotify, Apple Health, Peloton, Plaid, Function Health, plus Facebook, Instagram, and Threads via Accounts Center. That catalog is not an MCP directory. If the agent cannot add a remote MCP URL itself, finish in [Muse Code](/ai/muse-code).
+
+## Muse Code (verified)
+
+Install, ask Muse to add the URL, then authorize:
+
+```bash
+curl -fsSL https://dev.meta.ai/install.sh | bash
+muse
+```
+
+```
+Add the TryPost MCP server at https://app.trypost.it/mcp/trypost
+```
+
+```bash
+muse mcp login trypost
+```
+
+Complete the TryPost browser sign-in (**Allow**). Full steps, manual `~/.config/muse/settings.json`, and example prompts: [Muse Code](/ai/muse-code).
+
+## Related guides
+
+- [Muse Code](/ai/muse-code) — terminal MCP setup (verified)
+- [Introduction](/ai/introduction) — protocol, tools, and troubleshooting

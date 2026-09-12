@@ -1,0 +1,109 @@
+---
+title: "Muse Code"
+description: "Connect TryPost to Muse Code for AI-powered social media management from the terminal"
+icon: "/images/ai/muse.svg"
+---
+
+[Muse Code](https://dev.meta.ai/docs/muse-code) is Meta's terminal coding agent. You can connect it to TryPost's MCP server and manage scheduling in natural language — this is the path we verified.
+
+The personal agent (the character on [muse.ai](https://muse.ai)) is [Muse AI Agent](/ai/muse).
+
+## Prerequisites
+
+- Muse Code installed:
+
+  ```bash
+  curl -fsSL https://dev.meta.ai/install.sh | bash
+  ```
+
+- A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
+
+## Setup
+
+<Steps>
+  <Step title="Start Muse Code">
+    ```bash
+    muse
+    ```
+  </Step>
+  <Step title="Ask it to add the TryPost MCP server">
+    Paste the URL and let Muse write the config. For example:
+
+    ```
+    Add the TryPost MCP server at https://app.trypost.it/mcp/trypost
+    ```
+
+    Muse names the server `trypost` and tells you to authorize it with:
+
+    ```bash
+    muse mcp login trypost
+    ```
+  </Step>
+  <Step title="Authorize in the browser">
+    Run that command in your terminal (outside the Muse session if it printed it as a next step). Muse opens a browser to TryPost. Sign in, review the permissions, and click **Allow**.
+
+    The login argument must match the server key in settings — `trypost` if that's the name Muse chose.
+  </Step>
+  <Step title="Use TryPost in Muse Code">
+    Back in the session, ask:
+
+    ```
+    List all my scheduled posts
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  TryPost MCP accepts **OAuth** with the `mcp:use` scope. Personal Access Tokens from **Settings → API Keys** are rejected (`403`). After `muse mcp login trypost`, Muse stores and refreshes the grant. To disconnect: `muse mcp logout trypost`.
+</Note>
+
+<Note>
+  MCP tools in Muse Code are **not sandboxed**. They run as a direct network connection, outside the filesystem sandbox. Approval still applies.
+</Note>
+
+## Manual configuration
+
+If you prefer to edit the file yourself, put this in `~/.config/muse/settings.json`. The file **must** include `"schema_version": 1`. Muse Code 1.1 writes the block under `mcpServers` (not `mcp_servers`):
+
+```json
+{
+  "schema_version": 1,
+  "mcpServers": {
+    "trypost": {
+      "mode": "optional",
+      "transport": "streamable_http",
+      "url": "https://app.trypost.it/mcp/trypost"
+    }
+  }
+}
+```
+
+Merge into an existing file. Do not add a second `mcp_servers` block alongside `mcpServers` — that faults the config and `muse mcp login` refuses to run. Then:
+
+```bash
+muse mcp login trypost
+```
+
+No `Authorization` header. OAuth is discovered from the URL.
+
+## Example prompts
+
+```
+Show me all my connected social media accounts
+```
+
+```
+Create a draft LinkedIn post for tomorrow at 9am
+```
+
+```
+What posts do I have scheduled for this week?
+```
+
+```
+Create a label called "Campaign" with color #f59e0b
+```
+
+## Related guides
+
+Using the personal agent instead of the terminal? See [Muse AI Agent](/ai/muse).

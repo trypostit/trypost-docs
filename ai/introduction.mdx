@@ -53,7 +53,7 @@ https://app.trypost.it/mcp/trypost
 
 ## Authentication
 
-TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Perplexity, Grok, Cursor, Devin, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Hermes, Codex, Antigravity) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
+TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), PKCE, and the `mcp:use` scope. Modern MCP clients (Claude, Claude Code, Claude Desktop, ChatGPT, Muse Code, Perplexity, Cursor, Windsurf, VS Code, GitHub Copilot in IDE, Gemini CLI, OpenCode, OpenClaw, Codex) detect this automatically from the `.well-known` discovery endpoints — you only point them at the URL and the browser sign-in handles the rest.
 
 <Warning>
   Personal Access Tokens from **Settings → API Keys** authenticate the [REST API](/api-reference/introduction) only. They are **not** accepted on `/mcp/trypost`. MCP requires an OAuth grant with the `mcp:use` scope (browser sign-in from a supported client). Manage connected assistants under workspace **Settings → MCP**.
@@ -98,6 +98,12 @@ Every Build with AI page is linked here — the tools reference plus all 16 setu
   </Card>
   <Card title="ChatGPT" icon="/images/ai/chatgpt.svg" href="/ai/chatgpt">
     OpenAI ChatGPT with MCP apps.
+  </Card>
+  <Card title="Muse AI Agent" icon="/images/ai/muse.svg" href="/ai/muse">
+    Personal agent by Meta.
+  </Card>
+  <Card title="Muse Code" icon="/images/ai/muse.svg" href="/ai/muse-code">
+    CLI assistant by Meta.
   </Card>
   <Card title="Perplexity" icon="/images/ai/perplexity.svg" href="/ai/perplexity">
     Perplexity chat and Computer.

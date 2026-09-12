@@ -188,6 +188,8 @@
               "ai/claude-code",
               "ai/claude-desktop",
               "ai/chatgpt",
+              "ai/muse",
+              "ai/muse-code",
               "ai/perplexity",
               "ai/grok",
               "ai/cursor",
