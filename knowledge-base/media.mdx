@@ -19,7 +19,7 @@ You can attach media in four ways (same MIME allow-list for uploads):
 - [`POST /uploads/{token}`](/api-reference/endpoint/request-media-upload) — one-shot signed URL (MCP [`request-media-upload-tool`](/ai/tools-reference#posts)).
 - [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) — reuse a file already in the [Asset Library](/knowledge-base/assets) (`asset_id`). MCP: [`attach-existing-asset-tool`](/ai/tools-reference#attach-existing-asset-tool).
 
-WebM is intentionally excluded — every major social platform rejects it, so accepting it would just produce platform-specific publish failures.
+WebM is intentionally excluded — most networks reject it (TikTok and Bluesky would transcode it, the rest refuse it), so accepting it would just produce platform-specific publish failures.
 
 ## Upload limits
 
@@ -153,7 +153,7 @@ Official: [Media Transfer Guide](https://developers.tiktok.com/doc/content-posti
 
 | Type | Size | Duration | Format |
 |------|------|----------|--------|
-| `tiktok_video` | Video 1 GB (Cloud cap — TikTok allows 4 GB) | 10 minutes | MP4 or MOV. WebM is not accepted |
+| `tiktok_video` | Video 1 GB (Cloud cap — TikTok allows 4 GB) | 10 minutes | MP4 or MOV (TryPost does not accept WebM uploads, although TikTok would) |
 | `tiktok_photo` | Image 10 MB (TikTok allows 20 MB) | — | JPEG/WebP (PNG is converted to JPEG on store). Up to 35 images |
 
 10 minutes is TikTok's ceiling for API uploads. `creator_info` can return a shorter `max_video_post_duration_sec` for a given account; the editor shows it and publishing enforces it.
