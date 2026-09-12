@@ -59,7 +59,7 @@ Every publish or schedule — dashboard, [`PUT /posts/{post}`](/api-reference/en
 - the media kind is not supported (a video on `pinterest_pin`, a PDF outside LinkedIn, images mixed with a video where the network takes one or the other);
 - a **GIF** or **MOV** lands on a type that does not accept it;
 - a file's `size` is over the type's byte cap (the ~900 MB Instagram Reel is refused here, before Meta ever sees it);
-- a video's duration is over the type's cap — when the duration is known. Duration is measured in the browser when you upload from the dashboard; a file attached through the REST API or a signed upload URL carries no duration, so only its size is checked.
+- a video's duration is over the type's cap. Duration is read from the file's MP4/MOV header on the server when it is stored — dashboard upload, `POST /posts/{post}/media`, signed upload URL, or a public URL — so it is known for every path. A file whose container carries no duration (a fragmented MP4) is checked by size only.
 
 Drafts are never blocked: the checks run on publish and schedule only. Media attached before this check existed may lack `size` and is not size-checked until re-attached.
 

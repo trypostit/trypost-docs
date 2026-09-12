@@ -49,7 +49,7 @@ Send as `multipart/form-data` with a single `media` field.
 
   The FormRequest upper bound is the video ceiling; the per-type cap is enforced after MIME detection. MIME is detected from the file's magic bytes (not the extension or `Content-Type` header).
 
-  `request-media-upload-tool` also returns these limits as `max_bytes` (video ceiling) and `max_bytes_by_type`.
+  `request-media-upload-tool` also returns these limits as `max_bytes` (video ceiling) and `max_bytes_by_type`. These are the workspace-wide ceilings; each network's own size, duration, GIF and MOV caps (`list-content-types-tool`) are enforced when the post is scheduled or published. A video's `duration` is read from the file on the server and stored in `meta`.
 </ParamField>
 
 ## Authentication
