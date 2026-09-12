@@ -23,102 +23,183 @@ WebM is intentionally excluded — every major social platform rejects it, so ac
 
 ## Upload limits
 
-| Type | Default cap | Override (self-hosted) |
-|------|-------------|-----------------------|
+These are the **Cloud** upload hard caps. Every path (dashboard, REST, MCP signed URL) uses the same per-type ceiling. A network that officially allows more is still clamped here.
+
+| Type | Cloud cap | Override (self-hosted) |
+|------|-----------|------------------------|
 | Image | 10 MB per file | `MEDIA_IMAGE_MAX_SIZE_MB` |
 | Video | 1 GB per file | `MEDIA_VIDEO_MAX_SIZE_MB` |
 | Document (PDF) | 100 MB per file | `MEDIA_DOCUMENT_MAX_SIZE_MB` |
 
-All upload paths (dashboard, REST, MCP signed URL) use the **same** per-type caps. There is no separate MCP-only size limit.
+The editor, REST API, and MCP then apply a **tighter per-`content_type` cap** when the network's API is smaller than that hard cap. [`GET /content-types`](/api-reference/endpoint/list-content-types) is the live catalog — do not hard-code a second table of numbers.
 
 Files over 1 MB are sent in chunks (the dashboard streams them via `Content-Range` to the chunked upload endpoint) so big videos transfer reliably even on flaky connections. On self-hosted instances, raising the video cap also requires bumping PHP's `upload_max_filesize` / `post_max_size` and any reverse-proxy body-size cap to match.
 
 Signed upload URLs are single-use and expire after **15 minutes** by default (`MEDIA_SIGNED_UPLOAD_URL_TTL_MINUTES`; legacy fallback `MCP_UPLOAD_URL_TTL_MINUTES`).
 
-## Platform content types and media requirements
+## What TryPost does to your files
 
-Each platform supports different content formats with specific media requirements. Use [`GET /content-types`](/api-reference/endpoint/list-content-types) for the live, machine-readable version — that catalog is the source of truth.
+**Images — we convert and, on most networks, resize.**
+
+- On store: PNG and WebP become JPEG. JPEG and GIF stay as they are.
+- On publish, Instagram feed / carousel images are cropped to the feed window; Instagram Stories are fit onto a 9:16 canvas; Facebook feed images are cropped.
+- On publish, stills sent to X, LinkedIn, Pinterest, Mastodon, Bluesky, Discord (not GIF), and TikTok photos are resized into that network's image budget and written as JPEG.
+- Threads and Telegram receive the **original URL** — no crop and no optimize pass.
+
+**Videos — we do not transcode.** Upload accepts MP4 and MOV. What you attach is what the network receives (after the size / duration checks below). There is no FFmpeg step.
+
+**GIF:** only X, Bluesky, Mastodon, Discord, and Telegram accept an animated GIF. The editor blocks GIF on every other `content_type`.
+
+**MOV:** accepted everywhere except Bluesky. Bluesky's video lexicon is **MP4 only** — the editor and API reject MOV on `bluesky_post`.
+
+## Size catalog (Cloud)
+
+Numbers below are what the editor and [`GET /content-types`](/api-reference/endpoint/list-content-types) enforce after the Cloud hard cap (10 MB image / 1 GB video). A dash means that media kind is not accepted for the type.
+
+| `content_type` | Image | Video | Max duration |
+|----------------|-------|-------|--------------|
+| `instagram_feed` | 8 MB | 100 MB | 60 seconds |
+| `instagram_reel` | — | 300 MB | 15 minutes |
+| `instagram_story` | 8 MB | 100 MB | 60 seconds |
+| `facebook_post` | 4 MB | 1 GB | 240 minutes |
+| `facebook_reel` | — | 1 GB | 90 seconds |
+| `facebook_story` | — | 1 GB | 60 seconds |
+| `linkedin_post` / `linkedin_page_post` | 5 MB | 1 GB | 10 minutes |
+| `youtube_short` | — | 1 GB | 3 minutes |
+| `pinterest_pin` | 10 MB | — | — |
+| `pinterest_video_pin` | — | 1 GB | 15 minutes |
+| `pinterest_carousel` | 10 MB | — | — |
+| `x_post` | 5 MB | 1 GB | 20 minutes |
+| `threads_post` | 8 MB | 1 GB | 5 minutes |
+| `bluesky_post` | 2 MB | 300 MB | 60 seconds |
+| `mastodon_post` | 10 MB | 40 MB | — |
+| `tiktok_video` | — | 1 GB | per creator (`creator_info`) |
+| `tiktok_photo` | 10 MB | — | — |
+| `discord_message` | 10 MB | 20 MB | — |
+| `telegram_post` | 5 MB | 20 MB | — |
+
+LinkedIn PDF posts: **100 MB**. TikTok video duration is not a fixed editor cap — TikTok returns it per creator.
 
 There is **no** `linkedin_carousel`, `linkedin_page_carousel`, or `instagram_carousel` content type on posts. Multi-image Instagram posts use `instagram_feed`. LinkedIn multi-image / PDF posts use `linkedin_post` / `linkedin_page_post` (format is inferred from the attached media; optional `meta.document_title` for PDFs).
 
-### LinkedIn / LinkedIn Page
+## Limits by content type
 
-| Content type | Media | Max files | Notes |
-|-------------|-------|-----------|-------|
-| `linkedin_post` / `linkedin_page_post` | Optional | Up to 10 images, or 1 video, or 1 PDF | Images/videos/documents cannot be mixed. PDF posts can set `meta.document_title`. |
+Each block is the TryPost-enforced cap plus the official spec page we follow. Aspect windows are the editor cropper bounds.
 
-### X (Twitter)
+### Instagram
 
-| Content type | Media | Max files | Notes |
-|-------------|-------|-----------|-------|
-| `x_post` | Optional | 4 images or 1 video | Images and video cannot be mixed |
+Official: [IG User Media — Image, Reel, Story specs](https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media/).
+
+| Type | Size | Duration | Format | Aspect |
+|------|------|----------|--------|--------|
+| `instagram_feed` | Image 8 MB; video 100 MB | 60 seconds | JPEG after store (PNG/WebP converted). GIF no. Video MP4 or MOV | 4:5 (0.80–1.91) |
+| `instagram_reel` | Video 300 MB | 15 minutes | MOV or MP4 | 9:16 (0.50–0.60) |
+| `instagram_story` | Image 8 MB; video 100 MB | 60 seconds | Same as feed. Stories auto-fit stills onto 9:16 | 9:16 (0.50–0.60) |
+
+A **single video** attached to `instagram_feed` publishes as a Reel. Use `instagram_reel` for anything longer than 60 seconds or larger than 100 MB (up to 300 MB / 15 minutes). Feed video is the carousel `media_type=VIDEO` path, not the Reel container.
 
 ### Facebook
 
-| Content type | Media | Max files | Aspect | Notes |
-|-------------|-------|-----------|--------|-------|
-| `facebook_post` | Optional | Up to 10 images or 1 video | — | Standard page post |
-| `facebook_reel` | Required | 1 video | 9:16 | Short-form vertical video |
-| `facebook_story` | Required | 1 video | 9:16 | Vertical video story (up to 60s) |
+Official: [Reels Publishing API](https://developers.facebook.com/docs/video-api/guides/reels-publishing/), [Page Stories API](https://developers.facebook.com/docs/page-stories-api/), [Video API error codes](https://developers.facebook.com/docs/video-api/reference/error-codes/).
 
-### Instagram (and Instagram via Facebook)
-
-| Content type | Media | Max files | Aspect | Notes |
-|-------------|-------|-----------|--------|-------|
-| `instagram_feed` | Required | Up to 10 images, or 1 video | 4:5 | Single- or multi-image feed post (carousel = multiple images here) |
-| `instagram_reel` | Required | 1 video | 9:16 | Short-form vertical video |
-| `instagram_story` | Required | 1 image or 1 video | 9:16 | Disappears after 24 hours |
-
-### TikTok
-
-| Content type | Media | Max files | Aspect | Notes |
-|-------------|-------|-----------|--------|-------|
-| `tiktok_video` | Required | 1 video | 9:16 | Short or long-form video |
-| `tiktok_photo` | Required | Up to 35 images | 1:1 | Photo carousel — images only, no video |
-
-### YouTube
-
-| Content type | Media | Max files | Aspect | Notes |
-|-------------|-------|-----------|--------|-------|
-| `youtube_short` | Required | 1 video | 9:16 | Vertical short, up to 3 minutes |
+| Type | Size | Duration | Format | Aspect |
+|------|------|----------|--------|--------|
+| `facebook_post` | Image 4 MB; video 1 GB | 240 minutes | Feed photos cropped to JPEG. Video MP4 or MOV | — |
+| `facebook_reel` | Video 1 GB | 90 seconds | MP4 recommended | 9:16 (0.50–0.60) |
+| `facebook_story` | Video 1 GB | 60 seconds | MP4 recommended | 9:16 (0.50–0.60) |
 
 ### Threads
 
-| Content type | Media | Max files | Notes |
-|-------------|-------|-----------|-------|
-| `threads_post` | Optional | Up to 10 images or 1 video | Text post with optional media |
+Official: [Overview — Image / Video Specifications](https://developers.facebook.com/docs/threads/overview/) and [Threads Posts](https://developers.facebook.com/docs/threads/posts/).
+
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `threads_post` | Image 8 MB; video 1 GB | 5 minutes | JPEG/PNG; video MOV or MP4. No crop — original URL |
+
+### X (Twitter)
+
+Official: [Media best practices](https://docs.x.com/x-api/media/quickstart/best-practices).
+
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `x_post` | Image 5 MB; video 1 GB | 20 minutes | JPG/PNG/GIF/WebP; video H.264 (MP4 or MOV). Stills become JPEG on publish; GIF stays GIF |
+
+These are **Post** (`tweet_video`) limits, not Direct Message (`dm_video`) limits.
+
+### LinkedIn
+
+Official: [Videos API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/videos-api), [Images API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api), [Documents API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/documents-api).
+
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `linkedin_post` / `linkedin_page_post` | Image 5 MB; video 1 GB; PDF 100 MB | 10 minutes | JPG/PNG (GIF not accepted in the editor). Video MP4 or MOV. PDF alone |
+
+Images, a video, and a PDF cannot be mixed on one post.
+
+### TikTok
+
+Official: [Media Transfer Guide](https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide).
+
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `tiktok_video` | Video 1 GB | Per creator (`creator_info`) | MP4 or MOV. WebM is not accepted |
+| `tiktok_photo` | Image 10 MB | — | JPEG/WebP (PNG is converted to JPEG on store). Up to 35 images |
+
+### YouTube
+
+Official: [`videos.insert`](https://developers.google.com/youtube/v3/docs/videos/insert). Shorts length is a product rule: [3-minute Shorts](https://support.google.com/youtube/answer/15424877).
+
+| Type | Size | Duration | Format | Aspect |
+|------|------|----------|--------|--------|
+| `youtube_short` | Video 1 GB | 3 minutes | MP4 or MOV | 9:16 (0.50–0.60) |
 
 ### Pinterest
 
-| Content type | Media | Max files | Aspect | Notes |
-|-------------|-------|-----------|--------|-------|
-| `pinterest_pin` | Required | 1 image | 2:3 | Standard image pin |
-| `pinterest_video_pin` | Required | 1 video | 9:16 | Video pin |
-| `pinterest_carousel` | Required | 2–5 images | 2:3 | Multi-image swipeable pin |
+Official: [Creating boards and pins](https://developers.pinterest.com/docs/work-with-organic-content-and-users/create-boards-and-pins/), [Pinterest product specs](https://help.pinterest.com/en/business/article/pinterest-product-specs).
+
+| Type | Size | Duration | Format | Aspect |
+|------|------|----------|--------|--------|
+| `pinterest_pin` | Image 10 MB | — | JPEG/PNG | 2:3 |
+| `pinterest_video_pin` | Video 1 GB | 15 minutes | MP4 or MOV | 9:16 |
+| `pinterest_carousel` | Image 10 MB | — | JPEG/PNG, 2–5 images | 2:3 |
 
 ### Bluesky
 
-| Content type | Media | Max files | Notes |
-|-------------|-------|-----------|-------|
-| `bluesky_post` | Optional | Up to 4 images or 1 video | Text post with optional media |
+Official: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json) (300 MB, MP4), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json) (2 MB).
+
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `bluesky_post` | Image 2 MB; video 300 MB | 60 seconds | Images JPEG/PNG/GIF/WebP. Video **MP4 only** — MOV is blocked in the editor and API |
+
+Images and a video cannot be mixed (the embed is images XOR video).
 
 ### Mastodon
 
-| Content type | Media | Max files | Notes |
-|-------------|-------|-----------|-------|
-| `mastodon_post` | Optional | Up to 4 images or 1 video | Text post with optional media |
+Official: [Attachments](https://docs.joinmastodon.org/user/posting/#attachments) and [`Instance.media_attachments`](https://docs.joinmastodon.org/entities/Instance/).
 
-### Telegram
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `mastodon_post` | Image 10 MB; video 40 MB | — | JPEG/PNG/GIF/WebP; video MP4 or MOV |
 
-| Content type | Media | Max files | Notes |
-|-------------|-------|-----------|-------|
-| `telegram_post` | Optional | Up to 10 images/videos | Text post; multiple media sent as an album |
+Instance defaults vary. TryPost stays on 10 / 40 MB rather than assuming a 99 MB host.
 
 ### Discord
 
-| Content type | Media | Max files | Notes |
-|-------------|-------|-----------|-------|
-| `discord_message` | Optional | Up to 10 images/videos | Channel message; supports mentions and rich embeds |
+Official: [Uploading Files](https://docs.discord.com/developers/reference#uploading-files) (20 MiB default for bots).
+
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `discord_message` | Image 10 MB; video 20 MB | — | Any allowed upload type. GIF accepted. Stills are optimized; video and GIF go out as-is |
+
+### Telegram
+
+Official: [Sending files](https://core.telegram.org/bots/api#sending-files), [sendPhoto](https://core.telegram.org/bots/api#sendphoto), [sendVideo](https://core.telegram.org/bots/api#sendvideo).
+
+| Type | Size | Duration | Format |
+|------|------|----------|--------|
+| `telegram_post` | Image 5 MB; video 20 MB | — | JPEG/PNG/GIF/WebP; video MPEG4 (MP4 or MOV) |
+
+TryPost publishes Telegram media by **URL**, not multipart upload, so the caps are 5 MB (photo) and 20 MB (video) — not the 10 / 50 MB multipart figures.
 
 ## Media ordering
 
@@ -145,7 +226,19 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
 
 <AccordionGroup>
   <Accordion title="What's the maximum file size?">
-    Defaults: **10 MB** per image, **1 GB** per video, **100 MB** per PDF. Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers. Self-hosters can raise the caps with `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB` / `MEDIA_DOCUMENT_MAX_SIZE_MB`.
+    Cloud upload: **10 MB** per image, **1 GB** per video, **100 MB** per PDF. Many networks are tighter than that — see the [size catalog](#size-catalog-cloud). Files over 1 MB are sent through the chunked upload endpoint via `Content-Range` headers. Self-hosters can raise the upload caps with `MEDIA_IMAGE_MAX_SIZE_MB` / `MEDIA_VIDEO_MAX_SIZE_MB` / `MEDIA_DOCUMENT_MAX_SIZE_MB`.
+  </Accordion>
+  <Accordion title="Why was my ~900 MB Instagram video rejected?">
+    An Instagram Reel may be at most **300 MB** (and 15 minutes). Meta pulls the file from a public URL (`video_url`); a ~900 MB file misses that window even though Cloud upload allows 1 GB. Compress or trim the clip, or pick a different network. Resumable / rupload is not available yet.
+  </Accordion>
+  <Accordion title="I attached a long video to an Instagram feed post">
+    A **single** video on `instagram_feed` publishes as a Reel. Feed video is the carousel `VIDEO` slot: **100 MB / 60 seconds**. For anything longer, switch the content type to **Reel** (`instagram_reel`, 300 MB / 15 minutes).
+  </Accordion>
+  <Accordion title="Why is Telegram only 5 MB / 20 MB?">
+    TryPost sends Telegram photos and videos as a **URL**, and Telegram's URL path is 5 MB (photo) / 20 MB (video). Multipart upload would allow 10 / 50 MB — that is not the path we use.
+  </Accordion>
+  <Accordion title="Can I post a MOV on Bluesky?">
+    No. Bluesky accepts **MP4 only**. The editor and API block MOV on `bluesky_post`. Export or remux the file as MP4.
   </Accordion>
   <Accordion title="Can I use the same media in multiple posts?">
     Yes — store the file in the [Asset Library](/knowledge-base/assets), then attach it with [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) or MCP `attach-existing-asset-tool`. The post snapshot shares the library file path. You can also upload again via [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
@@ -154,6 +247,6 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
     The media records are removed along with the post.
   </Accordion>
   <Accordion title="Are images compressed or resized?">
-    TryPost uploads media to social platforms as-is. Each platform applies its own compression and resizing rules afterwards.
+    On store, PNG and WebP become JPEG. On publish, most networks get a cropped or optimized JPEG (see [What TryPost does to your files](#what-trypost-does-to-your-files)). Videos are never transcoded. After that, each network may compress again.
   </Accordion>
 </AccordionGroup>

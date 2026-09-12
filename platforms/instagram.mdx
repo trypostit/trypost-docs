@@ -47,6 +47,16 @@ There is **no** separate `instagram_carousel` content type on posts. The AI Crea
 
 All three content types are available on both connection flavors.
 
+## Media limits
+
+| `content_type` | Image | Video | Duration | Format |
+|----------------|-------|-------|----------|--------|
+| `instagram_feed` | 8 MB | 100 MB | 60 seconds | JPEG after store. Video MP4 or MOV |
+| `instagram_reel` | — | 300 MB | 15 minutes | MOV or MP4 |
+| `instagram_story` | 8 MB | 100 MB | 60 seconds | Same as feed; stills auto-fit to 9:16 |
+
+A single video on `instagram_feed` publishes as a Reel. Official specs: [IG User Media](https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media/). Full catalog: [Media](/knowledge-base/media).
+
 Either flavor can be a [repurpose](/knowledge-base/repurposes) source. TryPost watches the account for new Reels, feed videos, or Stories you publish outside TryPost and republishes them to the destinations you pick.
 
 ## OAuth scopes

@@ -23,6 +23,16 @@ TryPost supports posting to Facebook pages.
 | **Reel** | 9:16 | Short-form vertical video |
 | **Story** | 9:16 | Temporary content (24 hours) |
 
+## Media limits
+
+| `content_type` | Image | Video | Duration | Format |
+|----------------|-------|-------|----------|--------|
+| `facebook_post` | 4 MB | 1 GB | 240 minutes | Feed photos cropped to JPEG. Video MP4 or MOV |
+| `facebook_reel` | — | 1 GB | 90 seconds | MP4 recommended |
+| `facebook_story` | — | 1 GB | 60 seconds | MP4 recommended |
+
+Official specs: [Reels](https://developers.facebook.com/docs/video-api/guides/reels-publishing/), [Stories](https://developers.facebook.com/docs/page-stories-api/), [Video errors](https://developers.facebook.com/docs/video-api/reference/error-codes/). Full catalog: [Media](/knowledge-base/media).
+
 ## OAuth scopes
 
 `public_profile`, `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `read_insights`

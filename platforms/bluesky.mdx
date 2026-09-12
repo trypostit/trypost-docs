@@ -24,6 +24,14 @@ TryPost supports posting to Bluesky.
 |------|-------------|
 | **Post** | Text with up to 4 optional images **or** 1 video |
 
+## Media limits
+
+| `content_type` | Image | Video | Duration | Format |
+|----------------|-------|-------|----------|--------|
+| `bluesky_post` | 2 MB | 300 MB | 60 seconds | Images JPEG/PNG/GIF/WebP. Video **MP4 only** (MOV blocked) |
+
+Official specs: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json). Full catalog: [Media](/knowledge-base/media).
+
 ## Self-hosting setup
 
 No API credentials or environment variables are required for Bluesky. It works out of the box on any self-hosted instance.

@@ -21,6 +21,14 @@ TryPost supports posting to any Mastodon instance.
 |------|-------------|
 | **Post** | Text with up to 4 optional images or 1 video |
 
+## Media limits
+
+| `content_type` | Image | Video | Format |
+|----------------|-------|-------|--------|
+| `mastodon_post` | 10 MB | 40 MB | JPEG/PNG/GIF/WebP; video MP4 or MOV |
+
+Official specs: [Attachments](https://docs.joinmastodon.org/user/posting/#attachments), [`Instance.media_attachments`](https://docs.joinmastodon.org/entities/Instance/). Full catalog: [Media](/knowledge-base/media).
+
 ## OAuth scopes
 
 `read:accounts`, `write:statuses`, `write:media`

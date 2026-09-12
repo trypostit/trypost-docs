@@ -21,6 +21,15 @@ TryPost supports posting videos and photo carousels to TikTok.
 | **Video** | `tiktok_video` | 9:16 | Short or long-form video (1 video, required) |
 | **Photo carousel** | `tiktok_photo` | 1:1 | Multi-image post — up to 35 images per carousel |
 
+## Media limits
+
+| `content_type` | Image | Video | Duration | Format |
+|----------------|-------|-------|----------|--------|
+| `tiktok_video` | — | 1 GB | Per creator | MP4 or MOV (no WebM) |
+| `tiktok_photo` | 10 MB | — | — | JPEG/WebP, up to 35 images |
+
+Official specs: [Media Transfer Guide](https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide). Full catalog: [Media](/knowledge-base/media).
+
 ## Per-post options
 
 TikTok exposes extra publishing options that you can set per post in the editor sidebar (or via `platforms[].meta` on the API):

@@ -20,6 +20,14 @@ TryPost supports posting to X (formerly Twitter) accounts.
 |------|-------------|
 | **Post** | Text with up to 4 images or 1 video |
 
+## Media limits
+
+| `content_type` | Image | Video | Duration | Format |
+|----------------|-------|-------|----------|--------|
+| `x_post` | 5 MB | 1 GB | 20 minutes | JPG/PNG/GIF/WebP; video H.264 (MP4 or MOV) |
+
+These are Post (`tweet_video`) limits. Official specs: [Media best practices](https://docs.x.com/x-api/media/quickstart/best-practices). Full catalog: [Media](/knowledge-base/media).
+
 ## Links in posts
 
 X charges much more to deliver a post that carries a link, and shows it to fewer people. To keep a post out of that bracket, TryPost publishes the X version of a post with its links written non-clickable: `https://www.example.com/pricing` goes out as `example(.)com/pricing`.
