@@ -52,6 +52,17 @@ Signed upload URLs are single-use and expire after **15 minutes** by default (`M
 
 **MOV:** accepted everywhere except Bluesky. Bluesky's video lexicon is **MP4 only** — the editor and API reject MOV on `bluesky_post`.
 
+## Enforced on the server, not just in the editor
+
+Every publish or schedule — dashboard, [`PUT /posts/{post}`](/api-reference/endpoint/update-post) with `status: publishing|scheduled`, and MCP [`publish-post-tool`](/ai/tools-reference#posts) — re-checks each enabled platform's `content_type` against the post's media and fails with a validation error on `platforms.<n>.content_type` when:
+
+- the media kind is not supported (a video on `pinterest_pin`, a PDF outside LinkedIn, images mixed with a video where the network takes one or the other);
+- a **GIF** or **MOV** lands on a type that does not accept it;
+- a file's `size` is over the type's byte cap (the ~900 MB Instagram Reel is refused here, before Meta ever sees it);
+- a video's duration is over the type's cap — when the duration is known. Duration is measured in the browser when you upload from the dashboard; a file attached through the REST API or a signed upload URL carries no duration, so only its size is checked.
+
+Drafts are never blocked: the checks run on publish and schedule only. Media attached before this check existed may lack `size` and is not size-checked until re-attached.
+
 ## Size catalog (Cloud)
 
 Numbers below are what the editor and [`GET /content-types`](/api-reference/endpoint/list-content-types) enforce after the Cloud hard cap (10 MB image / 1 GB video). A dash means that media kind is not accepted for the type.
@@ -71,14 +82,14 @@ Numbers below are what the editor and [`GET /content-types`](/api-reference/endp
 | `pinterest_carousel` | 10 MB | — | — |
 | `x_post` | 5 MB | 1 GB | 20 minutes |
 | `threads_post` | 8 MB | 1 GB | 5 minutes |
-| `bluesky_post` | 2 MB | 300 MB | 60 seconds |
+| `bluesky_post` | 2 MB | 300 MB | 10 minutes |
 | `mastodon_post` | 10 MB | 40 MB | — |
-| `tiktok_video` | — | 1 GB | per creator (`creator_info`) |
+| `tiktok_video` | — | 1 GB | 10 minutes |
 | `tiktok_photo` | 10 MB | — | — |
 | `discord_message` | 10 MB | 20 MB | — |
 | `telegram_post` | 5 MB | 20 MB | — |
 
-LinkedIn PDF posts: **100 MB**. TikTok video duration is not a fixed editor cap — TikTok returns it per creator.
+LinkedIn PDF posts: **100 MB**. Bluesky's 2 MB / 300 MB are the lexicon's exact decimal values (2 000 000 / 300 000 000 bytes), not MiB. TikTok's 10 minutes is the developer-upload ceiling; TikTok may return a lower per-creator limit (`creator_info`), which is enforced at publish.
 
 There is **no** `linkedin_carousel`, `linkedin_page_carousel`, or `instagram_carousel` content type on posts. Multi-image Instagram posts use `instagram_feed`. LinkedIn multi-image / PDF posts use `linkedin_post` / `linkedin_page_post` (format is inferred from the attached media; optional `meta.document_title` for PDFs).
 
@@ -96,7 +107,7 @@ Official: [IG User Media — Image, Reel, Story specs](https://developers.facebo
 | `instagram_reel` | Video 300 MB | 15 minutes | MOV or MP4 | 9:16 (0.50–0.60) |
 | `instagram_story` | Image 8 MB; video 100 MB | 60 seconds | Same as feed. Stories auto-fit stills onto 9:16 | 9:16 (0.50–0.60) |
 
-A **single video** attached to `instagram_feed` publishes as a Reel. Use `instagram_reel` for anything longer than 60 seconds or larger than 100 MB (up to 300 MB / 15 minutes). Feed video is the carousel `media_type=VIDEO` path, not the Reel container.
+Instagram has no plain feed-video container any more: a **single video** on `instagram_feed` is published through the Reels container, and a video inside a multi-item feed post goes out as a carousel child (`media_type=VIDEO`). Meta only documents the Reel spec, so the **100 MB / 60 seconds** on `instagram_feed` is TryPost's conservative rule (same as Stories), not a Meta number. Pick `instagram_reel` for anything longer or larger — it unlocks the official 300 MB / 15 minutes.
 
 ### Facebook
 
@@ -122,9 +133,9 @@ Official: [Media best practices](https://docs.x.com/x-api/media/quickstart/best-
 
 | Type | Size | Duration | Format |
 |------|------|----------|--------|
-| `x_post` | Image 5 MB; video 1 GB | 20 minutes | JPG/PNG/GIF/WebP; video H.264 (MP4 or MOV). Stills become JPEG on publish; GIF stays GIF |
+| `x_post` | Image 5 MB; video 1 GB (Cloud cap — X allows 8 GB) | 20 minutes | JPG/PNG/GIF/WebP; video H.264 (MP4 or MOV). Stills become JPEG on publish; GIF stays GIF |
 
-These are **Post** (`tweet_video`) limits, not Direct Message (`dm_video`) limits.
+These are **Post** (`tweet_video`) limits — 8 GB / 20 minutes is the default entitlement, X Premium raises it to 16 GB / 125 minutes — not Direct Message (`dm_video`) limits, and not the `amplify_video` Ads category. TryPost always uploads Post videos as `tweet_video`. The 1 GB you see in the editor is the Cloud upload cap, not an X limit; self-hosted installs that raise `MEDIA_VIDEO_MAX_SIZE_MB` get up to 8 GB on X.
 
 ### LinkedIn
 
@@ -142,8 +153,10 @@ Official: [Media Transfer Guide](https://developers.tiktok.com/doc/content-posti
 
 | Type | Size | Duration | Format |
 |------|------|----------|--------|
-| `tiktok_video` | Video 1 GB | Per creator (`creator_info`) | MP4 or MOV. WebM is not accepted |
-| `tiktok_photo` | Image 10 MB | — | JPEG/WebP (PNG is converted to JPEG on store). Up to 35 images |
+| `tiktok_video` | Video 1 GB (Cloud cap — TikTok allows 4 GB) | 10 minutes | MP4 or MOV. WebM is not accepted |
+| `tiktok_photo` | Image 10 MB (TikTok allows 20 MB) | — | JPEG/WebP (PNG is converted to JPEG on store). Up to 35 images |
+
+10 minutes is TikTok's ceiling for API uploads. `creator_info` can return a shorter `max_video_post_duration_sec` for a given account; the editor shows it and publishing enforces it.
 
 ### YouTube
 
@@ -165,13 +178,13 @@ Official: [Creating boards and pins](https://developers.pinterest.com/docs/work-
 
 ### Bluesky
 
-Official: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json) (300 MB, MP4), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json) (2 MB).
+Official: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json) (`maxSize` 300 000 000, `accept: video/mp4`), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json) (`maxSize` 2 000 000). The lexicon carries no duration; the 10-minute limit is the video service's, [announced by @bsky.app on 26 August 2026](https://techcrunch.com/2026/08/26/bluesky-now-lets-you-upload-10-minute-long-videos/).
 
 | Type | Size | Duration | Format |
 |------|------|----------|--------|
-| `bluesky_post` | Image 2 MB; video 300 MB | 60 seconds | Images JPEG/PNG/GIF/WebP. Video **MP4 only** — MOV is blocked in the editor and API |
+| `bluesky_post` | Image 2 MB; video 300 MB (decimal bytes) | 10 minutes | Images JPEG/PNG/GIF/WebP. Video **MP4 only** — MOV is blocked in the editor and API |
 
-Images and a video cannot be mixed (the embed is images XOR video).
+Images and a video cannot be mixed (the embed is images XOR video). Self-hosted: `BLUESKY_VIDEO_MAX_BYTES` is the publisher's skip threshold and defaults to the same 300 000 000 — leave it alone unless the lexicon changes.
 
 ### Mastodon
 
@@ -232,7 +245,10 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
     An Instagram Reel may be at most **300 MB** (and 15 minutes). Meta pulls the file from a public URL (`video_url`); a ~900 MB file misses that window even though Cloud upload allows 1 GB. Compress or trim the clip, or pick a different network. Resumable / rupload is not available yet.
   </Accordion>
   <Accordion title="I attached a long video to an Instagram feed post">
-    A **single** video on `instagram_feed` publishes as a Reel. Feed video is the carousel `VIDEO` slot: **100 MB / 60 seconds**. For anything longer, switch the content type to **Reel** (`instagram_reel`, 300 MB / 15 minutes).
+    `instagram_feed` keeps video at **100 MB / 60 seconds**. That is TryPost's conservative rule (the same as Stories), not a Meta figure — Meta only documents the Reel spec, and a single feed video is published through the Reels container anyway. Switch the content type to **Reel** (`instagram_reel`) for anything longer: up to 300 MB / 15 minutes.
+  </Accordion>
+  <Accordion title="The API accepted my upload but refused to publish">
+    Upload checks the Cloud hard cap only; publish and schedule check the per-`content_type` cap and format rules (see [Enforced on the server](#enforced-on-the-server-not-just-in-the-editor)). The response is a `422` with the message under `errors["platforms.<n>.content_type"]`, e.g. `Reel accepts a video of up to 300 MB (yours is 900.0 MB).` Fix the file, or change the platform's `content_type`, then publish again.
   </Accordion>
   <Accordion title="Why is Telegram only 5 MB / 20 MB?">
     TryPost sends Telegram photos and videos as a **URL**, and Telegram's URL path is 5 MB (photo) / 20 MB (video). Multipart upload would allow 10 / 50 MB — that is not the path we use.
