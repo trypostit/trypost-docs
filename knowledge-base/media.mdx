@@ -248,7 +248,7 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
     `instagram_feed` keeps video at **100 MB / 60 seconds**. That is TryPost's conservative rule (the same as Stories), not a Meta figure — Meta only documents the Reel spec, and a single feed video is published through the Reels container anyway. Switch the content type to **Reel** (`instagram_reel`) for anything longer: up to 300 MB / 15 minutes.
   </Accordion>
   <Accordion title="The API accepted my upload but refused to publish">
-    Upload checks the Cloud hard cap only; publish and schedule check the per-`content_type` cap and format rules (see [Enforced on the server](#enforced-on-the-server-not-just-in-the-editor)). The response is a `422` with the message under `errors["platforms.<n>.content_type"]`, e.g. `Reel accepts a video of up to 300 MB (yours is 900.0 MB).` Fix the file, or change the platform's `content_type`, then publish again.
+    Upload checks the Cloud hard cap only; publish and schedule check the per-`content_type` cap and format rules (see [Enforced on the server](#enforced-on-the-server-not-just-in-the-editor)). The response is a `422` with the message under `errors["platforms.<n>.content_type"]`, e.g. `Video exceeds the 300 MB limit for this post type (yours is 900.0 MB).` Fix the file, or change the platform's `content_type`, then publish again.
   </Accordion>
   <Accordion title="Why is Telegram only 5 MB / 20 MB?">
     TryPost sends Telegram photos and videos as a **URL**, and Telegram's URL path is 5 MB (photo) / 20 MB (video). Multipart upload would allow 10 / 50 MB — that is not the path we use.
