@@ -4,7 +4,7 @@ description: "Connect AI coding assistants to your TryPost account using the Mod
 icon: "book-open"
 ---
 
-TryPost provides a built-in [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that lets AI coding assistants manage your social media scheduling directly. Your AI assistant can create and publish posts, manage signatures, labels, and webhooks, fetch metrics, and more — all through natural language.
+TryPost provides a built-in [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that lets AI coding assistants manage your social media scheduling directly. Your AI assistant can create and publish posts, manage signatures, labels, webhooks, and repurposes, fetch metrics, and more — all through natural language.
 
 ## What is MCP?
 
@@ -25,11 +25,12 @@ TryPost exposes a full set of MCP tools for end-to-end content workflows. See th
 | **Workspace** | Get | Get current workspace details |
 | **API Keys** | List, Create, Delete | Manage API keys |
 | **Webhooks** | List, Get, Create, Update, Delete, Send Test, Rotate Secret, List Logs, Replay | Subscribe to post events and inspect signed deliveries |
+| **Repurpose** | List, Get, Create, Update, Activate, Pause, Resume, Disable, Delete, List Items, List Source Formats | Watch Instagram or Facebook and republish new videos to other networks |
 
 ## How it works
 
 <Note>
-  MCP access on **TryPost Cloud** requires an active trial or subscription. New accounts get a 7-day trial automatically. See [Plans & billing](/knowledge-base/plans-and-billing) for details. Self-hosted instances skip this check.
+  MCP access on **TryPost Cloud** requires an active subscription. New accounts pay **$1 for the first month** during welcome. See [Plans & billing](/knowledge-base/plans-and-billing) for details. Self-hosted instances skip this check.
 </Note>
 
 <Steps>
@@ -62,7 +63,7 @@ TryPost's MCP server uses **OAuth 2.1** with Dynamic Client Registration (DCR), 
 
 <AccordionGroup>
   <Accordion title="HTTP 402 — Active subscription required">
-    Your OAuth grant is valid and the config is correct — the account behind it just doesn't have an active trial or subscription. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan (7-day free trial), then reconnect the MCP server. Self-hosted instances skip this check.
+    Your OAuth grant is valid and the config is correct — the account behind it just doesn't have an active subscription. Open [app.trypost.it](https://app.trypost.it), pick a plan, then reconnect the MCP server. Self-hosted instances skip this check.
   </Accordion>
   <Accordion title="HTTP 401 — Unauthenticated">
     The OAuth session expired and refresh failed, or the access token is missing/malformed/revoked. Re-run the assistant's connect flow to sign in again.

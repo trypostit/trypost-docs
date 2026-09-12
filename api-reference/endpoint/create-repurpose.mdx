@@ -1,0 +1,88 @@
+---
+title: "Create a repurpose"
+api: "POST /repurposes"
+description: "Create a draft repurpose. It does not watch the source until you activate it."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace source or destination IDs return `422`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+The row is always created as `draft`. Only videos published **after** [activate](/api-reference/endpoint/activate-repurpose) are replicated.
+
+The dashboard create dialog only sends `source_social_account_id`. If a `reel` row already exists for that source, the app opens it instead of creating another. This endpoint does not do that — you get `422`.
+
+The source must be an Instagram (`instagram` / `instagram-facebook`) or Facebook account in this workspace, switched on. Each workspace may have only one row per `source_social_account_id` + `source_format` pair — a collision returns `422` on `source_social_account_id`.
+
+Destinations are optional on create. A destination `content_type` must accept video. Required publish meta (TikTok `privacy_level`, …) can be omitted on a draft; [activate](/api-reference/endpoint/activate-repurpose) enforces it.
+
+The source cannot appear in `destinations`.
+
+## Request
+
+<ParamField body="source_social_account_id" type="string" required>
+  UUID of the Instagram or Facebook account to watch.
+</ParamField>
+<ParamField body="source_format" type="string">
+  `reel`, `video`, or `story`. Defaults to `reel`.
+</ParamField>
+<ParamField body="publish_mode" type="string">
+  `publish` or `draft`. Defaults to `publish`.
+</ParamField>
+<ParamField body="destinations" type="array">
+  Accounts that receive each video. Each item:
+
+  - `social_account_id` (required UUID in this workspace)
+  - `content_type` (required, must match the account's platform and accept video)
+  - `meta` (optional; same keys as [per-platform meta](/api-reference/endpoint/update-post#per-platform-meta))
+</ParamField>
+
+## Response
+
+`201` with the created repurpose. Same shape as [`GET /repurposes/{repurpose}`](/api-reference/endpoint/get-repurpose).
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/repurposes \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "source_social_account_id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+    "source_format": "reel",
+    "publish_mode": "publish",
+    "destinations": [
+      {
+        "social_account_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "content_type": "tiktok_video",
+        "meta": { "privacy_level": "PUBLIC_TO_EVERYONE" }
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "source_social_account_id": "9f1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "source_format": "reel",
+  "publish_mode": "publish",
+  "destinations": [
+    {
+      "social_account_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "content_type": "tiktok_video",
+      "meta": { "privacy_level": "PUBLIC_TO_EVERYONE" }
+    }
+  ],
+  "status": "draft",
+  "paused_reason": null,
+  "activated_at": null,
+  "last_polled_at": null,
+  "next_poll_at": null,
+  "last_error": null,
+  "created_at": "2026-09-10T11:55:00+00:00",
+  "updated_at": "2026-09-10T11:55:00+00:00"
+}
+```
+</ResponseExample>

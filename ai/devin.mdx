@@ -15,7 +15,7 @@ This page is for **Devin as an MCP client** — you point Devin at TryPost. It i
 ## Prerequisites
 
 - A [Devin](https://app.devin.ai) account
-- A TryPost Cloud account with an active trial or subscription ([start a 7-day free trial](/knowledge-base/plans-and-billing))
+- A TryPost Cloud account with an active subscription ([plans and billing](/knowledge-base/plans-and-billing))
 - On Devin Cloud, the **Manage MCP Servers** permission — required both to add a custom server and to complete OAuth. If you don't have it, ask an organization admin or use **Suggest MCP Integration**.
 
 ## Server URL
@@ -269,7 +269,7 @@ Example: `https://trypost.yourdomain.com/mcp/trypost`.
     Default scope is **local** (`.devin/mcp_config.local.json`), not `~/.config/devin/mcp_config.json`. Use `-s user` or `-s project`, or edit the local file.
   </Accordion>
   <Accordion title="HTTP 402 — Active subscription required">
-    The OAuth grant worked; the TryPost account is not active. Open [app.trypost.it](https://app.trypost.it), start a trial or pick a plan, then reconnect. Self-hosted instances skip this check. See [Introduction](/ai/introduction#troubleshooting).
+    The OAuth grant worked; the TryPost account is not active. Open [app.trypost.it](https://app.trypost.it), pick a plan, then reconnect. Self-hosted instances skip this check. See [Introduction](/ai/introduction#troubleshooting).
   </Accordion>
   <Accordion title="HTTP 401 or I need to sign in again">
     The OAuth session expired or was revoked. Cloud: start a new session and approve again. CLI: `devin mcp logout trypost` then `devin mcp login trypost`. Cascade: trigger a tool call and complete the browser flow.

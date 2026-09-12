@@ -1,0 +1,27 @@
+---
+title: "Resume a repurpose"
+api: "POST /repurposes/{repurpose}/resume"
+description: "Resume a paused repurpose. Only a paused row can be resumed."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+Same health checks as [activate](/api-reference/endpoint/activate-repurpose): usable source, at least one usable destination, required meta present.
+
+Watermark:
+
+- User pause (`paused_reason` is `null`) — keeps `activated_at`, so videos posted during the pause are still picked up
+- System pause (`source_removed`, `source_unavailable`, `no_destinations`) — stamps `activated_at` to now, so the outage backlog is not replayed
+
+## Response
+
+Same shape as [`GET /repurposes/{repurpose}`](/api-reference/endpoint/get-repurpose), with `status` `active` and `paused_reason` `null`.
+
+<RequestExample>
+```bash
+curl -X POST https://app.trypost.it/api/repurposes/a1b2c3d4-e5f6-7890-abcd-ef1234567890/resume \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</RequestExample>

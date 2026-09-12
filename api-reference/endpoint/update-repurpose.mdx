@@ -1,0 +1,54 @@
+---
+title: "Update a repurpose"
+api: "PUT /repurposes/{repurpose}"
+description: "Update the source, format, publish mode, or destinations of a repurpose."
+---
+
+Requires **manage repurposes** permission (Owner / Admin / Member). Viewers get `403`. Other-workspace IDs return `403`.
+
+Conceptual guide: [Repurpose](/knowledge-base/repurposes).
+
+Omitted fields stay unchanged. Changing `source_social_account_id` or `source_format` on a row that already has `activated_at` **resets the watermark** to now — only videos published after the change are replicated.
+
+An **active** row cannot drop its last usable destination (`422` on `destinations`). Required publish meta is enforced when the row is already running.
+
+A switched-off account is accepted as a destination (it is skipped at job time). The source still cannot appear in `destinations`. The source + format pair must stay unique in the workspace.
+
+`paused_reason` is not writable — do not send it.
+
+## Request
+
+<ParamField body="source_social_account_id" type="string">
+  Move the watch to another Instagram or Facebook account in this workspace.
+</ParamField>
+<ParamField body="source_format" type="string">
+  `reel`, `video`, or `story`.
+</ParamField>
+<ParamField body="publish_mode" type="string">
+  `publish` or `draft`.
+</ParamField>
+<ParamField body="destinations" type="array">
+  Replaces the full destination list when sent. Same shape as [create](/api-reference/endpoint/create-repurpose).
+</ParamField>
+
+## Response
+
+Same shape as [`GET /repurposes/{repurpose}`](/api-reference/endpoint/get-repurpose).
+
+<RequestExample>
+```bash
+curl -X PUT https://app.trypost.it/api/repurposes/a1b2c3d4-e5f6-7890-abcd-ef1234567890 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "publish_mode": "draft",
+    "destinations": [
+      {
+        "social_account_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "content_type": "tiktok_video",
+        "meta": { "privacy_level": "PUBLIC_TO_EVERYONE" }
+      }
+    ]
+  }'
+```
+</RequestExample>
