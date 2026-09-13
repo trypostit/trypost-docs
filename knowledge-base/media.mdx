@@ -50,14 +50,14 @@ Signed upload URLs are single-use and expire after **15 minutes** by default (`M
 
 **GIF:** only X, Bluesky, Mastodon, Discord, and Telegram accept an animated GIF. The editor blocks GIF on every other `content_type`.
 
-**MOV:** accepted everywhere except Bluesky. Bluesky's video lexicon is **MP4 only** — the editor and API reject MOV on `bluesky_post`.
+**MOV:** accepted on every network. Bluesky's stored embed is MP4, but its video service accepts MOV (`video/quicktime`) and transcodes it — the same list as the official app.
 
 ## Enforced on the server, not just in the editor
 
 Every publish or schedule — dashboard, [`PUT /posts/{post}`](/api-reference/endpoint/update-post) with `status: publishing|scheduled`, and MCP [`publish-post-tool`](/ai/tools-reference#posts) — re-checks each enabled platform's `content_type` against the post's media and fails with a validation error on `platforms.<n>.content_type` when:
 
 - the media kind is not supported (a video on `pinterest_pin`, a PDF outside LinkedIn, images mixed with a video where the network takes one or the other);
-- a **GIF** or **MOV** lands on a type that does not accept it;
+- a **GIF** lands on a type that does not accept it;
 - a file's `size` is over the type's byte cap (the ~900 MB Instagram Reel is refused here, before Meta ever sees it);
 - a video's duration is over the type's cap. Duration is read from the file's MP4/MOV header on the server when it is stored — dashboard upload, `POST /posts/{post}/media`, signed upload URL, or a public URL — so it is known for every path. A file whose container carries no duration (a fragmented MP4) is checked by size only.
 
@@ -178,11 +178,11 @@ Official: [Creating boards and pins](https://developers.pinterest.com/docs/work-
 
 ### Bluesky
 
-Official: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json) (`maxSize` 300 000 000, `accept: video/mp4`), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json) (`maxSize` 2 000 000). The lexicon carries no duration; the 10-minute limit is the video service's, [announced by @bsky.app on 26 August 2026](https://techcrunch.com/2026/08/26/bluesky-now-lets-you-upload-10-minute-long-videos/).
+Official: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json) (`maxSize` 300 000 000; stored blob is `video/mp4`), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json) (`maxSize` 2 000 000). The video service that receives the upload also accepts MOV, MPEG, WebM, and GIF — [same MIME list as the official app](https://github.com/bluesky-social/social-app/blob/main/src/lib/constants.ts). The lexicon carries no duration; the 10-minute limit is the video service's, [announced by @bsky.app on 26 August 2026](https://techcrunch.com/2026/08/26/bluesky-now-lets-you-upload-10-minute-long-videos/).
 
 | Type | Size | Duration | Format |
 |------|------|----------|--------|
-| `bluesky_post` | Image 2 MB; video 300 MB (decimal bytes) | 10 minutes | Images JPEG/PNG/GIF/WebP. Video **MP4 only** — MOV is blocked in the editor and API |
+| `bluesky_post` | Image 2 MB; video 300 MB (decimal bytes) | 10 minutes | Images JPEG/PNG/GIF/WebP. Video MP4 or MOV |
 
 Images and a video cannot be mixed (the embed is images XOR video). Self-hosted: `BLUESKY_VIDEO_MAX_BYTES` is the publisher's skip threshold and defaults to the same 300 000 000 — leave it alone unless the lexicon changes.
 
@@ -254,7 +254,7 @@ Any S3-compatible service (MinIO, DigitalOcean Spaces, Backblaze B2) works under
     TryPost sends Telegram photos and videos as a **URL**, and Telegram's URL path is 5 MB (photo) / 20 MB (video). Multipart upload would allow 10 / 50 MB — that is not the path we use.
   </Accordion>
   <Accordion title="Can I post a MOV on Bluesky?">
-    No. Bluesky accepts **MP4 only**. The editor and API block MOV on `bluesky_post`. Export or remux the file as MP4.
+    Yes. The official app and video service accept `.mov` (`video/quicktime`) and transcode it to the MP4 blob Bluesky stores. TryPost sends the file as-is.
   </Accordion>
   <Accordion title="Can I use the same media in multiple posts?">
     Yes — store the file in the [Asset Library](/knowledge-base/assets), then attach it with [`POST /posts/{post}/media/from-asset`](/api-reference/endpoint/attach-existing-asset) or MCP `attach-existing-asset-tool`. The post snapshot shares the library file path. You can also upload again via [`POST /posts/{post}/media`](/api-reference/endpoint/upload-media) or [`POST /posts/{post}/media/from-url`](/api-reference/endpoint/attach-media-from-url).
