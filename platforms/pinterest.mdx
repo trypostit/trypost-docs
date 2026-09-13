@@ -31,6 +31,16 @@ If neither a per-post `board_id` nor a default board is set, publishing fails wi
 | **Video Pin** | 9:16 | Video pin, 4 seconds to 15 minutes (1 video, required) |
 | **Carousel** | 2:3 | Multi-image pin (up to 5 images, required) |
 
+## Media limits
+
+| `content_type` | Image | Video | Duration | Format |
+|----------------|-------|-------|----------|--------|
+| `pinterest_pin` | 10 MB | — | — | JPEG/PNG |
+| `pinterest_video_pin` | — | 1 GB | 15 minutes | MP4 or MOV |
+| `pinterest_carousel` | 10 MB | — | — | JPEG/PNG, 2–5 images |
+
+Official specs: [Creating boards and pins](https://developers.pinterest.com/docs/work-with-organic-content-and-users/create-boards-and-pins/), [Product specs](https://help.pinterest.com/en/business/article/pinterest-product-specs). Full catalog: [Media](/knowledge-base/media).
+
 ## OAuth scopes
 
 `boards:read`, `boards:write`, `pins:read`, `pins:write`, `user_accounts:read`

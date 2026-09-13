@@ -102,7 +102,7 @@ Attach a library file to a post. Does **not** upload a new file. REST: [`POST /p
 
 | Tool | Description |
 |------|-------------|
-| **list-content-types-tool** | Returns `{ platforms: [...] }` — same catalog as [`GET /content-types`](/api-reference/endpoint/list-content-types). Each platform has `max_content_length`, `recommended_content_length`, `allowed_media_types`, `default_content_type`, and `content_types[]` rows with `max_media_count`, `min_media_count`, `requires_media`, `accept_images` / `accept_videos` / `accept_documents` / `accepts_gif`, `forbids_mixed_media`, and per-type byte caps. **20** content types total — there is no `linkedin_carousel` / `instagram_carousel`. Use before `create-post-tool` / `update-post-tool`. |
+| **list-content-types-tool** | Returns `{ platforms: [...] }` — same catalog as [`GET /content-types`](/api-reference/endpoint/list-content-types). Each platform has `max_content_length`, `recommended_content_length`, `allowed_media_types`, `default_content_type`, and `content_types[]` rows with `max_media_count`, `min_media_count`, `requires_media`, `accept_images` / `accept_videos` / `accept_documents` / `accepts_gif` / `accepts_mov`, `forbids_mixed_media`, and per-type byte caps. **20** content types total — there is no `linkedin_carousel` / `instagram_carousel`. Use before `create-post-tool` / `update-post-tool`. |
 
 ## Signatures
 

@@ -41,7 +41,7 @@ For uploading a file directly from your machine instead of fetching a URL, use [
 
 - The post must belong to the caller's current workspace; otherwise the response is `404`.
 - Allowed media types are **intersected with the platforms enabled on the post**. If an enabled platform doesn't support the file type (e.g. video on a platform that's image-only), that file is rejected and listed in `failed_urls`.
-- Successful attachments are appended to the post's `media[]` array (image `alt` becomes `media[].meta.alt_text`).
+- Successful attachments are appended to the post's `media[]` array with `size` and `meta` (image `alt` becomes `media[].meta.alt_text`; videos carry `meta.duration` read from the file). Per-network size, duration, GIF and MOV caps are enforced when the post is scheduled or published — see [Media → Enforced on the server](/knowledge-base/media#enforced-on-the-server-not-just-in-the-editor).
 
 ## Response
 

@@ -20,6 +20,14 @@ TryPost supports posting to Threads.
 |------|-------------|
 | **Post** | Text with up to 10 optional images **or** 1 video |
 
+## Media limits
+
+| `content_type` | Image | Video | Duration | Format |
+|----------------|-------|-------|----------|--------|
+| `threads_post` | 8 MB | 1 GB | 5 minutes | JPEG/PNG; video MOV or MP4. No crop |
+
+Official specs: [Overview](https://developers.facebook.com/docs/threads/overview/), [Posts](https://developers.facebook.com/docs/threads/posts/). Full catalog: [Media](/knowledge-base/media).
+
 ## OAuth scopes
 
 `threads_basic`, `threads_content_publish`, `threads_manage_insights`

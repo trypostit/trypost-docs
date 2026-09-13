@@ -34,6 +34,14 @@ Posting it somewhere else is rejected with *Post the command in the channel you 
 |------|-------------|
 | **Post** (`telegram_post`) | Text with up to 10 images/videos (multiple media are sent as an album) |
 
+## Media limits
+
+| `content_type` | Image | Video | Format |
+|----------------|-------|-------|--------|
+| `telegram_post` | 5 MB | 20 MB | JPEG/PNG/GIF/WebP; video MPEG4 (MP4 or MOV) |
+
+These are Telegram's **URL** limits (TryPost does not use multipart). Official specs: [Sending files](https://core.telegram.org/bots/api#sending-files). Full catalog: [Media](/knowledge-base/media).
+
 Telegram allows up to **4096** characters of text. Media captions are capped at **1024**, so a longer post is sent as the media followed by a separate text message. Formatting (bold, italic, links, `code`) and plain `@username` mentions are preserved — Telegram auto-links public usernames.
 
 ## Analytics

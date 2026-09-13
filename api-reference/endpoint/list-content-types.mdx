@@ -40,11 +40,14 @@ Returns `{ "platforms": [ ... ] }` — one object per social platform.
 | `accept_videos` | Whether videos are allowed. |
 | `accept_documents` | Whether PDFs are allowed (e.g. LinkedIn document posts). |
 | `accepts_gif` | Whether GIF is accepted as an image. |
+| `accepts_mov` | Whether QuickTime/MOV is accepted. `false` on Bluesky (MP4 only). |
 | `forbids_mixed_media` | When `true`, do not mix images and videos in one post. |
-| `max_video_duration_sec` | Max video length in seconds, or `null`. |
-| `max_image_bytes` | Max image size in bytes, or `null`. |
-| `max_video_bytes` | Max video size in bytes, or `null`. |
+| `max_video_duration_sec` | Max video length in seconds, or `null`. TikTok reports the 10-minute API ceiling; `creator_info` may lower it per account. |
+| `max_image_bytes` | Max image size in bytes, or `null`. Already clamped to the instance upload cap. |
+| `max_video_bytes` | Max video size in bytes, or `null`. Already clamped to the instance upload cap (Cloud: 1 GB, so X's 8 GB reads as 1 GB here). |
 | `max_document_bytes` | Max PDF size in bytes, or `null`. |
+
+Byte and duration caps are enforced server-side on publish/schedule as well as in the editor — see [Media → Enforced on the server](/knowledge-base/media#enforced-on-the-server-not-just-in-the-editor).
 
 ### Current `content_type` values (20)
 
@@ -91,6 +94,7 @@ Returns `{ "platforms": [ ... ] }` — one object per social platform.
           "accept_videos": true,
           "accept_documents": true,
           "accepts_gif": false,
+          "accepts_mov": true,
           "forbids_mixed_media": true,
           "max_video_duration_sec": 600,
           "max_image_bytes": 5242880,

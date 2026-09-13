@@ -37,6 +37,14 @@ Only channels the bot can actually post in are shown — **text** and **announce
 |------|-------------|
 | **Message** (`discord_message`) | Text with up to 10 images/videos, optional mentions and rich embeds |
 
+## Media limits
+
+| `content_type` | Image | Video | Format |
+|----------------|-------|-------|--------|
+| `discord_message` | 10 MB | 20 MB | Any allowed upload type. GIF accepted |
+
+Official specs: [Uploading Files](https://docs.discord.com/developers/reference#uploading-files) (20 MiB bot default). Full catalog: [Media](/knowledge-base/media).
+
 Discord allows up to **2000** characters of message text. Images are optimized to Discord's limits; videos and GIFs are sent as-is.
 
 ### Mentions

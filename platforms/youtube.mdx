@@ -21,6 +21,14 @@ TryPost supports uploading YouTube Shorts.
 |------|-------------|-------------|
 | **Short** | 9:16 | Vertical video up to 3 minutes (required) |
 
+## Media limits
+
+| `content_type` | Video | Duration | Format |
+|----------------|-------|----------|--------|
+| `youtube_short` | 1 GB | 3 minutes | MP4 or MOV |
+
+Official specs: [`videos.insert`](https://developers.google.com/youtube/v3/docs/videos/insert), [3-minute Shorts](https://support.google.com/youtube/answer/15424877). Full catalog: [Media](/knowledge-base/media).
+
 ## OAuth scopes
 
 `https://www.googleapis.com/auth/youtube.upload`, `https://www.googleapis.com/auth/youtube.readonly`, `https://www.googleapis.com/auth/youtube.force-ssl`, `https://www.googleapis.com/auth/yt-analytics.readonly`
