@@ -460,7 +460,7 @@ Raise the interval if you are close to Meta's app-wide quota. Horizon and the sc
 
 ## Social login
 
-TryPost supports sign in with **Google** and **GitHub**. Both providers are off by default — set the corresponding `*_AUTH_ENABLED` flag and provide credentials to surface the buttons on the login/register pages.
+TryPost supports sign in with **Google**, **GitHub** and any **OpenID Connect** provider. All of them are off by default — set the corresponding `*_AUTH_ENABLED` flag and provide credentials to surface the buttons on the login/register pages.
 
 ### Google
 
@@ -487,6 +487,121 @@ GITHUB_AUTH_CALLBACK="${APP_URL}/auth/github/callback"
 ```
 
 Register a new OAuth App at [github.com/settings/developers](https://github.com/settings/developers) and set the **Authorization callback URL** to `${APP_URL}/auth/github/callback`.
+
+### Turning off email and password sign-in
+
+Once an identity provider is in place, the local password form is usually
+unwanted: it is a second way in that your provider's policies — MFA, lockout,
+offboarding — do not cover.
+
+```env
+PASSWORD_LOGIN_ENABLED=false
+```
+
+This closes the login, password-reset and password-registration endpoints, not
+just the form in the UI. The login page itself stays reachable, since that is
+where the provider buttons live.
+
+<Note>
+  The setting is ignored while no other provider is enabled, so it can never
+  lock everybody out of an instance. Re-enable it in the environment if you
+  ever need the password form back.
+</Note>
+
+### OpenID Connect
+
+Any spec-compliant OIDC provider — Authentik, Keycloak, Zitadel, Pocket ID,
+Entra ID, Okta — can sign users in. Endpoints come from the provider's
+discovery document, so only the issuer and the client credentials are needed.
+
+```env
+OIDC_AUTH_ENABLED=true
+OIDC_CLIENT_ID=your-client-id
+OIDC_CLIENT_SECRET=your-client-secret
+OIDC_DISCOVERY_URL=https://id.example.com
+OIDC_AUTH_CALLBACK="${APP_URL}/auth/oidc/callback"
+OIDC_SCOPES="openid profile email"
+OIDC_DISPLAY_NAME="SSO"
+```
+
+`OIDC_DISCOVERY_URL` takes either the issuer URL or the full
+`.well-known/openid-configuration` URL. `OIDC_DISPLAY_NAME` is what the button
+reads: *Log in with SSO*.
+
+Register `${APP_URL}/auth/oidc/callback` as the redirect URI with your
+provider. PKCE is always sent, so switch it on there if your provider treats it
+as optional.
+
+An existing local account is adopted when the email addresses match, which is
+how someone moves from a password to SSO. If the provider reports the address
+as unverified, that adoption is refused - signing in still works, it just
+creates a separate account. Providers that do no email verification at all are
+therefore not locked out.
+
+<Note>
+  The provider must publish a JWKS — ID token signatures are verified against
+  it, along with issuer, audience, expiry and a per-request nonce.
+</Note>
+
+#### Signing out of the provider as well
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_LOGOUT_ENABLED` | `true` | When the provider publishes an `end_session_endpoint`, logging out of TryPost ends the session at the provider too. Turn it off to only clear the local session. |
+| `OIDC_POST_LOGOUT_REDIRECT_URI` | empty | Where the provider returns the browser afterwards. Leave empty to stay on the provider's page. |
+
+<Warning>
+  A post-logout redirect has to match a URI registered with your provider
+  character for character, trailing slash included. Providers reject the whole
+  logout request on a mismatch, which leaves the user signed in at the provider
+  while believing they are signed out. That is why nothing is sent by default.
+</Warning>
+
+#### Restricting who may sign in
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_GROUPS_CLAIM` | `groups` | Claim carrying the group names, read from userinfo or the ID token |
+| `OIDC_ALLOWED_GROUPS` | empty | Comma-separated groups allowed to sign in. Empty means the provider alone decides. |
+
+#### Onboarding without invites (self-hosted)
+
+By default a new user needs an invite, the same as with any other sign-up. On a
+single-team install you can let provider group membership be the only
+onboarding step instead:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_AUTO_JOIN_ENABLED` | `false` | Place new OIDC users on the shared account instead of requiring an invite. Ignored unless `SELF_HOSTED=true`. |
+| `OIDC_AUTO_JOIN_ROLE` | `member` | Role they join with: `admin`, `member` or `viewer` |
+| `OIDC_AUTO_JOIN_ACCOUNT_ID` | oldest account | Account to join, for instances hosting more than one team |
+| `OIDC_ADMIN_GROUPS` | empty | Groups whose members administer the workspace |
+| `OIDC_RELEASE_OWNERSHIP` | `false` | Clear the account owner so every right comes from the groups |
+
+With `OIDC_ADMIN_GROUPS` set, the workspace role of every OIDC user follows the
+provider on each sign-in: in the group means admin, out of it means
+`OIDC_AUTO_JOIN_ROLE`. An instance can then run without a standing local admin
+account, and taking someone out of the group at the provider is all that
+offboarding needs. Leave it empty to keep managing roles in the application.
+
+The account owner is left out of the sync: ownership is resolved separately and
+outranks the workspace role, so syncing it would show the owner as a member
+while every permission stays in place. On a fresh install the first person to
+sign in becomes the owner, so sign in yourself before inviting anyone.
+
+`OIDC_RELEASE_OWNERSHIP=true` removes that exception by clearing the owner
+altogether, which is usually what an instance wants when the provider is meant
+to decide who may do what. The owner-only actions - deleting a workspace and
+billing - then become unavailable to everyone; connecting accounts, managing
+the team and inviting run on the admin role and keep following the groups.
+
+<Note>
+  There is no way to transfer ownership, and deleting an owner deletes the
+  account and its workspaces with it. Releasing ownership is therefore also how
+  you retire a local admin account that an SSO-only instance no longer needs.
+</Note>
+
+Existing members keep the role they already have; auto-join never changes it.
 
 ## AI features (optional)
 
