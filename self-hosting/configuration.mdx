@@ -548,6 +548,14 @@ therefore not locked out.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OIDC_LOGOUT_ENABLED` | `true` | When the provider publishes an `end_session_endpoint`, logging out of TryPost ends the session at the provider too. Turn it off to only clear the local session. |
+| `OIDC_POST_LOGOUT_REDIRECT_URI` | empty | Where the provider returns the browser afterwards. Leave empty to stay on the provider's page. |
+
+<Warning>
+  A post-logout redirect has to match a URI registered with your provider
+  character for character, trailing slash included. Providers reject the whole
+  logout request on a mismatch, which leaves the user signed in at the provider
+  while believing they are signed out. That is why nothing is sent by default.
+</Warning>
 
 #### Restricting who may sign in
 
