@@ -82,14 +82,14 @@ Numbers below are what the editor and [`GET /content-types`](/api-reference/endp
 | `pinterest_carousel` | 10 MB | — | — |
 | `x_post` | 5 MB | 1 GB | 20 minutes |
 | `threads_post` | 8 MB | 1 GB | 5 minutes |
-| `bluesky_post` | 2 MB | 300 MB | 10 minutes |
+| `bluesky_post` | 10 MB | 300 MB | 10 minutes |
 | `mastodon_post` | 10 MB | 40 MB | — |
 | `tiktok_video` | — | 1 GB | 10 minutes |
 | `tiktok_photo` | 10 MB | — | — |
 | `discord_message` | 10 MB | 20 MB | — |
 | `telegram_post` | 5 MB | 20 MB | — |
 
-LinkedIn PDF posts: **100 MB**. Bluesky's 2 MB / 300 MB are the lexicon's exact decimal values (2 000 000 / 300 000 000 bytes), not MiB. TikTok's 10 minutes is the developer-upload ceiling; TikTok may return a lower per-creator limit (`creator_info`), which is enforced at publish.
+LinkedIn PDF posts: **100 MB**. Bluesky's 300 MB is the lexicon's exact decimal value (300 000 000 bytes), not MiB; its images are not capped below the hard cap because TryPost re-encodes every non-GIF image under Bluesky's 2 MB blob limit at publish (a GIF over 2 MB still fails at publish). TikTok's 10 minutes is the developer-upload ceiling; TikTok may return a lower per-creator limit (`creator_info`), which is enforced at publish.
 
 There is **no** `linkedin_carousel`, `linkedin_page_carousel`, or `instagram_carousel` content type on posts. Multi-image Instagram posts use `instagram_feed`. LinkedIn multi-image / PDF posts use `linkedin_post` / `linkedin_page_post` (format is inferred from the attached media; optional `meta.document_title` for PDFs).
 
@@ -182,7 +182,7 @@ Official: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blo
 
 | Type | Size | Duration | Format |
 |------|------|----------|--------|
-| `bluesky_post` | Image 2 MB; video 300 MB (decimal bytes) | 10 minutes | Images JPEG/PNG/GIF/WebP. Video MP4 or MOV |
+| `bluesky_post` | Image 10 MB (hard cap; re-encoded under the 2 MB blob limit at publish); video 300 MB (decimal bytes) | 10 minutes | Images JPEG/PNG/GIF/WebP. Video MP4 or MOV |
 
 Images and a video cannot be mixed (the embed is images XOR video). Self-hosted: `BLUESKY_VIDEO_MAX_BYTES` is the publisher's skip threshold and defaults to the same 300 000 000 — leave it alone unless the lexicon changes.
 
