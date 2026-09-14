@@ -28,9 +28,9 @@ TryPost supports posting to Bluesky.
 
 | `content_type` | Image | Video | Duration | Format |
 |----------------|-------|-------|----------|--------|
-| `bluesky_post` | 2 MB | 300 MB | 10 minutes | Images JPEG/PNG/GIF/WebP. Video **MP4 only** (MOV blocked) |
+| `bluesky_post` | 10 MB | 300 MB | 10 minutes | Images JPEG/PNG/GIF/WebP. Video MP4 or MOV |
 
-Sizes are the lexicon's decimal values (2 000 000 / 300 000 000 bytes). Official specs: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json); the 10-minute limit was [announced by Bluesky on 26 August 2026](https://techcrunch.com/2026/08/26/bluesky-now-lets-you-upload-10-minute-long-videos/). Full catalog: [Media](/knowledge-base/media).
+The video size is the lexicon's decimal value (300 000 000 bytes). Bluesky's image blob limit is 2 MB (2 000 000 bytes), but TryPost re-encodes every non-GIF image under it at publish, so only the 10 MB hard cap applies to the original; a GIF over 2 MB fails at publish. Official specs: [`app.bsky.embed.video`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/video.json), [`app.bsky.embed.images`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/embed/images.json); the 10-minute limit was [announced by Bluesky on 26 August 2026](https://techcrunch.com/2026/08/26/bluesky-now-lets-you-upload-10-minute-long-videos/). Full catalog: [Media](/knowledge-base/media).
 
 ## Self-hosting setup
 

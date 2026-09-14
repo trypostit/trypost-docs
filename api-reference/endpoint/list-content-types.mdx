@@ -40,7 +40,7 @@ Returns `{ "platforms": [ ... ] }` — one object per social platform.
 | `accept_videos` | Whether videos are allowed. |
 | `accept_documents` | Whether PDFs are allowed (e.g. LinkedIn document posts). |
 | `accepts_gif` | Whether GIF is accepted as an image. |
-| `accepts_mov` | Whether QuickTime/MOV is accepted. `false` on Bluesky (MP4 only). |
+| `accepts_mov` | Whether QuickTime/MOV is accepted. Currently `true` on every content type. |
 | `forbids_mixed_media` | When `true`, do not mix images and videos in one post. |
 | `max_video_duration_sec` | Max video length in seconds, or `null`. TikTok reports the 10-minute API ceiling; `creator_info` may lower it per account. |
 | `max_image_bytes` | Max image size in bytes, or `null`. Already clamped to the instance upload cap. |
