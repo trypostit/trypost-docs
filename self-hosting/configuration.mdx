@@ -583,6 +583,13 @@ provider on each sign-in: in the group means admin, out of it means
 account, and taking someone out of the group at the provider is all that
 offboarding needs. Leave it empty to keep managing roles in the application.
 
+<Note>
+  The account owner is left out of this. Ownership is resolved separately and
+  outranks the workspace role, so syncing it would show the owner as a member
+  while every permission stays in place. On a fresh install the first person to
+  sign in becomes the owner, so sign in yourself before inviting anyone.
+</Note>
+
 Existing members keep the role they already have; auto-join never changes it.
 
 ## AI features (optional)
