@@ -460,7 +460,7 @@ Raise the interval if you are close to Meta's app-wide quota. Horizon and the sc
 
 ## Social login
 
-TryPost supports sign in with **Google** and **GitHub**. Both providers are off by default — set the corresponding `*_AUTH_ENABLED` flag and provide credentials to surface the buttons on the login/register pages.
+TryPost supports sign in with **Google**, **GitHub** and any **OpenID Connect** provider. All of them are off by default — set the corresponding `*_AUTH_ENABLED` flag and provide credentials to surface the buttons on the login/register pages.
 
 ### Google
 
@@ -487,6 +487,63 @@ GITHUB_AUTH_CALLBACK="${APP_URL}/auth/github/callback"
 ```
 
 Register a new OAuth App at [github.com/settings/developers](https://github.com/settings/developers) and set the **Authorization callback URL** to `${APP_URL}/auth/github/callback`.
+
+### OpenID Connect
+
+Any spec-compliant OIDC provider — Authentik, Keycloak, Zitadel, Pocket ID,
+Entra ID, Okta — can sign users in. Endpoints come from the provider's
+discovery document, so only the issuer and the client credentials are needed.
+
+```env
+OIDC_AUTH_ENABLED=true
+OIDC_CLIENT_ID=your-client-id
+OIDC_CLIENT_SECRET=your-client-secret
+OIDC_DISCOVERY_URL=https://id.example.com
+OIDC_AUTH_CALLBACK="${APP_URL}/auth/oidc/callback"
+OIDC_SCOPES="openid profile email"
+OIDC_DISPLAY_NAME="SSO"
+```
+
+`OIDC_DISCOVERY_URL` takes either the issuer URL or the full
+`.well-known/openid-configuration` URL. `OIDC_DISPLAY_NAME` is what the button
+reads: *Log in with SSO*.
+
+Register `${APP_URL}/auth/oidc/callback` as the redirect URI with your
+provider. PKCE is always sent, so switch it on there if your provider treats it
+as optional. Sign-in is refused if the provider reports the email address as
+unverified, since accounts are matched by email.
+
+<Note>
+  The provider must publish a JWKS — ID token signatures are verified against
+  it, along with issuer, audience, expiry and a per-request nonce.
+</Note>
+
+#### Signing out of the provider as well
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_LOGOUT_ENABLED` | `true` | When the provider publishes an `end_session_endpoint`, logging out of TryPost ends the session at the provider too. Turn it off to only clear the local session. |
+
+#### Restricting who may sign in
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_GROUPS_CLAIM` | `groups` | Claim carrying the group names, read from userinfo or the ID token |
+| `OIDC_ALLOWED_GROUPS` | empty | Comma-separated groups allowed to sign in. Empty means the provider alone decides. |
+
+#### Onboarding without invites (self-hosted)
+
+By default a new user needs an invite, the same as with any other sign-up. On a
+single-team install you can let provider group membership be the only
+onboarding step instead:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OIDC_AUTO_JOIN_ENABLED` | `false` | Place new OIDC users on the shared account instead of requiring an invite. Ignored unless `SELF_HOSTED=true`. |
+| `OIDC_AUTO_JOIN_ROLE` | `member` | Role they join with: `admin`, `member` or `viewer` |
+| `OIDC_AUTO_JOIN_ACCOUNT_ID` | oldest account | Account to join, for instances hosting more than one team |
+
+Existing members keep the role they already have; auto-join never changes it.
 
 ## AI features (optional)
 
