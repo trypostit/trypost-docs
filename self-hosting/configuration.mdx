@@ -575,6 +575,13 @@ onboarding step instead:
 | `OIDC_AUTO_JOIN_ENABLED` | `false` | Place new OIDC users on the shared account instead of requiring an invite. Ignored unless `SELF_HOSTED=true`. |
 | `OIDC_AUTO_JOIN_ROLE` | `member` | Role they join with: `admin`, `member` or `viewer` |
 | `OIDC_AUTO_JOIN_ACCOUNT_ID` | oldest account | Account to join, for instances hosting more than one team |
+| `OIDC_ADMIN_GROUPS` | empty | Groups whose members administer the workspace |
+
+With `OIDC_ADMIN_GROUPS` set, the workspace role of every OIDC user follows the
+provider on each sign-in: in the group means admin, out of it means
+`OIDC_AUTO_JOIN_ROLE`. An instance can then run without a standing local admin
+account, and taking someone out of the group at the provider is all that
+offboarding needs. Leave it empty to keep managing roles in the application.
 
 Existing members keep the role they already have; auto-join never changes it.
 
