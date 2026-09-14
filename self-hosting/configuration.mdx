@@ -510,8 +510,13 @@ reads: *Log in with SSO*.
 
 Register `${APP_URL}/auth/oidc/callback` as the redirect URI with your
 provider. PKCE is always sent, so switch it on there if your provider treats it
-as optional. Sign-in is refused if the provider reports the email address as
-unverified, since accounts are matched by email.
+as optional.
+
+An existing local account is adopted when the email addresses match, which is
+how someone moves from a password to SSO. If the provider reports the address
+as unverified, that adoption is refused - signing in still works, it just
+creates a separate account. Providers that do no email verification at all are
+therefore not locked out.
 
 <Note>
   The provider must publish a JWKS — ID token signatures are verified against
