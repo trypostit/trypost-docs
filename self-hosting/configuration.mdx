@@ -510,6 +510,45 @@ GIPHY_API_KEY=
 
 Without these keys, the Library tab still works — only the stock-photo and GIF tabs are hidden.
 
+## WebDAV media source (optional)
+
+Teams that already keep their photos and videos on a WebDAV share — Nextcloud,
+ownCloud or anything else that speaks the protocol — can browse that share from
+the media picker instead of downloading files only to upload them again.
+
+```env
+WEBDAV_URL=https://cloud.example.com/remote.php/dav/files/trypost
+WEBDAV_USERNAME=trypost
+WEBDAV_PASSWORD=
+# Optional: confine browsing to one folder inside the share
+WEBDAV_ROOT=Marketing/Social
+# Optional: name of the tab in the media picker
+WEBDAV_LABEL="Files"
+# Optional: largest single file that may be imported, in megabytes
+WEBDAV_MAX_IMPORT_MB=512
+```
+
+Leave `WEBDAV_URL` empty and the tab stays hidden — nothing else changes.
+
+Picking files copies them into the workspace's own library, so a post keeps the
+media it was scheduled with even if the share changes afterwards. Up to 20 files
+per import; anything above `WEBDAV_MAX_IMPORT_MB` is listed but refused, on the
+size the share announces, before its body is fetched.
+
+<Note>
+  Use a dedicated account with **read-only** access to the folder you point at —
+  in Nextcloud, an [app password](https://docs.nextcloud.com/server/latest/user_manual/en/session_management.html#managing-devices)
+  rather than the account's own login. TryPost only reads from the share; it
+  never writes to it.
+</Note>
+
+<Warning>
+  These credentials belong to the instance, not to a workspace: every user who
+  can open the media picker browses the same share. That suits a self-hosted
+  instance run by one team. If yours hosts unrelated workspaces, point
+  `WEBDAV_ROOT` at a folder they may all see, or leave the feature off.
+</Warning>
+
 ## Analytics (optional)
 
 ### PostHog
