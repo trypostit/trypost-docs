@@ -576,6 +576,7 @@ onboarding step instead:
 | `OIDC_AUTO_JOIN_ROLE` | `member` | Role they join with: `admin`, `member` or `viewer` |
 | `OIDC_AUTO_JOIN_ACCOUNT_ID` | oldest account | Account to join, for instances hosting more than one team |
 | `OIDC_ADMIN_GROUPS` | empty | Groups whose members administer the workspace |
+| `OIDC_RELEASE_OWNERSHIP` | `false` | Clear the account owner so every right comes from the groups |
 
 With `OIDC_ADMIN_GROUPS` set, the workspace role of every OIDC user follows the
 provider on each sign-in: in the group means admin, out of it means
@@ -583,11 +584,21 @@ provider on each sign-in: in the group means admin, out of it means
 account, and taking someone out of the group at the provider is all that
 offboarding needs. Leave it empty to keep managing roles in the application.
 
+The account owner is left out of the sync: ownership is resolved separately and
+outranks the workspace role, so syncing it would show the owner as a member
+while every permission stays in place. On a fresh install the first person to
+sign in becomes the owner, so sign in yourself before inviting anyone.
+
+`OIDC_RELEASE_OWNERSHIP=true` removes that exception by clearing the owner
+altogether, which is usually what an instance wants when the provider is meant
+to decide who may do what. The owner-only actions - deleting a workspace and
+billing - then become unavailable to everyone; connecting accounts, managing
+the team and inviting run on the admin role and keep following the groups.
+
 <Note>
-  The account owner is left out of this. Ownership is resolved separately and
-  outranks the workspace role, so syncing it would show the owner as a member
-  while every permission stays in place. On a fresh install the first person to
-  sign in becomes the owner, so sign in yourself before inviting anyone.
+  There is no way to transfer ownership, and deleting an owner deletes the
+  account and its workspaces with it. Releasing ownership is therefore also how
+  you retire a local admin account that an SSO-only instance no longer needs.
 </Note>
 
 Existing members keep the role they already have; auto-join never changes it.
