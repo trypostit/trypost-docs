@@ -488,6 +488,26 @@ GITHUB_AUTH_CALLBACK="${APP_URL}/auth/github/callback"
 
 Register a new OAuth App at [github.com/settings/developers](https://github.com/settings/developers) and set the **Authorization callback URL** to `${APP_URL}/auth/github/callback`.
 
+### Turning off email and password sign-in
+
+Once an identity provider is in place, the local password form is usually
+unwanted: it is a second way in that your provider's policies — MFA, lockout,
+offboarding — do not cover.
+
+```env
+PASSWORD_LOGIN_ENABLED=false
+```
+
+This closes the login, password-reset and password-registration endpoints, not
+just the form in the UI. The login page itself stays reachable, since that is
+where the provider buttons live.
+
+<Note>
+  The setting is ignored while no other provider is enabled, so it can never
+  lock everybody out of an instance. Re-enable it in the environment if you
+  ever need the password form back.
+</Note>
+
 ### OpenID Connect
 
 Any spec-compliant OIDC provider — Authentik, Keycloak, Zitadel, Pocket ID,
