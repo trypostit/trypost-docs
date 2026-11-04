@@ -441,7 +441,7 @@
                     }
                   }
                 },
-                "linkedin_comment": {
+                "linkedin_with_comment": {
                   "summary": "LinkedIn post with a comment",
                   "value": {
                     "content": "We just shipped scheduled threads.",

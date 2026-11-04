@@ -51,16 +51,17 @@ Images, a video and a PDF never mix in one post, and GIFs are not accepted. Offi
 
 A post can carry **one comment**, published right after the post from the same profile or page. Use it for a link or more context you want under the post rather than in it.
 
-1. In the LinkedIn card of the composer (**Customize for each network**, or right away when LinkedIn is the only channel), click **Add comment** in the toolbar.
+1. In the **LinkedIn** or **LinkedIn Page** card of the composer (**Customize for each network**, or right away when only one of them is selected), click **Add comment** in the toolbar.
 2. Write the comment. The counter shows how many of its **3,000 characters** are left.
 3. To drop it, click the **×** on the comment (**Remove comment**), or press <kbd>Backspace</kbd> in an empty comment.
 
-- A comment is **text only**: emoji and links work, but no images, video or PDF ("LinkedIn comments can't include media."). LinkedIn draws no preview card for a link in a comment.
-- An empty comment or one over 3,000 characters can't be scheduled ("Your comment is empty.", "Your comment exceeds the 3000-character limit by …").
+- Profiles in the same post share one comment, and so do Pages.
+- A comment is **text only**: emoji and links work, but no images, video or PDF. The media button is off ("LinkedIn comments can't include media."). LinkedIn draws no preview card for a link in a comment.
+- An empty comment or one over 3,000 characters can't be scheduled or published ("Your comment is empty.", "Your comment exceeds the 3000-character limit by …").
 - The LinkedIn preview shows the comment under the post.
 - On LinkedIn, <kbd>Shift</kbd> <kbd>Enter</kbd> breaks the line, in the post and in the comment.
 
-If LinkedIn is not ready for the comment right after the post, the post shows **Retrying** and TryPost tries the comment again for up to about five minutes. If LinkedIn refuses the comment, or is still not ready after that, the post is marked **Failed** with "Published 1 of 2 posts in the thread: …", while the post itself stays live on LinkedIn.
+If LinkedIn is not ready for the comment right after the post, the post shows **Retrying** ("The platform is temporarily unavailable. We'll retry shortly.") and TryPost tries the comment again for up to about five minutes. If LinkedIn refuses the comment, or is still not ready after that, the post is marked **Failed** with "Published 1 of 2 posts in the thread: …", while the post itself stays live on LinkedIn.
 
 On the API and MCP, the comment is the one reply in `meta.thread_replies` (see [LinkedIn comment](/api-reference/guides/posting#linkedin-comment)).
 

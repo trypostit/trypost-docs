@@ -265,9 +265,9 @@ A LinkedIn post (`linkedin_post` or `linkedin_page_post`) takes **one** reply in
 }
 ```
 
-- The comment has no `content_type` of its own: it is a reply of a `linkedin_post` or `linkedin_page_post`.
+- The comment has no `content_type` of its own: it is a reply of a `linkedin_post` or `linkedin_page_post`. `linkedin_comment` is not accepted as a post's `content_type`.
 - The comment is text only, up to 3000 characters. HTML is handled as in the post (bold and underline converted, other tags stripped). A link in it gets no preview card.
-- A draft takes what any thread takes. Scheduling or publishing refuses a second reply ("Only one comment can follow this post."), media on the comment, an empty comment ("Your comment is empty.") and one over 3000 characters.
+- A draft accepts up to 24 replies, with media, like any thread. Scheduling or publishing refuses a second reply ("Only one comment can follow this post."), media on the comment, an empty comment ("Your comment is empty.") and one over 3000 characters.
 - If LinkedIn is not ready for the comment right after the post, `publish_status` is `retrying` for up to about five minutes. Those retries only add the comment, never the post again. If LinkedIn refuses the comment, or is still not ready after that, the post is `failed` with "Published 1 of 2 posts in the thread: …", and the post stays live.
 
 ## X polls
