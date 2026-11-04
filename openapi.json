@@ -440,6 +440,23 @@
                       }
                     }
                   }
+                },
+                "linkedin_with_comment": {
+                  "summary": "LinkedIn post with a comment",
+                  "value": {
+                    "content": "We just shipped scheduled threads.",
+                    "status": "scheduled",
+                    "queue": "next",
+                    "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
+                    "content_type": "linkedin_post",
+                    "meta": {
+                      "thread_replies": [
+                        {
+                          "text": "Read more: https://trypost.it/blog/threads"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -10221,7 +10238,7 @@
       },
       "ThreadReply": {
         "type": "object",
-        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon). A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped.",
+        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon), or the comment of a LinkedIn post. A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped. On LinkedIn a post takes one reply, published as a comment from the same profile or page: text only, up to 3000 characters.",
         "properties": {
           "text": {
             "type": [
@@ -10798,6 +10815,33 @@
             ],
             "maxLength": 300,
             "description": "Title shown on a PDF document post. Defaults to the file name."
+          },
+          "thread_replies": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "One reply, published as a comment from the same profile or page right after the post. Text only, at most 3000 characters, HTML handled as in the post. A draft accepts up to 24 replies like any thread; scheduling or publishing refuses a second reply, media, an empty comment and one over 3000 characters. On update this list replaces the stored one.",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "maxLength": 25000,
+                  "title": "Comment text"
+                },
+                {
+                  "$ref": "#/components/schemas/ThreadReply"
+                }
+              ]
+            },
+            "examples": [
+              [
+                {
+                  "text": "Read more: https://trypost.it/blog/threads"
+                }
+              ]
+            ],
+            "maxItems": 24
           }
         }
       },
@@ -11145,7 +11189,7 @@
               "failed",
               "rejected"
             ],
-            "description": "Publishing state on the network. `pending` until the post is sent; `retrying` waits for a retry after a network limit; `pending_review` and `rejected` come from networks that review posts (Google Business)."
+            "description": "Publishing state on the network. `pending` until the post is sent; `retrying` waits for a retry after a network limit or a temporary network problem (such as a LinkedIn post not yet ready for its comment); `pending_review` and `rejected` come from networks that review posts (Google Business)."
           },
           "platform": {
             "oneOf": [
@@ -11857,7 +11901,7 @@
           },
           "thread_replies": {
             "type": "array",
-            "description": "X, Bluesky and Mastodon, when the post has replies.",
+            "description": "X, Bluesky and Mastodon, when the post has replies, and LinkedIn when it has a comment.",
             "items": {
               "type": "object",
               "properties": {
@@ -13845,7 +13889,7 @@
           },
           "supports_thread_replies": {
             "type": "boolean",
-            "description": "`meta.thread_replies` is accepted (X, Bluesky, Mastodon)."
+            "description": "`meta.thread_replies` is accepted (X, Bluesky, Mastodon, and LinkedIn for one comment)."
           },
           "max_thread_replies": {
             "type": [

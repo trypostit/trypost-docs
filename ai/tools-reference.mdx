@@ -87,7 +87,7 @@ Drafts may be incomplete. Scheduling, queueing or publishing needs:
 - TikTok `meta.privacy_level`, one of the `privacy_level_options` from `get-tiktok-creator-info-tool`.
 - Pinterest `meta.board_id` and Discord `meta.channel_id`.
 - Google Business: `meta.event` with a title and start/end dates on `EVENT` and `OFFER` (the end may not precede the start). A `call_to_action` needs a `url` unless its `action_type` is `NONE` or `CALL`, and offers take no call to action.
-- Thread replies (X, Bluesky, Mastodon): each reply that is not a poll has text or media, and each reply fits the account limit.
+- Thread replies (X, Bluesky, Mastodon): each reply that is not a poll has text or media, and each reply fits the account limit. On LinkedIn, at most one reply (the comment), with text and no media.
 - YouTube: a title (`meta.title`, or the first line of the text).
 - X poll (`x_poll`, or a reply with `poll`): a question, at least 2 `poll.options` and `poll.duration_minutes`.
 
@@ -123,7 +123,7 @@ Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF when the server ca
 | Instagram | `is_ai_generated`; `collaborators` (up to 3 usernames, feed posts, carousels and reels, not stories; the post shows on a collaborator's profile only after they accept the invite in the Instagram app, and a username that does not exist is only refused when the post publishes); on `instagram_reel` also `share_to_feed` (default `true`), `trial_graduation` (`MANUAL` \| `SS_PERFORMANCE`, not with `collaborators`, only on accounts where Instagram offers trial reels) and `audio` (`instagram-facebook` accounts only: `{id, title, artist, cover_url, preview_url, audio_volume, video_volume}`, `id` from `search-instagram-audio-tool` as a string of digits, volumes 0–100, default 100). People tags and a video cover are per media item (see [Media](#media)). At most 5 hashtags | `audio.id` when `audio` is set; no `collaborators` on a trial reel |
 | Threads | `topic_tag` (1–50 characters, no `.` or `&`). Content type `threads_ghost_post` is a text-only post archived after 24 hours | — |
 | Facebook, Bluesky, LinkedIn | `link_preview` (default `true`; `false` publishes the link without a preview card) | — |
-| LinkedIn, LinkedIn Page | `document_title` (max 300, for PDF document posts) | — |
+| LinkedIn, LinkedIn Page | `document_title` (max 300, for PDF document posts); `thread_replies`: one text-only reply, published as a comment from the same profile or page (up to 3000 characters) | — |
 | Google Business | `topic_type` (`STANDARD` \| `EVENT` \| `OFFER`), `call_to_action` `{action_type, url}`, `event` `{title, start_date, end_date, start_time, end_time}`, `offer` `{coupon_code, redeem_online_url, terms_conditions}` | `event` on `EVENT`/`OFFER`; `call_to_action.url` unless `NONE`/`CALL`. `action_type` is one of `NONE`, `BOOK`, `ORDER`, `SHOP`, `LEARN_MORE`, `SIGN_UP`, `CALL`; offers take no call to action |
 | Telegram, Facebook reels and stories | none | — |
 
