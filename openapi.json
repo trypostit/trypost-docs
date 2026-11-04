@@ -989,7 +989,7 @@
         ],
         "summary": "Update post",
         "operationId": "updatePost",
-        "description": "Updates a post. Only the fields you send change. The social account is fixed (`social_account_id` is refused), and so is `platforms`.\n\n`content_type` and `meta` are top-level fields. `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list. Validation errors name the field directly (`meta.privacy_level`, `content_type`). `media` replaces the post's media; `label_ids` replaces its labels.\n\n`status: publishing` publishes the post now; `scheduled` schedules it at `scheduled_at`, in the queue (`queue`), or keeps its future `scheduled_at`; `draft` unschedules it (it is no longer published; the last `scheduled_at` stays on the draft). When scheduling or publishing, the content type must fit the media and the required settings must be present.\n\nPosts that are publishing, published or failed cannot be edited: the request returns `422` with `This post has already been processed and cannot be re-published. Duplicate it to try again.`\n\nOn this endpoint an invalid body may answer `422` before the `404` check of a post of another workspace.",
+        "description": "Updates a post. Only the fields you send change. The social account is fixed (`social_account_id` is refused), and so is `platforms`.\n\n`content_type` and `meta` are top-level fields. `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Validation errors name the field directly (`meta.privacy_level`, `content_type`). `media` replaces the post's media; `label_ids` replaces its labels.\n\n`status: publishing` publishes the post now; `scheduled` schedules it at `scheduled_at`, in the queue (`queue`), or keeps its future `scheduled_at`; `draft` unschedules it (it is no longer published; the last `scheduled_at` stays on the draft). When scheduling or publishing, the content type must fit the media and the required settings must be present.\n\nPosts that are publishing, published or failed cannot be edited: the request returns `422` with `This post has already been processed and cannot be re-published. Duplicate it to try again.`\n\nOn this endpoint an invalid body may answer `422` before the `404` check of a post of another workspace.",
         "requestBody": {
           "required": true,
           "content": {
@@ -9876,7 +9876,7 @@
           "discord_message",
           "google_business_post"
         ],
-        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text."
+        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text. An X poll (`x_poll`) takes no media; its choices and length are in `meta.poll`."
       },
       "Platform": {
         "type": "string",
@@ -10911,7 +10911,7 @@
         "properties": {}
       },
       "PlatformMeta": {
-        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more) and `poll.duration_minutes` on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
+        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more) and `poll.duration_minutes` on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
         "anyOf": [
           {
             "$ref": "#/components/schemas/PlatformMetaX"
@@ -11459,7 +11459,7 @@
                     ]
                   }
                 },
-                "description": "X polls: the votes per choice, read with the post's other X metrics (about an hour after publishing, then at 2, 3, 7, 14 and 28 days). `null` on any other post or before the first read."
+                "description": "X polls: the votes per choice, read with the post's other X metrics (about an hour after publishing, then at 2, 3, 7, 14 and 28 days). A poll made on x.com also gets them when it is discovered. `null` on any other post or before the first read."
               },
               "thread_polls": {
                 "type": "array",
