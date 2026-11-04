@@ -394,28 +394,53 @@
                   }
                 }
               },
-              "example": {
-                "content": "We just shipped scheduled threads. Here is how they work.",
-                "status": "scheduled",
-                "scheduled_at": "2026-10-12T14:00:00Z",
-                "media": [
-                  {
-                    "url": "https://example.com/launch.jpg",
-                    "alt": "Product launch banner"
+              "examples": {
+                "x_thread": {
+                  "summary": "X thread with media",
+                  "value": {
+                    "content": "We just shipped scheduled threads. Here is how they work.",
+                    "status": "scheduled",
+                    "scheduled_at": "2026-10-12T14:00:00Z",
+                    "media": [
+                      {
+                        "url": "https://example.com/launch.jpg",
+                        "alt": "Product launch banner"
+                      }
+                    ],
+                    "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
+                    "content_type": "x_post",
+                    "meta": {
+                      "thread_replies": [
+                        {
+                          "text": "2/ Replies publish under the first post."
+                        }
+                      ]
+                    },
+                    "label_ids": [
+                      "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1e2f"
+                    ]
                   }
-                ],
-                "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
-                "content_type": "x_post",
-                "meta": {
-                  "thread_replies": [
-                    {
-                      "text": "2/ Replies publish under the first post."
-                    }
-                  ]
                 },
-                "label_ids": [
-                  "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1e2f"
-                ]
+                "x_poll": {
+                  "summary": "X poll",
+                  "value": {
+                    "content": "Which feature should we ship next?",
+                    "status": "scheduled",
+                    "queue": "next",
+                    "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
+                    "content_type": "x_poll",
+                    "meta": {
+                      "poll": {
+                        "options": [
+                          "Calendar sync",
+                          "Bulk upload",
+                          "Dark mode"
+                        ],
+                        "duration_minutes": 1440
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -989,7 +1014,7 @@
         ],
         "summary": "Update post",
         "operationId": "updatePost",
-        "description": "Updates a post. Only the fields you send change. The social account is fixed (`social_account_id` is refused), and so is `platforms`.\n\n`content_type` and `meta` are top-level fields. `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list. Validation errors name the field directly (`meta.privacy_level`, `content_type`). `media` replaces the post's media; `label_ids` replaces its labels.\n\n`status: publishing` publishes the post now; `scheduled` schedules it at `scheduled_at`, in the queue (`queue`), or keeps its future `scheduled_at`; `draft` unschedules it (it is no longer published; the last `scheduled_at` stays on the draft). When scheduling or publishing, the content type must fit the media and the required settings must be present.\n\nPosts that are publishing, published or failed cannot be edited: the request returns `422` with `This post has already been processed and cannot be re-published. Duplicate it to try again.`\n\nOn this endpoint an invalid body may answer `422` before the `404` check of a post of another workspace.",
+        "description": "Updates a post. Only the fields you send change. The social account is fixed (`social_account_id` is refused), and so is `platforms`.\n\n`content_type` and `meta` are top-level fields. `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Validation errors name the field directly (`meta.privacy_level`, `content_type`). `media` replaces the post's media; `label_ids` replaces its labels.\n\n`status: publishing` publishes the post now; `scheduled` schedules it at `scheduled_at`, in the queue (`queue`), or keeps its future `scheduled_at`; `draft` unschedules it (it is no longer published; the last `scheduled_at` stays on the draft). When scheduling or publishing, the content type must fit the media and the required settings must be present.\n\nPosts that are publishing, published or failed cannot be edited: the request returns `422` with `This post has already been processed and cannot be re-published. Duplicate it to try again.`\n\nOn this endpoint an invalid body may answer `422` before the `404` check of a post of another workspace.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1292,6 +1317,8 @@
                       "permalink": "https://x.com/trypostit/status/1843921066571337728",
                       "excerpt": "We just shipped scheduled threads.",
                       "preview_metadata": null,
+                      "poll": null,
+                      "thread_polls": [],
                       "account_display_name": "TryPost",
                       "account_username": "trypostit",
                       "account_avatar_url": null
@@ -2276,7 +2303,7 @@
         ],
         "summary": "Upload media",
         "operationId": "uploadPostMedia",
-        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create.",
+        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2419,7 +2446,7 @@
         ],
         "summary": "Attach media from upload",
         "operationId": "attachMediaFromUpload",
-        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create.",
+        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2585,7 +2612,7 @@
         ],
         "summary": "Attach media from URL",
         "operationId": "attachMediaFromUrl",
-        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create.",
+        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `urls` with `This post type can't include media. Change the post type to add media.`, before anything is downloaded.",
         "requestBody": {
           "required": true,
           "content": {
@@ -5951,6 +5978,8 @@
                     "permalink": "https://x.com/trypostit/status/1843921066571337728",
                     "excerpt": "We just shipped scheduled threads.",
                     "preview_metadata": null,
+                    "poll": null,
+                    "thread_polls": [],
                     "account_display_name": "TryPost",
                     "account_username": "trypostit",
                     "account_avatar_url": null
@@ -9401,6 +9430,40 @@
                           "document_must_be_alone": false,
                           "supports_thread_replies": true,
                           "max_thread_replies": 24
+                        },
+                        {
+                          "value": "x_poll",
+                          "label": "Poll",
+                          "description": "Question with 2 to 4 choices",
+                          "max_media_count": 0,
+                          "min_media_count": 0,
+                          "requires_media": false,
+                          "accept_images": false,
+                          "accept_videos": false,
+                          "accept_documents": false,
+                          "accepts_gif": false,
+                          "accepts_mov": false,
+                          "forbids_mixed_media": false,
+                          "max_video_duration_sec": null,
+                          "max_image_bytes": null,
+                          "max_video_bytes": null,
+                          "max_document_bytes": null,
+                          "aspect_ratio_min": null,
+                          "aspect_ratio_max": null,
+                          "video_aspect_ratio_min": null,
+                          "video_aspect_ratio_max": null,
+                          "auto_fits_image": false,
+                          "supports_alt_text": false,
+                          "supports_user_tags": false,
+                          "supports_video_cover": false,
+                          "image_min_width": null,
+                          "image_min_height": null,
+                          "image_max_width": null,
+                          "image_max_height": null,
+                          "captionless": false,
+                          "document_must_be_alone": false,
+                          "supports_thread_replies": true,
+                          "max_thread_replies": 24
                         }
                       ]
                     }
@@ -9830,6 +9893,7 @@
           "tiktok_photo",
           "youtube_short",
           "x_post",
+          "x_poll",
           "threads_post",
           "threads_ghost_post",
           "pinterest_pin",
@@ -9841,7 +9905,7 @@
           "discord_message",
           "google_business_post"
         ],
-        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text."
+        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text. An X poll (`x_poll`) takes no media; its choices and length are in `meta.poll`."
       },
       "Platform": {
         "type": "string",
@@ -10157,7 +10221,7 @@
       },
       "ThreadReply": {
         "type": "object",
-        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon). A reply needs text or media. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network.",
+        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon). A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped.",
         "properties": {
           "text": {
             "type": [
@@ -10173,6 +10237,17 @@
             "items": {
               "$ref": "#/components/schemas/MediaReference"
             }
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/XPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "X only: makes this reply a poll."
           }
         },
         "examples": [
@@ -10189,7 +10264,7 @@
       "PlatformMetaX": {
         "type": "object",
         "title": "X",
-        "description": "Settings for `x_post`.",
+        "description": "Settings for `x_post` and `x_poll`.",
         "properties": {
           "thread_replies": {
             "type": [
@@ -10197,7 +10272,7 @@
               "null"
             ],
             "maxItems": 24,
-            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one.",
+            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one. On X a reply can be a poll: `{text, poll}` with no media.",
             "items": {
               "oneOf": [
                 {
@@ -10214,6 +10289,17 @@
           "is_ai_generated": {
             "type": "boolean",
             "description": "Discloses AI-generated media on the post (sent to X as `made_with_ai`)."
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/XPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`x_poll` only: the poll's choices and length. Dropped on any other content type. On update it is merged with the stored poll."
           }
         }
       },
@@ -10854,7 +10940,7 @@
         "properties": {}
       },
       "PlatformMeta": {
-        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text). `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
+        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more), `poll.duration_minutes` and a question (the post `content`) on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
         "anyOf": [
           {
             "$ref": "#/components/schemas/PlatformMetaX"
@@ -11356,6 +11442,106 @@
                   "null"
                 ]
               },
+              "poll": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "votes": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "voting_status": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "open",
+                      "closed",
+                      null
+                    ],
+                    "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                  },
+                  "end_datetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "duration_minutes": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                },
+                "description": "X polls: the votes per choice, read with the post's other X metrics (about an hour after publishing, then at 2, 3, 7, 14 and 28 days). A poll made on x.com also gets them when it is discovered. `null` on any other post or before the first read."
+              },
+              "thread_polls": {
+                "type": "array",
+                "description": "X threads published by TryPost: the votes of each reply that is a poll. Empty otherwise.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reply": {
+                      "type": "integer",
+                      "description": "The reply's position in `meta.thread_replies`, from 0."
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string"
+                          },
+                          "votes": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "voting_status": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "open",
+                        "closed",
+                        null
+                      ],
+                      "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                    },
+                    "end_datetime": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    },
+                    "duration_minutes": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              },
               "account_display_name": {
                 "type": [
                   "string",
@@ -11636,7 +11822,7 @@
           },
           "max_content_length": {
             "type": "integer",
-            "description": "Text limit of the account (an X account with long posts gets 25000)."
+            "description": "Text limit of the account (an X account with long posts gets 25000; an X poll's question is capped at 280)."
           },
           "truncated": {
             "type": "boolean",
@@ -11654,6 +11840,21 @@
             "type": "integer",
             "description": "YouTube only. The limit is 5000 bytes."
           },
+          "poll": {
+            "type": "object",
+            "properties": {
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "duration_minutes": {
+                "type": "integer"
+              }
+            },
+            "description": "X `x_poll` only: the poll as it is sent (choices without blanks; a draft without a length shows 1440)."
+          },
           "thread_replies": {
             "type": "array",
             "description": "X, Bluesky and Mastodon, when the post has replies.",
@@ -11668,6 +11869,21 @@
                   "items": {
                     "$ref": "#/components/schemas/MediaItem"
                   }
+                },
+                "poll": {
+                  "type": "object",
+                  "properties": {
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "duration_minutes": {
+                      "type": "integer"
+                    }
+                  },
+                  "description": "X only, when the reply is a poll."
                 }
               }
             }
@@ -13670,7 +13886,7 @@
             "items": {
               "type": "string"
             },
-            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on others (a Google Business event) or that the text can stand in for (a YouTube title) are not listed."
+            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on the content type (a Google Business event, the `poll` of an X poll) or that the text can stand in for (a YouTube title) are not listed."
           },
           "recommended_content_length": {
             "type": [
@@ -13756,6 +13972,41 @@
             "description": "A playable preview. Expires like `cover_url`."
           }
         }
+      },
+      "XPoll": {
+        "type": "object",
+        "description": "An X poll: the post `content` (or the reply `text`) is the question, at most 280 characters even on an account with long posts. A poll carries no media, drafts included. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question. On update, `meta.poll` is merged key by key with the stored one and `options` replaces the whole list; a reply's `poll` is replaced along with `thread_replies`.",
+        "properties": {
+          "options": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "2 to 4 choices to schedule or publish, each 1 to 25 characters as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 25 characters is refused on every save, drafts included. Length is measured after trimming.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "duration_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 5,
+            "maximum": 10080,
+            "description": "How long voting stays open, from 5 minutes to 7 days. Required to schedule or publish; there is no default."
+          }
+        },
+        "examples": [
+          {
+            "options": [
+              "Calendar sync",
+              "Bulk upload",
+              "Dark mode"
+            ],
+            "duration_minutes": 1440
+          }
+        ]
       }
     },
     "responses": {

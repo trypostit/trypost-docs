@@ -238,18 +238,69 @@ X, Bluesky and Mastodon posts can carry up to **24** replies, published one unde
 }
 ```
 
-- A reply needs text or media.
+- A reply needs text or media. A poll reply needs text and carries no media.
 - Each reply's text must fit the account limit: 280 on X (25000 with long posts), 300 on Bluesky, 500 on Mastodon. On Mastodon the content warning (`spoiler_text`) is repeated on every reply and counts toward it.
 - A reply's media belongs to that reply only: up to 4 items, given by `url`, `id` or `upload_token`, following that network's media rules.
 - On [Update post](/api-reference/posts/update-post), `thread_replies` replaces the whole list.
+- On X, a reply can be a poll instead: `{ "text", "poll" }`, with no media. See [X polls](#x-polls).
 
 If publishing stops halfway, replies already live are kept, and a retry continues from the next one instead of posting them again.
+
+## X polls
+
+An X poll is its own content type, `x_poll`. The post `content` is the question and `meta.poll` holds the choices and how long voting stays open:
+
+```json
+{
+  "content": "Which feature should we ship next?",
+  "status": "scheduled",
+  "queue": "next",
+  "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
+  "content_type": "x_poll",
+  "meta": {
+    "poll": {
+      "options": ["Calendar sync", "Bulk upload", "Dark mode"],
+      "duration_minutes": 1440
+    }
+  }
+}
+```
+
+- `options`: 2 to 4 choices of 1 to 25 characters, no two the same (compared without case). Blank choices are dropped. X counts an emoji outside the basic plane, such as 🐧, as two characters.
+- Repeated choices, more than 4 choices, a choice over 25 characters, a `duration_minutes` outside 5–10080 and media are refused on every save, drafts included, on the post's poll and on reply polls.
+- `duration_minutes`: from 5 to 10080 (7 days).
+- The question is at most **280 characters**, even on an account with long posts.
+- A poll carries no media. Media on a poll, or an attach to one through [Upload media](/api-reference/media-and-uploads/upload-media), [Attach media from upload](/api-reference/media-and-uploads/attach-media-from-upload) or [Attach media from URL](/api-reference/media-and-uploads/attach-media-from-url), is refused with "This post type can't include media. Change the post type to add media."
+- A draft can lack the question, the choices or the length. Scheduling or publishing needs a question, at least 2 choices and `duration_minutes`; there is no default length through the API.
+- On [Update post](/api-reference/posts/update-post), `meta.poll` is merged key by key: send only `duration_minutes` and the stored choices are kept. `options` replaces the whole list. `meta.poll` is kept only on `x_poll`: change `content_type` back to `x_post`, or send a poll with any other type, and it is dropped.
+
+Any reply of an X thread can be a poll too, under the same rules, with the reply `text` as its question:
+
+```json
+{
+  "content": "1/ We rebuilt scheduling from scratch.",
+  "content_type": "x_post",
+  "meta": {
+    "thread_replies": [
+      { "text": "2/ Every channel now has its own posting times." },
+      {
+        "text": "3/ Which part should we cover next?",
+        "poll": { "options": ["Queues", "Approvals"], "duration_minutes": 4320 }
+      }
+    ]
+  }
+}
+```
+
+On other networks a reply's `poll` is dropped. A poll can't be a [repurpose](/api-reference/repurposes/create-repurpose) destination.
+
+[Get post preview](/api-reference/posts/get-post-preview) returns the poll of the post and of each reply. After publishing, [Get post metrics](/api-reference/posts/get-post-metrics) returns the votes in `metrics.publication.poll`, and each reply poll in `metrics.publication.thread_polls` (`reply` is the reply's position, from 0). Votes are read with the post's other X metrics, about an hour after publishing and then 2, 3, 7, 14 and 28 days later. `voting_status` is `closed` only once a read after the poll ended has seen it closed.
 
 ## Content limits
 
 Network limits are checked when a post is scheduled or published; drafts can go over them. The 25000-character ceiling applies to every post, drafts included.
 
-- **Text per account.** The text must fit the account's `max_content_length`, measured on the text the network receives. An X account with long posts takes 25000 characters; other X accounts take 280. An emoji counts as one character.
+- **Text per account.** The text must fit the account's `max_content_length`, measured on the text the network receives. An X account with long posts takes 25000 characters; other X accounts take 280. An X poll's question takes 280 on every account. An emoji counts as one character.
 - **Instagram hashtags.** Instagram takes at most **5** hashtags per post.
 - **Stories are captionless.** `instagram_story` and `facebook_story` send no text, so their text is neither published nor measured, and the hashtag cap does not apply.
 - **Media.** Each content type has its own media count, size, duration and aspect ratio rules, listed by [List content types](/api-reference/platform/list-content-types) and on each network's page, for example [Instagram](/platforms/instagram), [X](/platforms/x-twitter) or [TikTok](/platforms/tiktok).
