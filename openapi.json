@@ -394,28 +394,53 @@
                   }
                 }
               },
-              "example": {
-                "content": "We just shipped scheduled threads. Here is how they work.",
-                "status": "scheduled",
-                "scheduled_at": "2026-10-12T14:00:00Z",
-                "media": [
-                  {
-                    "url": "https://example.com/launch.jpg",
-                    "alt": "Product launch banner"
+              "examples": {
+                "x_thread": {
+                  "summary": "X thread with media",
+                  "value": {
+                    "content": "We just shipped scheduled threads. Here is how they work.",
+                    "status": "scheduled",
+                    "scheduled_at": "2026-10-12T14:00:00Z",
+                    "media": [
+                      {
+                        "url": "https://example.com/launch.jpg",
+                        "alt": "Product launch banner"
+                      }
+                    ],
+                    "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
+                    "content_type": "x_post",
+                    "meta": {
+                      "thread_replies": [
+                        {
+                          "text": "2/ Replies publish under the first post."
+                        }
+                      ]
+                    },
+                    "label_ids": [
+                      "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1e2f"
+                    ]
                   }
-                ],
-                "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
-                "content_type": "x_post",
-                "meta": {
-                  "thread_replies": [
-                    {
-                      "text": "2/ Replies publish under the first post."
-                    }
-                  ]
                 },
-                "label_ids": [
-                  "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1e2f"
-                ]
+                "x_poll": {
+                  "summary": "X poll",
+                  "value": {
+                    "content": "Which feature should we ship next?",
+                    "status": "scheduled",
+                    "queue": "next",
+                    "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
+                    "content_type": "x_poll",
+                    "meta": {
+                      "poll": {
+                        "options": [
+                          "Calendar sync",
+                          "Bulk upload",
+                          "Dark mode"
+                        ],
+                        "duration_minutes": 1440
+                      }
+                    }
+                  }
+                }
               }
             }
           }
