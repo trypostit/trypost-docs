@@ -46,18 +46,18 @@ These are Post (`tweet_video`) limits — 8 GB / 20 minutes by default, 16 GB / 
 
 ## Polls
 
-Pick **Poll** in the X card's post type to publish a poll. The post text is the question, and the poll editor below it holds the choices and how long voting stays open.
+Pick **Poll** as the **Post Type** of the X card to publish a poll. The post text is the question, and the poll editor below it holds the choices and how long voting stays open.
 
 - **Question** — the post text, up to **280 characters**, even on an account with long posts. A poll can't be scheduled without one.
 - **Choices** — **2 to 4**, each up to **25 characters**. Click **+** (**Add a choice**) for a third or fourth choice. Each choice must be different; empty ones are dropped.
-- **Length** — from **5 minutes to 7 days** in **Days**, **Hours** and **Minutes**. It starts at 1 day.
-- **No media** — a poll can't carry images or video. While the card has media, **Poll** is disabled; on a poll, the media button is disabled.
+- **Length** — from **5 minutes to 7 days** in **Days**, **Hours** and **Minutes**. It starts at 1 day; at 7 days, **Hours** and **Minutes** are off.
+- **No media** — a poll can't carry images or video, not even in a draft. While the card has media, **Poll** is disabled; on a poll, the media button is disabled.
 
 **Remove poll** turns the card back into a regular post. The X preview shows the choices and the length.
 
 ### Polls in a thread
 
-Any post of a thread can be a poll, and one thread can hold several. The first post becomes a poll through its post type; a reply becomes a poll with the poll button in the editor toolbar (**Add a poll**). A reply poll follows the same rules: its text is the question (up to 280 characters), it has 2 to 4 choices and it carries no media. While a reply has media, its poll button is disabled.
+Any post of a thread can be a poll, and one thread can hold several. The first post becomes a poll through its post type; a reply becomes a poll with the poll button in the editor toolbar (**Add a poll**). A reply poll follows the same rules: its text is the question (up to 280 characters, needed to schedule), it has 2 to 4 choices and it carries no media. While a reply has media, its poll button is disabled; **Remove poll** gives the reply its media button back.
 
 ### Poll results
 
@@ -103,6 +103,8 @@ X posts and followers appear in [Insights](/knowledge-base/insights/overview). B
   ```
 
   How often TryPost reads X is set by `X_PUBLICATION_DISCOVERY_INTERVAL_HOURS` and `X_EXTERNAL_POSTS_IMPORT_DAYS` — see [Importing posts made outside TryPost](/self-hosting/configuration#importing-posts-made-outside-trypost).
+
+  Poll votes ride on the metrics read TryPost already makes. When a thread has polls on its replies, that read asks for the post and those replies in one request, and X bills each extra post it returns.
 
   Hide X with `X_ENABLED=false`.
 </Accordion>

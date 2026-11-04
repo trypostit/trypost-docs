@@ -11824,7 +11824,7 @@
                 "type": "integer"
               }
             },
-            "description": "X `x_poll` only: the poll that is sent (choices without blanks, length defaulting to 1440)."
+            "description": "X `x_poll` only: the poll as it is sent (choices without blanks; a draft without a length shows 1440)."
           },
           "thread_replies": {
             "type": "array",
@@ -13946,16 +13946,15 @@
       },
       "XPoll": {
         "type": "object",
-        "description": "An X poll: the post `content` (or the reply `text`) is the question, at most 280 characters even on an account with long posts. A poll carries no media. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question.",
+        "description": "An X poll: the post `content` (or the reply `text`) is the question, at most 280 characters even on an account with long posts. A poll carries no media, drafts included. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question. On update the poll is merged key by key with the stored one; `options` replaces the whole list.",
         "properties": {
           "options": {
             "type": [
               "array",
               "null"
             ],
-            "minItems": 2,
             "maxItems": 4,
-            "description": "2 to 4 choices, each 1 to 25 characters as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped.",
+            "description": "2 to 4 choices to schedule or publish, each 1 to 25 characters as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 25 characters is refused on every save, drafts included.",
             "items": {
               "type": "string",
               "maxLength": 25
@@ -13968,8 +13967,7 @@
             ],
             "minimum": 5,
             "maximum": 10080,
-            "default": 1440,
-            "description": "How long voting stays open, from 5 minutes to 7 days."
+            "description": "How long voting stays open, from 5 minutes to 7 days. Required to schedule or publish; there is no default."
           }
         },
         "examples": [
