@@ -10821,12 +10821,12 @@
               "array",
               "null"
             ],
-            "description": "One reply, published as a comment from the same profile or page right after the post. Text only (no media), up to 3000 characters, sent as plain text. Scheduling or publishing refuses a second reply, media and an empty comment. On update this list replaces the stored one.",
+            "description": "One reply, published as a comment from the same profile or page right after the post. Text only, at most 3000 characters, HTML handled as in the post. A draft accepts up to 24 replies like any thread; scheduling or publishing refuses a second reply, media, an empty comment and one over 3000 characters. On update this list replaces the stored one.",
             "items": {
               "oneOf": [
                 {
                   "type": "string",
-                  "maxLength": 3000,
+                  "maxLength": 25000,
                   "title": "Comment text"
                 },
                 {
@@ -10840,7 +10840,8 @@
                   "text": "Read more: https://trypost.it/blog/threads"
                 }
               ]
-            ]
+            ],
+            "maxItems": 24
           }
         }
       },
@@ -11188,7 +11189,7 @@
               "failed",
               "rejected"
             ],
-            "description": "Publishing state on the network. `pending` until the post is sent; `retrying` waits for a retry after a network limit; `pending_review` and `rejected` come from networks that review posts (Google Business)."
+            "description": "Publishing state on the network. `pending` until the post is sent; `retrying` waits for a retry after a network limit or a temporary network problem (such as a LinkedIn post not yet ready for its comment); `pending_review` and `rejected` come from networks that review posts (Google Business)."
           },
           "platform": {
             "oneOf": [
