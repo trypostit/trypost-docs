@@ -113,6 +113,7 @@ Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF when the server ca
 | Platform | Keys | Required to schedule or publish |
 |----------|------|---------------------------------|
 | X, Bluesky, Mastodon | `thread_replies`: up to 24 replies published under the post, each `{text, media}` (up to 4 media items per reply) or a plain string. Each reply fits the account's text limit. X also takes `is_ai_generated` | — |
+| X | `poll` on content type `x_poll`: `{options, duration_minutes}`, 2 to 4 different choices of 1–25 characters and 5–10080 minutes (default 1440). The post text is the question (max 280, even with long posts) and a poll takes no media. A reply in `thread_replies` can be `{text, poll}` under the same rules | `poll.options` (2 or more), `poll.duration_minutes` and a question |
 | Mastodon | `spoiler_text` (content warning, max 500; counts toward the 500 characters and is repeated on every reply) | — |
 | TikTok | `privacy_level` (`PUBLIC_TO_EVERYONE` \| `MUTUAL_FOLLOW_FRIENDS` \| `FOLLOWER_OF_CREATOR` \| `SELF_ONLY`); `allow_comments`, `disclose`, `brand_content_toggle`, `brand_organic_toggle`; on `tiktok_video` also `allow_duet`, `allow_stitch`, `is_aigc`; on `tiktok_photo` also `auto_add_music`. `SELF_ONLY` cannot be combined with `brand_content_toggle` | `privacy_level` |
 | Pinterest | `board_id`, `title` (max 100), `link` | `board_id` |

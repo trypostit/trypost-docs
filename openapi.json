@@ -9401,6 +9401,40 @@
                           "document_must_be_alone": false,
                           "supports_thread_replies": true,
                           "max_thread_replies": 24
+                        },
+                        {
+                          "value": "x_poll",
+                          "label": "Poll",
+                          "description": "Question with 2 to 4 choices",
+                          "max_media_count": 0,
+                          "min_media_count": 0,
+                          "requires_media": false,
+                          "accept_images": false,
+                          "accept_videos": false,
+                          "accept_documents": false,
+                          "accepts_gif": false,
+                          "accepts_mov": true,
+                          "forbids_mixed_media": false,
+                          "max_video_duration_sec": null,
+                          "max_image_bytes": null,
+                          "max_video_bytes": null,
+                          "max_document_bytes": null,
+                          "aspect_ratio_min": null,
+                          "aspect_ratio_max": null,
+                          "video_aspect_ratio_min": null,
+                          "video_aspect_ratio_max": null,
+                          "auto_fits_image": false,
+                          "supports_alt_text": true,
+                          "supports_user_tags": false,
+                          "supports_video_cover": false,
+                          "image_min_width": null,
+                          "image_min_height": null,
+                          "image_max_width": null,
+                          "image_max_height": null,
+                          "captionless": false,
+                          "document_must_be_alone": false,
+                          "supports_thread_replies": true,
+                          "max_thread_replies": 24
                         }
                       ]
                     }
@@ -9830,6 +9864,7 @@
           "tiktok_photo",
           "youtube_short",
           "x_post",
+          "x_poll",
           "threads_post",
           "threads_ghost_post",
           "pinterest_pin",
@@ -10157,7 +10192,7 @@
       },
       "ThreadReply": {
         "type": "object",
-        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon). A reply needs text or media. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network.",
+        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon). A reply needs text or media. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped.",
         "properties": {
           "text": {
             "type": [
@@ -10173,6 +10208,17 @@
             "items": {
               "$ref": "#/components/schemas/MediaReference"
             }
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/XPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "X only: makes this reply a poll."
           }
         },
         "examples": [
@@ -10189,7 +10235,7 @@
       "PlatformMetaX": {
         "type": "object",
         "title": "X",
-        "description": "Settings for `x_post`.",
+        "description": "Settings for `x_post` and `x_poll`.",
         "properties": {
           "thread_replies": {
             "type": [
@@ -10197,7 +10243,7 @@
               "null"
             ],
             "maxItems": 24,
-            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one.",
+            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one. On X a reply can be a poll: `{text, poll}` with no media.",
             "items": {
               "oneOf": [
                 {
@@ -10214,6 +10260,17 @@
           "is_ai_generated": {
             "type": "boolean",
             "description": "Discloses AI-generated media on the post (sent to X as `made_with_ai`)."
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/XPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`x_poll` only: the poll's choices and length. Dropped on any other content type. On update it is merged with the stored poll."
           }
         }
       },
@@ -10854,7 +10911,7 @@
         "properties": {}
       },
       "PlatformMeta": {
-        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text). `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
+        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more) and `poll.duration_minutes` on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
         "anyOf": [
           {
             "$ref": "#/components/schemas/PlatformMetaX"
@@ -11356,6 +11413,106 @@
                   "null"
                 ]
               },
+              "poll": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "votes": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "voting_status": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "open",
+                      "closed",
+                      null
+                    ],
+                    "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                  },
+                  "end_datetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "duration_minutes": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                },
+                "description": "X polls: the votes per choice, read with the post's other X metrics (about an hour after publishing, then at 2, 3, 7, 14 and 28 days). `null` on any other post or before the first read."
+              },
+              "thread_polls": {
+                "type": "array",
+                "description": "X threads published by TryPost: the votes of each reply that is a poll. Empty otherwise.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reply": {
+                      "type": "integer",
+                      "description": "The reply's position in `meta.thread_replies`, from 0."
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string"
+                          },
+                          "votes": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "voting_status": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "open",
+                        "closed",
+                        null
+                      ],
+                      "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                    },
+                    "end_datetime": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    },
+                    "duration_minutes": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              },
               "account_display_name": {
                 "type": [
                   "string",
@@ -11636,7 +11793,7 @@
           },
           "max_content_length": {
             "type": "integer",
-            "description": "Text limit of the account (an X account with long posts gets 25000)."
+            "description": "Text limit of the account (an X account with long posts gets 25000; an X poll's question is capped at 280)."
           },
           "truncated": {
             "type": "boolean",
@@ -11654,6 +11811,21 @@
             "type": "integer",
             "description": "YouTube only. The limit is 5000 bytes."
           },
+          "poll": {
+            "type": "object",
+            "properties": {
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "duration_minutes": {
+                "type": "integer"
+              }
+            },
+            "description": "X `x_poll` only: the poll that is sent (choices without blanks, length defaulting to 1440)."
+          },
           "thread_replies": {
             "type": "array",
             "description": "X, Bluesky and Mastodon, when the post has replies.",
@@ -11668,6 +11840,21 @@
                   "items": {
                     "$ref": "#/components/schemas/MediaItem"
                   }
+                },
+                "poll": {
+                  "type": "object",
+                  "properties": {
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "duration_minutes": {
+                      "type": "integer"
+                    }
+                  },
+                  "description": "X only, when the reply is a poll."
                 }
               }
             }
@@ -13756,6 +13943,45 @@
             "description": "A playable preview. Expires like `cover_url`."
           }
         }
+      },
+      "XPoll": {
+        "type": "object",
+        "description": "An X poll: the post `content` (or the reply `text`) is the question, at most 280 characters even on an account with long posts. A poll carries no media. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question.",
+        "properties": {
+          "options": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "minItems": 2,
+            "maxItems": 4,
+            "description": "2 to 4 choices, each 1 to 25 characters as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped.",
+            "items": {
+              "type": "string",
+              "maxLength": 25
+            }
+          },
+          "duration_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 5,
+            "maximum": 10080,
+            "default": 1440,
+            "description": "How long voting stays open, from 5 minutes to 7 days."
+          }
+        },
+        "examples": [
+          {
+            "options": [
+              "Calendar sync",
+              "Bulk upload",
+              "Dark mode"
+            ],
+            "duration_minutes": 1440
+          }
+        ]
       }
     },
     "responses": {
