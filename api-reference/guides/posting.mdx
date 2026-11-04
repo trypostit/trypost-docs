@@ -238,7 +238,7 @@ X, Bluesky and Mastodon posts can carry up to **24** replies, published one unde
 }
 ```
 
-- A reply needs text or media.
+- A reply needs text or media. A poll reply needs text and carries no media.
 - Each reply's text must fit the account limit: 280 on X (25000 with long posts), 300 on Bluesky, 500 on Mastodon. On Mastodon the content warning (`spoiler_text`) is repeated on every reply and counts toward it.
 - A reply's media belongs to that reply only: up to 4 items, given by `url`, `id` or `upload_token`, following that network's media rules.
 - On [Update post](/api-reference/posts/update-post), `thread_replies` replaces the whole list.
@@ -267,7 +267,7 @@ An X poll is its own content type, `x_poll`. The post `content` is the question 
 ```
 
 - `options`: 2 to 4 choices of 1 to 25 characters, no two the same (compared without case). Blank choices are dropped. X counts an emoji outside the basic plane, such as 🐧, as two characters.
-- Repeated choices, more than 4 choices, a choice over 25 characters and media are refused on every save, drafts included.
+- Repeated choices, more than 4 choices, a choice over 25 characters, a `duration_minutes` outside 5–10080 and media are refused on every save, drafts included, on the post's poll and on reply polls.
 - `duration_minutes`: from 5 to 10080 (7 days).
 - The question is at most **280 characters**, even on an account with long posts.
 - A poll carries no media. Media on a poll, or an attach to one through [Upload media](/api-reference/media-and-uploads/upload-media), [Attach media from upload](/api-reference/media-and-uploads/attach-media-from-upload) or [Attach media from URL](/api-reference/media-and-uploads/attach-media-from-url), is refused with "This post type can't include media. Change the post type to add media."

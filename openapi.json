@@ -1292,6 +1292,8 @@
                       "permalink": "https://x.com/trypostit/status/1843921066571337728",
                       "excerpt": "We just shipped scheduled threads.",
                       "preview_metadata": null,
+                      "poll": null,
+                      "thread_polls": [],
                       "account_display_name": "TryPost",
                       "account_username": "trypostit",
                       "account_avatar_url": null
@@ -2276,7 +2278,7 @@
         ],
         "summary": "Upload media",
         "operationId": "uploadPostMedia",
-        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create.",
+        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2419,7 +2421,7 @@
         ],
         "summary": "Attach media from upload",
         "operationId": "attachMediaFromUpload",
-        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create.",
+        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2585,7 +2587,7 @@
         ],
         "summary": "Attach media from URL",
         "operationId": "attachMediaFromUrl",
-        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create.",
+        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `urls` with `This post type can't include media. Change the post type to add media.`, before anything is downloaded.",
         "requestBody": {
           "required": true,
           "content": {
@@ -5951,6 +5953,8 @@
                     "permalink": "https://x.com/trypostit/status/1843921066571337728",
                     "excerpt": "We just shipped scheduled threads.",
                     "preview_metadata": null,
+                    "poll": null,
+                    "thread_polls": [],
                     "account_display_name": "TryPost",
                     "account_username": "trypostit",
                     "account_avatar_url": null
@@ -10192,7 +10196,7 @@
       },
       "ThreadReply": {
         "type": "object",
-        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon). A reply needs text or media. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped.",
+        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon). A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped.",
         "properties": {
           "text": {
             "type": [
@@ -10911,7 +10915,7 @@
         "properties": {}
       },
       "PlatformMeta": {
-        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more) and `poll.duration_minutes` on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
+        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more), `poll.duration_minutes` and a question (the post `content`) on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
         "anyOf": [
           {
             "$ref": "#/components/schemas/PlatformMetaX"
@@ -13946,18 +13950,16 @@
       },
       "XPoll": {
         "type": "object",
-        "description": "An X poll: the post `content` (or the reply `text`) is the question, at most 280 characters even on an account with long posts. A poll carries no media, drafts included. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question. On update the poll is merged key by key with the stored one; `options` replaces the whole list.",
+        "description": "An X poll: the post `content` (or the reply `text`) is the question, at most 280 characters even on an account with long posts. A poll carries no media, drafts included. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question. On update, `meta.poll` is merged key by key with the stored one and `options` replaces the whole list; a reply's `poll` is replaced along with `thread_replies`.",
         "properties": {
           "options": {
             "type": [
               "array",
               "null"
             ],
-            "maxItems": 4,
-            "description": "2 to 4 choices to schedule or publish, each 1 to 25 characters as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 25 characters is refused on every save, drafts included.",
+            "description": "2 to 4 choices to schedule or publish, each 1 to 25 characters as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 25 characters is refused on every save, drafts included. Length is measured after trimming.",
             "items": {
-              "type": "string",
-              "maxLength": 25
+              "type": "string"
             }
           },
           "duration_minutes": {

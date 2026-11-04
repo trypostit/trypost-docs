@@ -46,22 +46,24 @@ These are Post (`tweet_video`) limits — 8 GB / 20 minutes by default, 16 GB / 
 
 ## Polls
 
-Pick **Poll** as the **Post Type** of the X card to publish a poll. The post text is the question, and the poll editor below it holds the choices and how long voting stays open.
+Pick **Poll** at the top of the X card to publish a poll. The post text is the question, and the poll editor below it holds the choices and how long voting stays open.
 
-- **Question** — the post text, up to **280 characters**, even on an account with long posts. A poll can't be scheduled without one.
-- **Choices** — **2 to 4**, each up to **25 characters** as X counts them (some emoji, such as 🐧, count as two). Click **+** (**Add a choice**) for a third or fourth choice. Each choice must be different; empty ones are dropped.
-- **Length** — from **5 minutes to 7 days** in **Days**, **Hours** and **Minutes**. It starts at 1 day; at 7 days, **Hours** and **Minutes** are off.
-- **No media** — a poll can't carry images or video, not even in a draft. While the card has media or a file is uploading, **Poll** is disabled; on a poll, the media button is disabled.
+- The question is the post text, up to **280 characters**, even on an account with long posts. A poll can't be scheduled without one.
+- **Choices**: **2 to 4**, each up to **25 characters** as X counts them (some emoji, such as 🐧, count as two). Each choice shows a counter and stops at 25 characters. Click **Add a choice** for a third or fourth choice. Each choice must be different; empty ones are dropped.
+- **Length**: from **5 minutes to 7 days** in **Days**, **Hours** and **Minutes**. It starts at 1 day; at 7 days, **Hours** and **Minutes** are off.
+- A poll can't carry images or video, not even in a draft. While the card has media or a file is uploading, **Poll** is disabled; on a poll, the media button is disabled.
 
 **Remove poll** turns the card back into a regular post. The X preview shows the choices and the length.
 
+Adding another network while the X card is a poll takes you back to the shared editor and turns the card back into a **Post**; pick **Poll** again when you customize the X card.
+
 ### Polls in a thread
 
-Any post of a thread can be a poll, and one thread can hold several. The first post becomes a poll through its post type; a reply becomes a poll with the poll button in the editor toolbar (**Add a poll**). A reply poll follows the same rules: its text is the question (up to 280 characters, needed to schedule), it has 2 to 4 choices and it carries no media. While a reply has media, its poll button is disabled; **Remove poll** gives the reply its media button back.
+Any post of a thread can be a poll, and one thread can hold several. The first post becomes a poll through its post type; a reply becomes a poll with the poll button in the editor toolbar (**Add a poll**). A reply poll follows the same rules: its text is the question (up to 280 characters, needed to schedule), it has 2 to 4 choices and it carries no media. While a reply has media, its poll button is disabled; **Remove poll** gives the reply its media button back. Replies that are not polls can still carry media, even under a poll.
 
 ### Poll results
 
-After the poll is published, **Sent** and the post details show each choice with its votes and percentage, and the total. The caption says when voting **Ends**, then **Voting ended** once the end has passed, and **Final results** once X reports the poll closed. A reply's poll shows under it, captioned "Post 2 of the thread" (or its number).
+Every post card in **Publish** and the post details show the poll's choices. Once it is published, each choice shows its votes and percentage, followed by the total and where voting stands: "Ends in …", then "Voting ended" once the end has passed, and "Final results" once X reports the poll closed. A reply's poll shows under it, captioned "Post 2 of the thread" (or its number).
 
 TryPost reads the votes together with the post's other metrics, about an hour after publishing and then 2, 3, 7, 14 and 28 days later, so the numbers are not live. Until the first read, the poll shows its choices with 0 votes.
 

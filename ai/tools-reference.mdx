@@ -87,11 +87,11 @@ Drafts may be incomplete. Scheduling, queueing or publishing needs:
 - TikTok `meta.privacy_level`, one of the `privacy_level_options` from `get-tiktok-creator-info-tool`.
 - Pinterest `meta.board_id` and Discord `meta.channel_id`.
 - Google Business: `meta.event` with a title and start/end dates on `EVENT` and `OFFER` (the end may not precede the start). A `call_to_action` needs a `url` unless its `action_type` is `NONE` or `CALL`, and offers take no call to action.
-- Thread replies (X, Bluesky, Mastodon): each reply has text or media and fits the account limit.
+- Thread replies (X, Bluesky, Mastodon): each reply that is not a poll has text or media, and each reply fits the account limit.
 - YouTube: a title (`meta.title`, or the first line of the text).
 - X poll (`x_poll`, or a reply with `poll`): a question, at least 2 `poll.options` and `poll.duration_minutes`.
 
-`list-content-types-tool` lists these per platform as `required_meta`. Media rules (count, size, duration, aspect ratio, GIF and MOV) are checked at the same moment, never on a draft. The exception is an X poll: media on it is refused on every save.
+`list-content-types-tool` lists the unconditional ones (TikTok, Pinterest, Discord) per platform as `required_meta`. Media rules (count, size, duration, aspect ratio, GIF and MOV) are checked at the same moment, never on a draft. The exception is X polls: media on an `x_poll` post or on a reply poll is refused on every save.
 
 ### Media
 

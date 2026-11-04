@@ -43,7 +43,7 @@ The first step is one editor for every selected network. Your text, media and li
 
 ### Step 2: one card per network
 
-**Customize for each network** opens one card per network, in the same order as your channel list. Each card starts as a copy of the shared text, and you can change the text, media, **Post Type** and network settings for that network only.
+**Customize for each network** opens one card per network, in the same order as your channel list. Each card starts as a copy of the shared text, and you can change the text, media, post type and network settings for that network only.
 
 <Warning>
   Going back to step 1 discards every per-network change, including post types and settings. TryPost asks first: "You may lose your changes."
@@ -82,10 +82,11 @@ The composer counts characters for each channel and warns before you save.
 - No post can be longer than 25,000 characters, not even a draft.
 - Every character counts once, emoji included.
 - Mastodon's content warning counts toward its 500 characters.
+- An X poll's question (the post text) is capped at 280 characters, even with long posts.
 - Instagram allows up to 5 hashtags. The counter shows how many hashtags you have left.
 - Instagram and Facebook Stories send no caption, so their text is not measured.
 
-The network limits are checked when you schedule or publish, not when you save a draft. Each network's limit is on its page in the **Platforms** section of the docs, for example [X (Twitter)](/platforms/x-twitter) or [Instagram](/platforms/instagram).
+The network limits are checked when you schedule or publish, not when you save a draft. X poll choices are the exception: more than 4, a repeated one or one over 25 characters is refused even on a draft. Each network's limit is on its page in the **Platforms** section of the docs, for example [X (Twitter)](/platforms/x-twitter) or [Instagram](/platforms/instagram).
 
 <Note>
   On TryPost Cloud, links in the X version of a post may be shown without being clickable. See [X (Twitter)](/platforms/x-twitter).
@@ -97,7 +98,7 @@ On X, Bluesky and Mastodon you can publish a thread:
 
 - **Start thread** adds a reply under the first post; **Add to thread** adds another.
 - A thread has up to 24 replies.
-- Each reply has its own text and media, and needs one of the two. Its media appears under that reply only.
+- Each reply has its own text and media, and needs one of the two (a poll reply needs text and has no media). Its media appears under that reply only.
 - Each reply is measured against the account's character limit.
 - On X, a reply can be a poll: click the poll button (**Add a poll**) in the toolbar. See [Polls in a thread](/platforms/x-twitter#polls-in-a-thread).
 - Press <kbd>Shift</kbd> <kbd>Enter</kbd> to start the next post of the thread, and <kbd>Backspace</kbd> in an empty one to remove it.
