@@ -49,7 +49,7 @@ These are Post (`tweet_video`) limits — 8 GB / 20 minutes by default, 16 GB / 
 Pick **Poll** at the top of the X card to publish a poll. The post text is the question, and the poll editor below it holds the choices and how long voting stays open.
 
 - The question is the post text, up to **280 characters**, even on an account with long posts. A poll can't be scheduled without one.
-- **Choices**: **2 to 4**, each up to **25 characters** as X counts them (some emoji, such as 🐧, count as two). Each choice shows a counter and stops at 25 characters. Click **Add a choice** for a third or fourth choice. Each choice must be different; empty ones are dropped.
+- **Choices**: **2 to 4**, each up to **25 characters** as X counts them (some emoji, such as 🐧, count as two). Each choice shows a counter and stops at 25 characters. Click **Add a choice** for a third or fourth choice. Each choice must be different, ignoring upper and lower case; empty ones are dropped.
 - **Length**: from **5 minutes to 7 days** in **Days**, **Hours** and **Minutes**. It starts at 1 day; at 7 days, **Hours** and **Minutes** are off.
 - A poll can't carry images or video, not even in a draft. While the card has media or a file is uploading, **Poll** is disabled; on a poll, the media button is disabled.
 
@@ -59,11 +59,11 @@ Adding another network while the X card is a poll takes you back to the shared e
 
 ### Polls in a thread
 
-Any post of a thread can be a poll, and one thread can hold several. The first post becomes a poll through its post type; a reply becomes a poll with the poll button in the editor toolbar (**Add a poll**). A reply poll follows the same rules: its text is the question (up to 280 characters, needed to schedule), it has 2 to 4 choices and it carries no media. While a reply has media, its poll button is disabled; **Remove poll** gives the reply its media button back. Replies that are not polls can still carry media, even under a poll.
+Any post of a thread can be a poll, and one thread can hold several. The first post becomes a poll through its post type; a reply becomes a poll with the poll button in the editor toolbar (**Add a poll**). A reply poll follows the same rules: its text is the question (up to 280 characters, needed to schedule), it has 2 to 4 choices and it carries no media. While a reply has media or a file is uploading to it, its poll button is disabled; **Remove poll** gives the reply its media button back. Replies that are not polls can still carry media, even under a poll.
 
 ### Poll results
 
-Every post card in **Publish** and the post details show the poll's choices. Once it is published, each choice shows its votes and percentage, followed by the total and where voting stands: "Ends in …", then "Voting ended" once the end has passed, and "Final results" once X reports the poll closed. A reply's poll shows under it, captioned "Post 2 of the thread" (or its number).
+Every post card in **Publish** and the post details show the poll's choices, each with its votes and percentage, and the total. Once the post is published, the total is followed by where voting stands: "Ends in …", then "Voting ended" once the end has passed, and "Final results" once X reports the poll closed. A reply's poll shows under it, captioned "Post 2 of the thread" (or its number).
 
 TryPost reads the votes together with the post's other metrics, about an hour after publishing and then 2, 3, 7, 14 and 28 days later, so the numbers are not live. Until the first read, the poll shows its choices with 0 votes.
 
@@ -81,7 +81,7 @@ The editor previews the X post as it will be published and counts characters aga
 
 ## Insights
 
-X posts and followers appear in [Insights](/knowledge-base/insights/overview). Because X bills every read, TryPost checks X for new posts once a day, and posts made directly on X are imported into **Sent** only from the last 30 days. A poll made directly on X is imported as a **Poll**, with its choices and length.
+X posts and followers appear in [Insights](/knowledge-base/insights/overview). Because X bills every read, TryPost checks X for new posts once a day, reads a post's metrics about an hour after publishing and then only 2, 3, 7, 14 and 28 days later, and posts made directly on X are imported into **Sent** only from the last 30 days. A poll made directly on X is imported as a **Poll**, with its choices and length.
 
 ## OAuth scopes
 

@@ -23,7 +23,7 @@ A post's media is a list of files of three types: **image**, **video** and **doc
 
 HEIC and HEIF photos are accepted too when the server can convert them, and are stored as JPEG.
 
-These are the caps for any upload. Each network has its own, usually smaller, limits on count, size, duration and aspect ratio, checked when the post is scheduled or published. [List content types](/api-reference/platform/list-content-types) returns them per content type (`max_media_count`, `max_image_bytes`, `max_video_bytes`, `max_video_duration_sec`, …), and each network page lists them, for example [Instagram](/platforms/instagram), [TikTok](/platforms/tiktok) or [LinkedIn](/platforms/linkedin). A file whose type the channel does not accept is refused with `422`.
+These are the caps for any upload. Each network has its own, usually smaller, limits on count, size, duration and aspect ratio, checked when the post is scheduled or published. [List content types](/api-reference/platform/list-content-types) returns them per content type (`max_media_count`, `max_image_bytes`, `max_video_bytes`, `max_video_duration_sec`, …), and each network page lists them, for example [Instagram](/platforms/instagram), [TikTok](/platforms/tiktok) or [LinkedIn](/platforms/linkedin). A file whose type the channel does not accept is refused with `422`. An X poll (`x_poll`) takes no media at all: adding any is refused with `422` ("This post type can't include media. Change the post type to add media.") on every save, drafts included.
 
 ## Media on create and update
 

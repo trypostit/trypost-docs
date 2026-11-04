@@ -272,7 +272,7 @@ An X poll is its own content type, `x_poll`. The post `content` is the question 
 - The question is at most **280 characters**, even on an account with long posts.
 - A poll carries no media. Media on a poll, or an attach to one through [Upload media](/api-reference/media-and-uploads/upload-media), [Attach media from upload](/api-reference/media-and-uploads/attach-media-from-upload) or [Attach media from URL](/api-reference/media-and-uploads/attach-media-from-url), is refused with "This post type can't include media. Change the post type to add media."
 - A draft can lack the question, the choices or the length. Scheduling or publishing needs a question, at least 2 choices and `duration_minutes`; there is no default length through the API.
-- On [Update post](/api-reference/posts/update-post), `meta.poll` is merged key by key: send only `duration_minutes` and the stored choices are kept. `options` replaces the whole list. Change `content_type` back to `x_post` and the poll is dropped.
+- On [Update post](/api-reference/posts/update-post), `meta.poll` is merged key by key: send only `duration_minutes` and the stored choices are kept. `options` replaces the whole list. `meta.poll` is kept only on `x_poll`: change `content_type` back to `x_post`, or send a poll with any other type, and it is dropped.
 
 Any reply of an X thread can be a poll too, under the same rules, with the reply `text` as its question:
 
