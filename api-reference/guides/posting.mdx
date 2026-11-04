@@ -84,7 +84,7 @@ Read these fields before you build a post:
 | `max_content_length` | The network's text limit. The account's own limit (`max_content_length` on the social account) is what counts |
 | `max_hashtags` | Hashtag cap, `5` on Instagram, `null` elsewhere |
 | `content_types[].captionless` | `true` when the format sends no text (Instagram and Facebook Stories) |
-| `content_types[].supports_thread_replies` | `true` when the format takes thread replies (X, Bluesky, Mastodon), with `max_thread_replies` |
+| `content_types[].supports_thread_replies` | `true` when the format takes thread replies (X, Bluesky, Mastodon, and LinkedIn for its comment), with `max_thread_replies` (24, or 1 on LinkedIn) |
 | `content_types[].requires_media`, `min_media_count`, `max_media_count` | Media the format needs |
 
 When you omit `content_type`, it is picked like the app does: on Pinterest a video makes `pinterest_video_pin` and several images `pinterest_carousel`, on TikTok images only make `tiktok_photo`, and every other network takes its default format.
@@ -245,6 +245,29 @@ X, Bluesky and Mastodon posts can carry up to **24** replies, published one unde
 - On X, a reply can be a poll instead: `{ "text", "poll" }`, with no media. See [X polls](#x-polls).
 
 If publishing stops halfway, replies already live are kept, and a retry continues from the next one instead of posting them again.
+
+### LinkedIn comment
+
+A LinkedIn post (`linkedin_post` or `linkedin_page_post`) takes **one** reply in `meta.thread_replies`, published as a comment from the same profile or page right after the post:
+
+```json
+{
+  "content": "We just shipped scheduled threads.",
+  "status": "scheduled",
+  "queue": "next",
+  "social_account_id": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
+  "content_type": "linkedin_post",
+  "meta": {
+    "thread_replies": [
+      { "text": "Read more: https://trypost.it/blog/threads" }
+    ]
+  }
+}
+```
+
+- The comment is text only, up to 3000 characters, sent as plain text. A link in it gets no preview card.
+- Scheduling or publishing refuses a second reply ("Only one comment can follow this post."), media on the comment and an empty comment ("Your comment is empty.").
+- If LinkedIn is not ready for the comment right after the post, `publish_status` is `retrying` for up to about five minutes. Those retries only add the comment, never the post again. If the comment still fails, the post is `failed` with "Published 1 of 2 posts in the thread: …", and the post stays live.
 
 ## X polls
 

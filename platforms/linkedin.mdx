@@ -6,7 +6,7 @@ icon: "linkedin"
 
 # LinkedIn
 
-TryPost publishes to LinkedIn personal profiles and to the company pages you administer.
+TryPost publishes posts, each with an optional comment, to LinkedIn personal profiles and to the company pages you administer.
 
 ## Connect your account
 
@@ -46,6 +46,23 @@ Images, a video and a PDF never mix in one post, and GIFs are not accepted. Offi
 - **Link preview** — the first link in the text gets a preview card. Remove it with the **×** on the card (`meta.link_preview: false` on the API).
 - **Document title** — for PDF posts, set the title shown on the document (`meta.document_title`, up to 300 characters). Defaults to the file name.
 - **Alt text** — up to 4,086 characters per image.
+
+## Comment
+
+A post can carry **one comment**, published right after the post from the same profile or page. Use it for a link or more context you want under the post rather than in it.
+
+1. In the composer, click **Add comment** on the LinkedIn post.
+2. Write the comment. A counter shows the **3,000-character** limit.
+3. To drop it, click the **×** on the comment (**Remove comment**).
+
+- A comment is **text only**: emoji and links work, but no images, video or PDF ("LinkedIn comments can't include media."). LinkedIn draws no preview card for a link in a comment.
+- An empty comment or one over 3,000 characters can't be scheduled ("Your comment is empty.", "Your comment exceeds the 3000-character limit by …").
+- The LinkedIn preview shows the comment under the post.
+- In the comment, <kbd>Shift</kbd> <kbd>Enter</kbd> breaks the line; there is only one comment to add.
+
+If LinkedIn is not ready for the comment right after the post, the post shows **Retrying** and TryPost tries the comment again for up to about five minutes. If the comment is still refused, the post is marked **Failed** with "Published 1 of 2 posts in the thread: …", while the post itself stays live on LinkedIn.
+
+On the API and MCP, the comment is the one reply in `meta.thread_replies` (see [Thread replies](/api-reference/guides/posting#thread-replies)).
 
 ## Insights
 

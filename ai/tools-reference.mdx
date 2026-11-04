@@ -87,7 +87,7 @@ Drafts may be incomplete. Scheduling, queueing or publishing needs:
 - TikTok `meta.privacy_level`, one of the `privacy_level_options` from `get-tiktok-creator-info-tool`.
 - Pinterest `meta.board_id` and Discord `meta.channel_id`.
 - Google Business: `meta.event` with a title and start/end dates on `EVENT` and `OFFER` (the end may not precede the start). A `call_to_action` needs a `url` unless its `action_type` is `NONE` or `CALL`, and offers take no call to action.
-- Thread replies (X, Bluesky, Mastodon): each reply that is not a poll has text or media, and each reply fits the account limit.
+- Thread replies (X, Bluesky, Mastodon): each reply that is not a poll has text or media, and each reply fits the account limit. On LinkedIn, at most one reply (the comment), with text and no media.
 - YouTube: a title (`meta.title`, or the first line of the text).
 - X poll (`x_poll`, or a reply with `poll`): a question, at least 2 `poll.options` and `poll.duration_minutes`.
 
@@ -115,6 +115,7 @@ Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF when the server ca
 |----------|------|---------------------------------|
 | X, Bluesky, Mastodon | `thread_replies`: up to 24 replies published under the post, each `{text, media}` (up to 4 media items per reply) or a plain string. Each reply fits the account's text limit. X also takes `is_ai_generated` | — |
 | X | `poll` on content type `x_poll`: `{options, duration_minutes}`, 2 to 4 different choices of 1–25 characters and 5–10080 minutes. The post text is the question (max 280, even with long posts). A poll takes no media, drafts included, and media tools refuse to attach to one. `poll` is merged key by key on update; `options` replaces the list. A reply in `thread_replies` can be `{text, poll}` under the same rules | `poll.options` (2 or more), `poll.duration_minutes` and a question |
+| LinkedIn, LinkedIn Page | `thread_replies`: one text-only reply, published as a comment from the same profile or page (up to 3000 characters) | — |
 | Mastodon | `spoiler_text` (content warning, max 500; counts toward the 500 characters and is repeated on every reply) | — |
 | TikTok | `privacy_level` (`PUBLIC_TO_EVERYONE` \| `MUTUAL_FOLLOW_FRIENDS` \| `FOLLOWER_OF_CREATOR` \| `SELF_ONLY`); `allow_comments`, `disclose`, `brand_content_toggle`, `brand_organic_toggle`; on `tiktok_video` also `allow_duet`, `allow_stitch`, `is_aigc`; on `tiktok_photo` also `auto_add_music`. `SELF_ONLY` cannot be combined with `brand_content_toggle` | `privacy_level` |
 | Pinterest | `board_id`, `title` (max 100), `link` | `board_id` |
