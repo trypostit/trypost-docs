@@ -91,7 +91,7 @@ Drafts may be incomplete. Scheduling, queueing or publishing needs:
 - YouTube: a title (`meta.title`, or the first line of the text).
 - X poll (`x_poll`, or a reply with `poll`): a question, at least 2 `poll.options` and `poll.duration_minutes`.
 
-`list-content-types-tool` lists the unconditional ones (TikTok, Pinterest, Discord) per platform as `required_meta`. Media rules (count, size, duration, aspect ratio, GIF and MOV) are checked at the same moment, never on a draft. The exception is X polls: media on an `x_poll` post or on a reply poll is refused on every save.
+`list-content-types-tool` lists the unconditional ones (TikTok, Pinterest, Discord) per platform as `required_meta`. Media rules (count, size, duration, aspect ratio, GIF and MOV) are checked at the same moment, never on a draft. The exception is X polls: on an `x_poll` post or a reply poll, media, a repeated choice, more than 4 choices, a choice over 25 characters or a `duration_minutes` outside 5–10080 is refused on every save, drafts included.
 
 ### Media
 

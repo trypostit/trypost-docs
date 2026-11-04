@@ -9417,7 +9417,7 @@
                           "accept_videos": false,
                           "accept_documents": false,
                           "accepts_gif": false,
-                          "accepts_mov": true,
+                          "accepts_mov": false,
                           "forbids_mixed_media": false,
                           "max_video_duration_sec": null,
                           "max_image_bytes": null,
@@ -9428,7 +9428,7 @@
                           "video_aspect_ratio_min": null,
                           "video_aspect_ratio_max": null,
                           "auto_fits_image": false,
-                          "supports_alt_text": true,
+                          "supports_alt_text": false,
                           "supports_user_tags": false,
                           "supports_video_cover": false,
                           "image_min_width": null,
@@ -13861,7 +13861,7 @@
             "items": {
               "type": "string"
             },
-            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on others (a Google Business event) or that the text can stand in for (a YouTube title) are not listed."
+            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on the content type (a Google Business event, the `poll` of an X poll) or that the text can stand in for (a YouTube title) are not listed."
           },
           "recommended_content_length": {
             "type": [
