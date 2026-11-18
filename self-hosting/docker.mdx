@@ -242,7 +242,7 @@ docker compose up -d
 
 On first boot the entrypoint can seed `.env` from `docker/.env.docker.example`, install Composer/npm deps if missing, generate `APP_KEY`, migrate, `storage:link`, `passport:keys` and the Passport personal access client (so `db:seed` below is only needed for plans and the admin user). Horizon, Reverb, the scheduler, and Vite start via Supervisor.
 
-For local media URLs, set `FILESYSTEM_DISK=public` in `.env` and ensure `storage:link` ran. The Docker example ships with `local`, which is a private disk with no public URL, so uploaded media cannot be served until you change it.
+The Docker example's default `FILESYSTEM_DISK` has no public URL, so uploaded media cannot be served until you change it. Set `FILESYSTEM_DISK=public` in `.env` and make sure `storage:link` ran, or use `s3` or `r2` (see [File Storage](/self-hosting/configuration#file-storage)).
 
 ### 2. Seed admin + Passport client
 
