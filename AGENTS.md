@@ -147,11 +147,11 @@ Every email the app sends is a Maizzle template in `maizzle/templates/` with a M
 
 ## Scheduled Commands
 
-The full table (17 entries, including analytics, retention and Google Business review checks) lives in `self-hosting/production.mdx` → **Scheduled Tasks (Cron)**; the source is `routes/console.php` / `php artisan schedule:list`.
+The full table (17 rows, including analytics, retention, Google Business review checks, PostHog sync and database backups) lives in `self-hosting/production.mdx` → **Scheduled Tasks (Cron)**. `php artisan schedule:list` shows 20 entries: the two publication-discovery entries (X and the rest) share a row, and the two analytics finalize jobs are covered in prose. The sources are `routes/console.php` and the `paulocastellano/laravel-database-backup` service provider (`backup:database`).
 
 ## Self-Hosted Requirements
 
-- PHP 8.4.1+ (the Docker image ships 8.4), Node.js 22.12+, PostgreSQL or MySQL, Redis
+- PHP 8.4.1+ (the Docker image ships 8.5), Node.js 22.12+, PostgreSQL or MySQL, Redis
 - Horizon (queues), Reverb (WebSockets) and the scheduler running continuously
 - Imagick with HEIC for iPhone photo conversion (in the Docker image)
 - Upload limits: `upload_max_filesize=1G`, `post_max_size=1G` (matches the Docker image)

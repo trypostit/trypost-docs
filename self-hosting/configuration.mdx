@@ -36,7 +36,7 @@ SELF_HOSTED=true
 `SELF_HOSTED=true` is the default. It bypasses everything billing-related so you never have to touch Stripe or Cashier, and it locks down public sign-ups:
 
 - **Public registration is disabled** — `/register` is closed so random users can't create accounts on your instance. Bootstrap the first admin via the `UserSeeder` (see [Seed default data and create the admin user](/self-hosting/installation#6-seed-passport-client-and-admin-user)); after that, every account comes from a workspace invite (Settings → Members).
-- No Stripe, Cashier, or `CASHIER_TRIAL_DAYS` configuration required
+- No Stripe or Cashier configuration required
 - The `LoadWorkspaceFromToken` middleware skips the `402 Payment Required` gate
 - Subscription gating is not enforced, so workspaces, social accounts, and members are unlimited per account
 - The **Billing** settings page and the welcome plan step are hidden
@@ -197,9 +197,11 @@ POST_HISTORY_RETENTION_DAYS=730
 
 ## File Storage
 
-TryPost supports local public storage and S3-compatible cloud storage.
+Set `FILESYSTEM_DISK` to `public`, `s3` or `r2`. The application default is **`public`**, which stores media on the server's disk. Use object storage (`s3` or `r2`) when you outgrow the disk or run several app instances.
 
-The application default is **`public`** (`FILESYSTEM_DISK=public`). `.env.example` sets `local`, which has no public URL — change it. Use object storage (S3 / R2 / Spaces) when you outgrow local disk or run multiple app instances.
+<Warning>
+  `.env.example` ships a different `FILESYSTEM_DISK` value with no public URL. Change it to one of the three disks above, or the networks cannot download your media.
+</Warning>
 
 ### Public Disk
 
@@ -215,7 +217,7 @@ Create the symlink from `public/storage` to `storage/app/public` (once per insta
 php artisan storage:link
 ```
 
-Only needed for the `public` disk. Object storage (`s3`, `r2`, `spaces`) does not use this symlink.
+Only needed for the `public` disk. Object storage (`s3`, `r2`) does not use this symlink.
 
 See Laravel's [public disk documentation](https://laravel.com/docs/13.x/filesystem#the-public-disk) for more details.
 
@@ -246,31 +248,21 @@ R2_URL=https://your-custom-domain.com
 
 Connect a public custom domain to the bucket and set it as `R2_URL`; that is the address the networks download media from.
 
-### DigitalOcean Spaces
-
-```env
-FILESYSTEM_DISK=spaces
-SPACES_ACCESS_KEY_ID=your_key
-SPACES_SECRET_ACCESS_KEY=your_secret
-SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
-SPACES_REGION=nyc3
-SPACES_BUCKET=your_bucket
-```
-
-Make the Space (or its CDN) publicly readable. The `spaces` disk has no URL setting of its own, so media URLs are built from the endpoint and bucket.
-
 ### Other S3-Compatible Storage
 
-Any other S3-compatible storage (MinIO, Backblaze B2, etc.) can be used with the `s3` disk configuration. Point it at your endpoint, and turn on path-style URLs if your server needs them (MinIO usually does):
+Any other S3-compatible storage (DigitalOcean Spaces, MinIO, Backblaze B2, etc.) works with the `s3` disk. Point it at your endpoint, and turn on path-style URLs if your server needs them (MinIO usually does):
 
 ```env
 FILESYSTEM_DISK=s3
 AWS_ENDPOINT=https://minio.yourdomain.com
 AWS_USE_PATH_STYLE_ENDPOINT=true
+AWS_URL=https://media.yourdomain.com
 ```
 
+Set `AWS_URL` to the public address of the bucket (or its CDN); that is the address the networks download media from.
+
 <Note>
-  Media must be reachable at a public URL, because the networks download it from there. Use `public` or object storage — the private `local` disk has no URL.
+  Media must be reachable at a public URL, because the networks download it from there. Use `public`, `s3` or `r2`.
 </Note>
 
 <Note>
@@ -332,8 +324,9 @@ MAIL_FROM_NAME="${APP_NAME}"
 | **Workspace invite** | Someone is invited to join a workspace |
 | **Email verification** | A new user needs to verify their email address |
 | **Password reset** | A user requests a password reset |
+| **Database backup succeeded** / **Database backup failed** | A [database backup](#database-backups-optional) finished; sent to `BACKUP_NOTIFY_EMAIL` after every run, only when backups are configured |
 
-Every email is translated into all the languages of the app and sent in the recipient's language; an invite goes out in the language of the person who sent it.
+Every email is translated into all the languages of the app and sent in the recipient's language; an invite goes out in the language of the person who sent it. The two backup emails are the exception: they are in English only.
 
 ## WebSockets (Reverb)
 
@@ -637,7 +630,7 @@ VITE_POSTHOG_API_KEY="${POSTHOG_API_KEY}"
 VITE_POSTHOG_HOST="${POSTHOG_HOST}"
 ```
 
-`POSTHOG_ENABLED` gates the entire integration — without it set to `true`, the keys are ignored. The `VITE_*` values are baked into the frontend when it is built, so change them before `npm run build` (or rebuild the Docker image).
+Tracking needs both `POSTHOG_ENABLED=true` and `POSTHOG_API_KEY`; without either, nothing is sent and the hourly `posthog:sync-lifecycle-stages` task does not run. The `VITE_*` values are baked into the frontend when it is built, so change them before `npm run build` (or rebuild the Docker image).
 
 ### Google Tag Manager
 
@@ -646,6 +639,54 @@ GTM_ID=GTM-XXXXXXX
 ```
 
 Both are optional and only needed if you want to track usage analytics.
+
+## Database backups (optional)
+
+TryPost can back its database up on a schedule to a private S3-compatible bucket (Amazon S3, Cloudflare R2, DigitalOcean Spaces, MinIO). Backups are off until you turn them on.
+
+```env
+BACKUP_ENABLED=true
+BACKUP_INTERVAL_HOURS=6
+BACKUP_KEEP_DAYS=30
+BACKUP_BUCKET=your-backup-bucket
+BACKUP_DIRECTORY=trypost
+BACKUP_ENDPOINT=https://your-account.r2.cloudflarestorage.com
+BACKUP_REGION=auto
+BACKUP_ACCESS_KEY_ID=your_key
+BACKUP_SECRET_ACCESS_KEY=your_secret
+BACKUP_NOTIFY_EMAIL=ops@example.com
+BACKUP_NOTIFY_DISCORD_WEBHOOK_URL=
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BACKUP_ENABLED` | `false` | Runs `backup:database` on the scheduler. `php artisan backup:database` also works by hand when this is `false` |
+| `BACKUP_INTERVAL_HOURS` | `6` | Hours between backups, from 1 to 24. Backups run on the hour, in UTC (`6` runs at 00:00, 06:00, 12:00 and 18:00 UTC) |
+| `BACKUP_KEEP_DAYS` | `30` | After each backup, deletes the backups older than this many days. `0` keeps every backup |
+| `BACKUP_BUCKET` | — | Required. The bucket the backups go to. Keep it private: a backup holds the whole database |
+| `BACKUP_DIRECTORY` | `trypost` in `.env.example` | Required. The folder of the bucket the backups go to. Give it to the backups alone, because pruning may empty it; one bucket can hold the backups of several apps, each in its own folder |
+| `BACKUP_ENDPOINT` | — | The S3 endpoint, which picks the provider (for example `https://your-account.r2.cloudflarestorage.com` or `https://nyc3.digitaloceanspaces.com`) |
+| `BACKUP_REGION` | `auto` | The bucket's region |
+| `BACKUP_ACCESS_KEY_ID` / `BACKUP_SECRET_ACCESS_KEY` | — | Credentials with read, write, list and delete access to the bucket |
+| `BACKUP_NOTIFY_EMAIL` | — | Receives an email after every backup, successful or not. Leave it empty to skip |
+| `BACKUP_NOTIFY_DISCORD_WEBHOOK_URL` | — | Receives a Discord message after every backup, successful or not. Leave it empty to skip |
+
+Each backup dumps the database with `pg_dump` (PostgreSQL) or `mysqldump --single-transaction` (MySQL and MariaDB), gzips it and uploads it as `<BACKUP_DIRECTORY>/YYYYMMDDHHMMSS.sql.gz` (UTC). The server that runs the scheduler needs that client installed, and for PostgreSQL `pg_dump` must be the same major version as the database server or newer. The dump is written to the system temporary directory (`TMPDIR`) before the upload, so that directory needs room for it.
+
+There is no restore command. Download the file from the bucket, restore it into a new, empty database, check it, then point TryPost at it:
+
+```bash
+# PostgreSQL
+createdb trypost_restored
+gunzip -c 20261113135350.sql.gz | psql -v ON_ERROR_STOP=1 trypost_restored
+
+# MySQL / MariaDB
+gunzip -c 20261113135350.sql.gz | mysql trypost_restored
+```
+
+<Note>
+  On the bundled Compose stack, the backup variables are listed, commented out, in `compose.prod.yaml`. The image installs Alpine's `postgresql-client` package, whose major version follows the image's Alpine release rather than the bundled `postgres:16-alpine` server. Before you rely on backups, run `docker compose -f compose.prod.yaml exec app pg_dump --version` and check that it is 16 or newer (or not older than your own PostgreSQL server), then run `php artisan backup:database` once by hand and test a restore.
+</Note>
 
 ## Horizon (Queue Dashboard)
 
@@ -733,15 +774,17 @@ TRUSTED_PROXIES=
 |----------|---------|-------------|
 | `TRUSTED_PROXIES` | Cloudflare's published ranges | The proxies whose `X-Forwarded-*` headers TryPost trusts, which decides the client IP every per-IP rate limit reads. Behind Cloudflare, leave it unset. Behind another proxy or load balancer, list its IPs or ranges, comma-separated. `*` trusts any proxy, which also lets a client fake its IP with `X-Forwarded-For` |
 
-## What's New
+## What's New and tours
 
 ```env
 CHANGELOG_ENABLED=true
+TOURS_ENABLED=true
 ```
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `CHANGELOG_ENABLED` | `true` | Shows the **What's New** card in the sidebar and the modal in the Help menu, with the entries shipped in the release. `php artisan changelog:sync` loads them after each deploy (the Docker image runs it on boot). `false` hides both |
+| `TOURS_ENABLED` | `true` | Opens the in-app tours that walk a user through a page the first time they see it. `false` turns every tour off |
 
 ## Advanced
 
@@ -774,8 +817,10 @@ LEGAL_PRIVACY_URL=https://trypost.it/privacy
 | `VITE_APP_NAME` | App name baked into the frontend build (defaults to `APP_NAME`) |
 | `TELESCOPE_ENABLED` | Debugging tool; only loads in the `local` environment |
 | `NIGHTWATCH_ENABLED`, `NIGHTWATCH_TOKEN` | Optional Laravel Nightwatch monitoring. Off in `.env.example`; the package itself defaults to on and `compose.prod.yaml` sets neither, so set `NIGHTWATCH_ENABLED=false` explicitly in Compose |
-| `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_SOCIALS_MONTHLY`, `STRIPE_SOCIALS_YEARLY`, `STRIPE_WORKSPACES_MONTHLY`, `STRIPE_WORKSPACES_YEARLY`, `STRIPE_WORKSPACE_MONTHLY`, `STRIPE_WORKSPACE_YEARLY`, `STRIPE_SOCIALS_FIRST_MONTH_COUPON_ID`, `STRIPE_WORKSPACES_FIRST_MONTH_COUPON_ID`, `REQUIRE_CARD_FOR_TRIAL`, `CASHIER_ALLOW_PROMOTION_CODES` | TryPost Cloud billing. Ignored when `SELF_HOSTED=true`; leave them empty |
+| `NIGHTWATCH_SLOW_QUERY_MS` (`500`) | With Nightwatch on, jobs, commands and scheduled tasks send only the queries that take at least this many milliseconds. Web requests send every query |
+| `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_SOCIALS_MONTHLY`, `STRIPE_SOCIALS_YEARLY`, `STRIPE_WORKSPACES_MONTHLY`, `STRIPE_WORKSPACES_YEARLY`, `STRIPE_WORKSPACE_MONTHLY`, `STRIPE_WORKSPACE_YEARLY` | TryPost Cloud billing. Ignored when `SELF_HOSTED=true`; leave them empty |
 | `AI_AUDIO_PROVIDER`, `ELEVENLABS_API_KEY`, `ELEVENLABS_AUDIO_MODEL`, `OPENAI_AUDIO_MODEL`, `GEMINI_AUDIO_MODEL`, `OPENROUTER_AUDIO_MODEL` | Audio settings of the AI SDK. No TryPost feature uses audio, so they do nothing |
+| `SPACES_ACCESS_KEY_ID`, `SPACES_SECRET_ACCESS_KEY`, `SPACES_ENDPOINT`, `SPACES_REGION`, `SPACES_BUCKET` | Not needed. For DigitalOcean Spaces, use the `s3` disk with your Spaces endpoint — see [Other S3-compatible storage](#other-s3-compatible-storage) |
 | `UNSPLASH_SECRET_KEY` | Not read. Unsplash only needs `UNSPLASH_ACCESS_KEY` |
 | `MAIL_ENCRYPTION` | Not read. SMTP encryption is set with `MAIL_SCHEME` |
 | `UNSPLASH_API_URL`, `UNSPLASH_WEBSITE_URL`, `UNSPLASH_DOWNLOAD_HOSTS`, `UNSPLASH_REQUESTS_PER_MINUTE` | Unsplash host overrides and rate limit |

@@ -78,7 +78,7 @@ FILESYSTEM_DISK=public
 | Database | Where posts, users, and Passport clients live. The block above is PostgreSQL; for MySQL use `DB_CONNECTION=mysql` on port `3306` — see [Database](/self-hosting/configuration#database) |
 | Redis + queue/cache drivers | Horizon publishes posts and processes background jobs from Redis queues |
 | `BROADCAST_CONNECTION=reverb` | Live dashboard updates |
-| `FILESYSTEM_DISK=public` | Local media on disk (use `s3` / `r2` / `spaces` for object storage) |
+| `FILESYSTEM_DISK=public` | Local media on disk (use `s3` or `r2` for object storage) |
 | `SELF_HOSTED=true` | Disables Stripe billing and public `/register` |
 
 Also configure **mail** (invites / password reset) and optional social OAuth / AI keys — see [Configuration](/self-hosting/configuration).
@@ -124,7 +124,7 @@ If you keep `FILESYSTEM_DISK=public`, also create the public media symlink:
 php artisan storage:link
 ```
 
-Skip `storage:link` when using object storage (`s3`, `r2`, `spaces`) — those disks serve from the bucket URL.
+Skip `storage:link` when using object storage (`s3`, `r2`) — those disks serve from the bucket URL.
 
 ### 6. Seed Passport client and admin user
 

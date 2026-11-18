@@ -20,7 +20,7 @@ This guide covers the requirements for self-hosting TryPost.
 
 ### Required
 
-- **PHP 8.4.1+** (8.4 or 8.5; the Docker image ships 8.4) with extensions:
+- **PHP 8.4.1+** (8.4 or 8.5; the Docker image ships 8.5) with extensions:
   - BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
   - **cURL**, **Fileinfo**, **Sodium**, **POSIX**, **DOM** / **SimpleXML** (cURL is a separate package on Debian and Ubuntu)
   - **pdo_pgsql** or **pdo_mysql**, matching the database you chose — without it the app fails at boot with *could not find driver*
@@ -95,8 +95,7 @@ Media files (images, videos, documents) can be stored:
 - **Locally** — `FILESYSTEM_DISK=public` + `php artisan storage:link`
 - **S3** — Amazon S3
 - **R2** — Cloudflare R2
-- **Spaces** — DigitalOcean Spaces
-- **Any S3-compatible** — MinIO, etc.
+- **Any S3-compatible** — DigitalOcean Spaces, MinIO, etc. (with the `s3` disk)
 
 For production with heavy media usage, object storage is recommended. See [Configuration → File Storage](/self-hosting/configuration#file-storage).
 

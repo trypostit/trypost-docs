@@ -220,6 +220,8 @@ TryPost uses Laravel's task scheduler for several recurring jobs. The scheduler 
 | `analytics:dispatch-account-daily` | daily, 02:00 UTC | Collects daily follower and account numbers |
 | `analytics:dispatch-publication-discovery` | every 3 hours (X: every 24 hours) | Finds new posts on each channel, including ones made outside TryPost — see [`PUBLICATION_DISCOVERY_INTERVAL_HOURS`](/self-hosting/configuration#importing-posts-made-outside-trypost) |
 | `analytics:dispatch-publication-metrics` | daily, 03:00 UTC | Refreshes post metrics |
+| `posthog:sync-lifecycle-stages` | hourly | Sends each account's lifecycle stage to PostHog. Runs only when [PostHog](/self-hosting/configuration#posthog) is enabled |
+| `backup:database` | every `BACKUP_INTERVAL_HOURS` hours (default 6), on the hour, UTC | Backs the database up to your bucket. Runs only when [`BACKUP_ENABLED`](/self-hosting/configuration#database-backups-optional) is `true` |
 
 Two jobs also run on the scheduler to close each day's analytics (23:30 and 00:30 UTC).
 
@@ -295,7 +297,7 @@ Make sure all of these are in place in production:
 | **Passport keys** | `PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY` (or `php artisan passport:keys` once on bare metal) | Sign/verify API & MCP tokens |
 | **Passport client** | `php artisan db:seed` (once; Docker prod also runs `PassportSeeder` on boot) | Issue personal access tokens |
 | **Admin user** | `php artisan db:seed --class=UserSeeder` (once) | First login |
-| **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 / Spaces |
+| **Storage link** | `php artisan storage:link` (once, if `FILESYSTEM_DISK=public`) | Local media URLs — skip for S3 / R2 |
 | **Redis** | `QUEUE_CONNECTION=redis` + Redis up | Queues, cache, schedule locks |
 | **Mail** | SMTP or SendKit | Invites, password reset, alerts |
 | **Horizon** | `php artisan horizon` (Supervisor) | Publishes posts, sends email and [webhooks](/knowledge-base/settings/webhooks), collects analytics |
@@ -319,10 +321,10 @@ Consider setting up monitoring for:
 
 Regularly backup:
 
-- Database
+- Database — TryPost can do this on a schedule to an S3-compatible bucket, see [Database backups](/self-hosting/configuration#database-backups-optional)
 - `.env` file
 - Passport keys (`storage/oauth-*.key` or `PASSPORT_*` env) — losing them invalidates API keys and MCP OAuth grants
-- Uploaded media (if using local storage)
+- Uploaded media (if using the `public` disk)
 
 [Upgrading](/self-hosting/upgrading) asks for a database dump before every `migrate --force`. The commands below read the database credentials from environment variables. On bare metal, load them from `.env` first, from the app directory: `set -a; . ./.env; set +a`. Inside the bundled Compose stack the `app` container already has them.
 

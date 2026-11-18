@@ -51,7 +51,7 @@ See [Database](/self-hosting/configuration#database) for the trade-offs between 
 
 ## Production self-hosting
 
-No local PHP/Node install required. The published image (`ghcr.io/trypostit/trypost`, amd64 and arm64) is built on Alpine with PHP 8.4, includes the built frontend, and ships GD and Imagick with HEIC support. The image also contains an Inertia SSR bundle, but TryPost does not run SSR — leave `INERTIA_SSR_ENABLED` unset.
+No local PHP/Node install required. The published image (`ghcr.io/trypostit/trypost`, amd64 and arm64) is built on Alpine with PHP 8.5, includes the built frontend, and ships GD and Imagick with HEIC support. The image also contains an Inertia SSR bundle, but TryPost does not run SSR — leave `INERTIA_SSR_ENABLED` unset.
 
 ### What you do vs what the container does
 
@@ -124,7 +124,7 @@ On first boot the entrypoint:
 - waits for the database (PostgreSQL only — see above if you run MySQL)
 - runs migrations
 - syncs the **What's New** entries (`changelog:sync`)
-- creates `storage:link` if missing (unused if you later switch to S3 / R2 / Spaces)
+- creates `storage:link` if missing (unused if you later switch to S3 or R2)
 - loads Passport keys from `PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY` (exits if unset in production)
 - ensures the Passport Personal Access Client (`PassportSeeder`)
 - caches config / routes / views / events
