@@ -10563,7 +10563,7 @@
           },
           "cover": {
             "type": "object",
-            "description": "An image used as the video's cover instead of a frame. Only on content types with `supports_custom_video_cover` (`instagram_reel`, `youtube_short`); dropped on every other content type. In a request, give exactly one of `upload_token`, `url` or `id`, like a media item; anything else fails with `Choose an image for the video cover.` It must be a still image: a GIF, video or PDF fails with `The video cover must be a JPEG, PNG or WebP image.` The network crops it to the middle 9:16, so upload it at 9:16. In responses it is the stored image, a media item (`id`, `path`, `url`, `type`, `mime_type`, `size`, ...). On a YouTube Short it is set as the thumbnail once YouTube has processed the video; a channel that is not verified cannot take one.",
+            "description": "An image used as the video's cover instead of a frame. Only in `media[]` of `POST /posts`, `POST /posts/batch` and `PUT /posts/{post}`: the attach endpoints (`POST /posts/{post}/media/from-upload`, `POST /posts/{post}/media/from-url`) accept it but discard it. Only on content types with `supports_custom_video_cover` (`instagram_reel`, `youtube_short`); dropped on every other content type. In a request, give exactly one of `upload_token`, `url` or `id`, like a media item; anything else fails with `Choose an image for the video cover.` It must be a still image: a GIF, video or PDF fails with `The video cover must be a JPEG, PNG or WebP image.` The network crops it to the middle 9:16, so upload it at 9:16. In responses it is the stored image, a media item (`id`, `path`, `url`, `type`, `mime_type`, `size`, ...). On a YouTube Short it is set as the thumbnail once YouTube has processed the video; a channel that is not verified cannot take one.",
             "properties": {
               "upload_token": {
                 "type": "string",
@@ -10589,7 +10589,7 @@
               "frame",
               "image"
             ],
-            "description": "Where the cover comes from. `image`: the uploaded `cover` (the default when `cover` is sent without a source). `frame`: the frame at `cover_offset_ms`; on a YouTube Short, which takes no frame time, `cover` is then that frame's screenshot. A network that only takes a frame keeps `cover_offset_ms` and drops `cover`. Dropped when there is no `cover`."
+            "description": "Where the cover comes from. `image`: the uploaded `cover` (the default when `cover` is sent without a source). `frame`: the frame at `cover_offset_ms`; on a YouTube Short, which takes no frame time, `cover` is then that frame's screenshot. A network that only takes a frame keeps `cover_offset_ms` and drops `cover`. Dropped when there is no `cover`, so it is also dropped by the attach endpoints, which discard `cover`."
           }
         }
       },

@@ -53,7 +53,7 @@ The post text (your description when **Description** is empty) is capped at **5,
 
 Pick the cover of a Short in **Edit Media** > **Thumbnail**: drag along the video's frames, or switch to **Image** and upload a 9:16 JPEG, PNG or WebP image. A picked frame is saved as a screenshot, because YouTube takes a cover image, not a frame time. In the API and MCP the cover is `media[].meta.cover`, with `cover_source` `frame` or `image`. See [Thumbnail](/knowledge-base/media#thumbnail).
 
-YouTube applies a cover only once it has processed the video, so TryPost sets it a few minutes after the Short is published. If YouTube refuses it, the post stays **Published** and its card shows **Warning**. Click it to see **Cover not applied** and the reason:
+YouTube applies a cover only once it has processed the video, so after the Short is published TryPost checks every minute and sets the cover as soon as processing finishes. If YouTube refuses it, the post stays **Published** and its card shows **Warning**. Click it to see **Cover not applied** and the reason:
 
 - Your YouTube channel isn't verified yet. Verify it at [youtube.com/verify](https://www.youtube.com/verify) to publish with your own cover.
 - Your channel reached YouTube's daily limit of custom covers. Your posts take their covers again tomorrow, and you can set this one in YouTube Studio.

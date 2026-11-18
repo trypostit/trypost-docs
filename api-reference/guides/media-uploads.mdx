@@ -168,8 +168,8 @@ Each media item takes optional settings:
 | `meta.alt_text` | Alt text, up to 2000 characters. Wins over `alt` when both are sent. Each network cuts it to its own cap |
 | `meta.user_tags` | Up to 20 people tagged on an Instagram image: `{ "username", "x", "y" }`, with `x` and `y` from 0 to 1 |
 | `meta.cover_offset_ms` | The video frame used as the cover, in milliseconds from the start |
-| `meta.cover` | An image used as the video cover instead of a frame, on content types with `supports_custom_video_cover` (`instagram_reel`, `youtube_short`; dropped elsewhere). Give `upload_token`, `url` or `id`, like a media item. A JPEG, PNG or WebP image; the network crops it to the middle 9:16. Responses return it as a media item |
-| `meta.cover_source` | `frame` or `image`: where the cover comes from. `image` when `cover` is sent without it. With `frame`, `cover_offset_ms` is the cover |
+| `meta.cover` | An image used as the video cover instead of a frame. Only in `media[]` of [Create post](/api-reference/posts/create-post), [Create posts](/api-reference/posts/create-posts-in-batch) and [Update post](/api-reference/posts/update-post); the attach endpoints discard it. Only on content types with `supports_custom_video_cover` (`instagram_reel`, `youtube_short`; dropped elsewhere). Give `upload_token`, `url` or `id`, like a media item. A JPEG, PNG or WebP image; the network crops it to the middle 9:16. Responses return it as a media item |
+| `meta.cover_source` | `frame` or `image`: where the cover comes from. `image` when `cover` is sent without it. With `frame`, `cover_offset_ms` is the cover. Dropped when there is no `cover` |
 
 ```json
 {
