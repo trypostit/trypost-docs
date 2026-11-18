@@ -10296,7 +10296,7 @@
             }
           },
           "poll": {
-            "oneOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/XPoll"
               },
