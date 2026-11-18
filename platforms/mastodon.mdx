@@ -37,6 +37,7 @@ Official specs: [Attachments](https://docs.joinmastodon.org/user/posting/#attach
 ## Text and per-post options
 
 - **500 characters** per post, **including the content warning**. TryPost uses the default Mastodon limit even if your instance allows more.
+- The text goes to Mastodon as plain text. Mastodon links hashtags, mentions and URLs itself.
 - **Content warning** — hide the post behind a warning (`meta.spoiler_text`, up to 500 characters). In a thread, the warning is repeated on every reply.
 - **Threads** — click **Start thread** to add replies under the post, up to **24**. Each reply has its own text and up to 4 media items. Any reply can also be a [poll](#polls).
 - **Alt text** — up to 1,500 characters per image or video.

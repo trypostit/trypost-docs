@@ -4208,7 +4208,7 @@
                 "properties": {
                   "timezone": {
                     "type": "string",
-                    "description": "IANA time zone, for example `America/Sao_Paulo`."
+                    "description": "IANA time zone, for example `America/Sao_Paulo`. Use the canonical name (`Asia/Kolkata`, not `Asia/Calcutta`); a legacy alias is rejected with `422`."
                   },
                   "posting_goal": {
                     "type": [
@@ -11597,7 +11597,7 @@
               "string",
               "null"
             ],
-            "description": "Post text, stored as sent (posts written in the app hold the editor's HTML)."
+            "description": "Post text, stored as sent."
           },
           "media": {
             "type": [
