@@ -262,7 +262,7 @@ AWS_URL=https://media.yourdomain.com
 Set `AWS_URL` to the public address of the bucket (or its CDN); that is the address the networks download media from.
 
 <Note>
-  Media must be reachable at a public URL, because the networks download it from there. Use `public`, `s3` or `r2`.
+  Media must be reachable at a public URL, because the networks download it from there.
 </Note>
 
 <Note>
@@ -820,7 +820,7 @@ LEGAL_PRIVACY_URL=https://trypost.it/privacy
 | `NIGHTWATCH_SLOW_QUERY_MS` (`500`) | With Nightwatch on, jobs, commands and scheduled tasks send only the queries that take at least this many milliseconds. Web requests send every query |
 | `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_SOCIALS_MONTHLY`, `STRIPE_SOCIALS_YEARLY`, `STRIPE_WORKSPACES_MONTHLY`, `STRIPE_WORKSPACES_YEARLY`, `STRIPE_WORKSPACE_MONTHLY`, `STRIPE_WORKSPACE_YEARLY` | TryPost Cloud billing. Ignored when `SELF_HOSTED=true`; leave them empty |
 | `AI_AUDIO_PROVIDER`, `ELEVENLABS_API_KEY`, `ELEVENLABS_AUDIO_MODEL`, `OPENAI_AUDIO_MODEL`, `GEMINI_AUDIO_MODEL`, `OPENROUTER_AUDIO_MODEL` | Audio settings of the AI SDK. No TryPost feature uses audio, so they do nothing |
-| `SPACES_ACCESS_KEY_ID`, `SPACES_SECRET_ACCESS_KEY`, `SPACES_ENDPOINT`, `SPACES_REGION`, `SPACES_BUCKET` | Not needed. For DigitalOcean Spaces, use the `s3` disk with your Spaces endpoint — see [Other S3-compatible storage](#other-s3-compatible-storage) |
+| `SPACES_ACCESS_KEY_ID`, `SPACES_SECRET_ACCESS_KEY`, `SPACES_ENDPOINT`, `SPACES_REGION`, `SPACES_BUCKET` | Not needed. `.env.example` lists a `spaces` disk, but use the `s3` disk with your Spaces endpoint instead — see [Other S3-compatible storage](#other-s3-compatible-storage) |
 | `UNSPLASH_SECRET_KEY` | Not read. Unsplash only needs `UNSPLASH_ACCESS_KEY` |
 | `MAIL_ENCRYPTION` | Not read. SMTP encryption is set with `MAIL_SCHEME` |
 | `UNSPLASH_API_URL`, `UNSPLASH_WEBSITE_URL`, `UNSPLASH_DOWNLOAD_HOSTS`, `UNSPLASH_REQUESTS_PER_MINUTE` | Unsplash host overrides and rate limit |

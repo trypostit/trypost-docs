@@ -46,7 +46,7 @@ Until the owner finishes checkout, members of the account see **Waiting for the 
 
 ### Offers
 
-An offer link (an address with `?offer=` from a TryPost campaign) changes the plan step: it shows the offer's price, such as a discount for your first months or **Free** for a free trial. A trial that needs no card starts right away, without Stripe Checkout; one that needs a card goes through Stripe Checkout like a normal subscription. Each offer works once per account, and only while the account has no active subscription. Offers apply to the Socials monthly price. When an offer already gives a discount, Checkout has no promotion code field.
+An offer link (an address with `?offer=` from a TryPost campaign) changes the plan step: it shows the offer's price, such as a discount for your first months or **Free** for a free trial, and can change the button too: free-trial offers show **Start free trial**, and a trial that needs no card adds "No credit card required". A trial that needs no card starts right away, without Stripe Checkout; one that needs a card goes through Stripe Checkout like a normal subscription. Each offer works once per account, and only while the account has no active subscription. Offers apply to the Socials monthly price. When an offer already gives a discount, Checkout has no promotion code field.
 
 ## The Billing page
 
