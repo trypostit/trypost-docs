@@ -164,7 +164,7 @@ Each media item takes optional settings:
 
 | Key | Use |
 |---|---|
-| `alt` | Alt text shorthand, up to 2000 characters. Images only |
+| `alt` | Alt text shorthand, up to 2000 characters. On an image, and on a video where the content type has `supports_video_alt_text` (Bluesky, Mastodon, Threads and Discord). Ignored for a PDF |
 | `meta.alt_text` | Alt text, up to 2000 characters. Wins over `alt` when both are sent. Each network cuts it to its own cap |
 | `meta.user_tags` | Up to 20 people tagged on an Instagram image: `{ "username", "x", "y" }`, with `x` and `y` from 0 to 1 |
 | `meta.cover_offset_ms` | The video frame used as the cover, in milliseconds from the start |

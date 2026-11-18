@@ -2934,7 +2934,7 @@
                       "null"
                     ],
                     "maxLength": 2000,
-                    "description": "Alt text. Applies to images only. `meta.alt_text` wins when both are sent."
+                    "description": "Alt text. Applies to images, and to videos where the content type has `supports_video_alt_text`; ignored for a PDF. `meta.alt_text` wins when both are sent."
                   },
                   "meta": {
                     "$ref": "#/components/schemas/MediaItemMeta"
@@ -3111,7 +3111,7 @@
                             "null"
                           ],
                           "maxLength": 2000,
-                          "description": "Alt text. Applies to images only. `meta.alt_text` wins when both are sent."
+                          "description": "Alt text. Applies to images, and to videos where the content type has `supports_video_alt_text`; ignored for a PDF. `meta.alt_text` wins when both are sent."
                         },
                         "meta": {
                           "$ref": "#/components/schemas/MediaItemMeta"
@@ -9887,6 +9887,7 @@
                           "video_aspect_ratio_max": null,
                           "auto_fits_image": false,
                           "supports_alt_text": true,
+                          "supports_video_alt_text": false,
                           "supports_user_tags": false,
                           "supports_video_cover": false,
                           "supports_custom_video_cover": false,
@@ -9922,6 +9923,7 @@
                           "video_aspect_ratio_max": null,
                           "auto_fits_image": false,
                           "supports_alt_text": false,
+                          "supports_video_alt_text": false,
                           "supports_user_tags": false,
                           "supports_video_cover": false,
                           "supports_custom_video_cover": false,
@@ -10520,7 +10522,7 @@
           "alt_text": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Accessibility description. Applies to images; each network truncates it to its own cap."
+            "description": "Accessibility description. Applies to images, and to videos where the content type has `supports_video_alt_text`; each network truncates it to its own cap."
           },
           "user_tags": {
             "type": "array",
@@ -10614,7 +10616,7 @@
           "alt": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Alt text shorthand. Applies to images only; `meta.alt_text` wins when both are sent."
+            "description": "Alt text shorthand. Applies to images, and to videos where the content type has `supports_video_alt_text`; ignored for a PDF. `meta.alt_text` wins when both are sent."
           },
           "meta": {
             "$ref": "#/components/schemas/MediaItemMeta"
@@ -14495,6 +14497,10 @@
           },
           "supports_alt_text": {
             "type": "boolean"
+          },
+          "supports_video_alt_text": {
+            "type": "boolean",
+            "description": "Alt text on a video (`media[].meta.alt_text`). `true` on `bluesky_post`, `mastodon_post`, `threads_post` and `discord_message`."
           },
           "supports_user_tags": {
             "type": "boolean",
