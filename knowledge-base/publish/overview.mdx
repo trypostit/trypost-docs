@@ -1,10 +1,12 @@
 ---
 title: "Publish"
-description: "See and manage every post: the queue, approvals, drafts and what was sent, as a list or a calendar."
+description: "See and manage every post: the queue, approvals, drafts and what was sent, as a list, a calendar or a board."
 icon: "pen-to-square"
 ---
 
 **Publish** is where your posts live. Open it from the sidebar for **All channels**, or open one channel in the **Channels** section and pick **Publish** to see only that channel.
+
+**Publish** opens the view you used last in this browser: **List**, **Calendar** or **Board**. The first time, it opens the list.
 
 Each post belongs to one channel. When you save a post for several channels in the [composer](/knowledge-base/publish/composer), TryPost creates one post per channel, so each can be edited, moved or deleted on its own.
 
@@ -31,19 +33,34 @@ A poll on X, Mastodon or Threads also shows its votes per choice; see Poll resul
 
 **Sent** also shows posts you published directly on the network, outside TryPost. They are marked "This was published directly from Instagram" (or the channel's network).
 
-## List and Calendar
+## List, Calendar and Board
 
-Switch between **List** and **Calendar**.
+Switch between **List**, **Calendar** and **Board**. The tabs above belong to the list.
 
 - The calendar has **3 days**, **Week** and **Month** views, and a **Status** filter: **All posts**, **Drafts**, **Scheduled** or **Sent**.
 - **Undated drafts** lists drafts without a date.
 - Clicking a time on the calendar opens the composer at that time.
-- Instagram channels have a third view, **Grid**: an approximation of your profile grid.
+- Instagram channels have one more view, **Grid**: an approximation of your profile grid.
+
+### Board
+
+**Board** shows your posts as columns of cards. Pick how to split them with **Group by**:
+
+| Group by | Columns |
+| --- | --- |
+| **Status** | **Draft**, **Approvals**, **Scheduled**, **Published** and **Failed**. |
+| **Label** | One column per label, then **Untagged**. A post with two labels shows in both columns. |
+| **Channel** | One column per channel, in the sidebar's order. Only on **All channels**. |
+
+Each column shows how many posts it holds and loads more cards as you scroll. An empty column says "Nothing here". If your filters leave no column, the board says "Nothing matches these filters".
+
+Click a card to open its **Post Details**. The card's menu has the same actions as on the list, except reordering the queue. Approvers can **Approve**, **Schedule**, **Add to queue** or **Reject** a pending post right on its card; see [Approvals](/knowledge-base/publish/approvals).
 
 ## Filters and time zone
 
-- **Labels** and **Channels** filter the list and the calendar. **Untagged** shows posts without labels. See [Labels](/knowledge-base/settings/labels).
+- **Labels** and **Channels** filter the list, the calendar and the board. **Untagged** shows posts without labels. See [Labels](/knowledge-base/settings/labels).
 - **Time zone** sets the zone the page shows times in. It starts as your own time zone from [Preferences](/knowledge-base/settings/preferences). Changing it only changes what you see; each channel still publishes on its own schedule.
+- The filters and the time zone stay set when you switch between **List**, **Calendar** and **Board**.
 
 ## Post actions
 
@@ -73,7 +90,7 @@ Posts that are **Publishing**, **Published** or **Failed** cannot be edited or d
 | Status | Meaning |
 | --- | --- |
 | **Draft** | Saved, not scheduled. |
-| **Pending approval** | Waiting for an approver. |
+| **Pending** | Waiting for an approver. On the calendar, its tooltip reads "Pending approval". |
 | **Scheduled** | Will publish at its time. |
 | **Publishing** | Being sent to the network now. |
 | **Retrying** | The network had a temporary problem; TryPost tries again at the time shown. |
@@ -115,6 +132,8 @@ Type `@` to mention someone: the list starts with **@all** ("Everyone on this po
 Each person you mention gets an email. A new note also emails the post's other participants: its author, the member who asked for approval and everyone who already wrote a note on it. Nobody else is emailed, the note's author never is, and editing a note only emails the people the edit adds as mentions. Reactions send no email. On a post pending approval, only the approvers and the member who asked see its notes, so only they can be mentioned. Each person can turn these emails off with **New note on a post** in [Notifications](/knowledge-base/settings/notifications).
 
 ## Channel page extras
+
+Admins see a gear in the header: **Manage channels** on **All channels** opens [Settings → Channels](/knowledge-base/channels/settings), and **Channel settings** on a channel opens that channel's settings.
 
 When you open **Publish** for a single channel, the header also shows:
 

@@ -12,7 +12,7 @@ The account owner and admins always publish directly.
 
 ## Request approval
 
-A member who needs approval writes the post in the [composer](/knowledge-base/publish/composer) as usual. The save button reads **Save and request approval**. Instead of being scheduled or published, the post becomes **Pending approval** and appears in the **Approvals** tab of [Publish](/knowledge-base/publish/overview).
+A member who needs approval writes the post in the [composer](/knowledge-base/publish/composer) as usual. The save button reads **Save and request approval**. Instead of being scheduled or published, the post becomes **Pending** and appears in the **Approvals** tab of [Publish](/knowledge-base/publish/overview).
 
 The request remembers what the member asked for: a date and time, a queue slot, or publishing now.
 
@@ -21,7 +21,7 @@ While it waits, the member can:
 - edit it;
 - **Revert approval request**, which turns it back into a draft.
 
-If a member who needs approval edits a post that was already approved or scheduled, including someone else's, the post goes back to **Pending approval**. The member who made that change is the requester.
+If a member who needs approval edits a post that was already approved or scheduled, including someone else's, the post goes back to **Pending**. The member who made that change is the requester.
 
 ## Approve or reject
 
@@ -34,11 +34,13 @@ Approvers are the account owner, admins and members who publish directly. On a p
 | **Approve** | The requested time has passed ("Time has passed") or it was a publish-now request. | Asks you to pick a new time, or publish now. |
 | **Reject** | Always. | Returns the post to **Draft**. |
 
+The same buttons show on pending posts in the **Approvals** column of the [Board](/knowledge-base/publish/overview#board).
+
 Approving or rejecting a post that someone else already handled fails with "This post is no longer waiting for approval."
 
 ## Who sees what
 
-- Approvers see every pending post in the Approvals tab and on the calendar.
+- Approvers see every pending post in the Approvals tab, on the calendar and on the board.
 - A member who needs approval sees only their own requests.
 - Only the approvers and the requester see the notes on a pending post, so only they can be mentioned or emailed about them.
 
