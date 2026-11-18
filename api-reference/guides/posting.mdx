@@ -242,7 +242,7 @@ X, Bluesky and Mastodon posts can carry up to **24** replies, published one unde
 - Each reply's text must fit the account limit: 280 on X (25000 with long posts), 300 on Bluesky, 500 on Mastodon. On Mastodon the content warning (`spoiler_text`) is repeated on every reply and counts toward it.
 - A reply's media belongs to that reply only: up to 4 items, given by `url`, `id` or `upload_token`, following that network's media rules.
 - On [Update post](/api-reference/posts/update-post), `thread_replies` replaces the whole list.
-- On X, a reply can be a poll instead: `{ "text", "poll" }`, with no media. See [X polls](#x-polls).
+- On X and Mastodon, a reply can be a poll instead: `{ "text", "poll" }`, with no media. See [Polls in a thread](#polls-in-a-thread).
 
 If publishing stops halfway, replies already live are kept, and a retry continues from the next one instead of posting them again.
 
@@ -270,9 +270,9 @@ A LinkedIn post (`linkedin_post` or `linkedin_page_post`) takes **one** reply in
 - A draft accepts up to 24 replies, with media, like any thread. Scheduling or publishing refuses a second reply ("Only one comment can follow this post."), media on the comment, an empty comment ("Your comment is empty.") and one over 3000 characters.
 - If LinkedIn is not ready for the comment right after the post, `publish_status` is `retrying` for up to about five minutes. Those retries only add the comment, never the post again. If LinkedIn refuses the comment, or is still not ready after that, the post is `failed` with "Published 1 of 2 posts in the thread: …", and the post stays live.
 
-## X polls
+## Polls
 
-An X poll is its own content type, `x_poll`. The post `content` is the question and `meta.poll` holds the choices and how long voting stays open:
+A poll is its own content type on three networks: `x_poll` on X, `mastodon_poll` on Mastodon and `threads_poll` on Threads. The post `content` is the question and `meta.poll` holds the choices, plus how long voting stays open on X and Mastodon:
 
 ```json
 {
@@ -290,15 +290,46 @@ An X poll is its own content type, `x_poll`. The post `content` is the question 
 }
 ```
 
-- `options`: 2 to 4 choices of 1 to 25 characters, no two the same (compared without case). Blank choices are dropped. X counts an emoji outside the basic plane, such as 🐧, as two characters.
-- Repeated choices, more than 4 choices, a choice over 25 characters, a `duration_minutes` outside 5–10080 and media are refused on every save, drafts included, on the post's poll and on reply polls.
-- `duration_minutes`: from 5 to 10080 (7 days).
-- The question is at most **280 characters**, even on an account with long posts.
-- A poll carries no media. Media on a poll, or an attach to one through [Upload media](/api-reference/media-and-uploads/upload-media), [Attach media from upload](/api-reference/media-and-uploads/attach-media-from-upload) or [Attach media from URL](/api-reference/media-and-uploads/attach-media-from-url), is refused with "This post type can't include media. Change the post type to add media."
-- A draft can lack the question, the choices or the length. Scheduling or publishing needs a question, at least 2 choices and `duration_minutes`; there is no default length through the API.
-- On [Update post](/api-reference/posts/update-post), `meta.poll` is merged key by key: send only `duration_minutes` and the stored choices are kept. `options` replaces the whole list. `meta.poll` is kept only on `x_poll`: change `content_type` back to `x_post`, or send a poll with any other type, and it is dropped.
+| | X (`x_poll`) | Mastodon (`mastodon_poll`) | Threads (`threads_poll`) |
+|---|---|---|---|
+| `options` | 2 to 4, each 1 to 25 characters | 2 to 4, each 1 to 50 characters | 2 to 4, each 1 to 25 characters |
+| `duration_minutes` | 5 to 10080 (7 days), required | 5 to 43200 (30 days), required | Not taken: Threads sets the length, and a value you send is dropped |
+| `multiple` | — | `true` lets voters pick several choices (default `false`) | — |
+| `hide_totals` | — | `true` hides the votes until the poll ends (default `false`) | — |
+| Question | The `content`, at most 280 characters even on an account with long posts | The `content`, within the 500-character limit, content warning included | The `content`, within the 500-character limit |
+| Reply polls | Yes | Yes | No (Threads has no thread replies) |
 
-Any reply of an X thread can be a poll too, under the same rules, with the reply `text` as its question:
+A key the network does not take (`multiple` or `hide_totals` off Mastodon, `duration_minutes` on Threads) is dropped when the post is saved.
+
+- `options`: no two the same (compared without case). Blank choices are dropped. Each choice is counted as X counts it, on every network: an emoji outside the basic plane, such as 🐧, counts as two characters.
+- Repeated choices, more than 4 choices, a choice over the network's limit, a `duration_minutes` outside the network's range and media are refused on every save, drafts included, on the post's poll and on reply polls.
+- A poll carries no media. Media on a poll, or an attach to one through [Upload media](/api-reference/media-and-uploads/upload-media), [Attach media from upload](/api-reference/media-and-uploads/attach-media-from-upload) or [Attach media from URL](/api-reference/media-and-uploads/attach-media-from-url), is refused with "This post type can't include media. Change the post type to add media."
+- A poll draws no link card, and a Threads poll can still take a `topic_tag`. A Mastodon poll can take a content warning (`spoiler_text`).
+- A draft can lack the question, the choices or the length. Scheduling or publishing needs a question, at least 2 choices and, on X and Mastodon, `duration_minutes`; there is no default length through the API.
+- On [Update post](/api-reference/posts/update-post), `meta.poll` is merged key by key: send only `duration_minutes` and the stored choices are kept. `options` replaces the whole list. `meta.poll` is kept only on a poll content type: change `content_type` back to `x_post`, `mastodon_post` or `threads_post`, or send a poll with any other type, and it is dropped.
+
+A Mastodon poll with several answers and hidden totals:
+
+```json
+{
+  "content": "Which days work for the community call?",
+  "status": "draft",
+  "social_account_id": "5f4e3d2c-1b0a-4f9e-8d7c-6b5a4f3e2d1c",
+  "content_type": "mastodon_poll",
+  "meta": {
+    "poll": {
+      "options": ["Monday", "Wednesday", "Friday"],
+      "duration_minutes": 4320,
+      "multiple": true,
+      "hide_totals": true
+    }
+  }
+}
+```
+
+### Polls in a thread
+
+On X and Mastodon any reply of a thread can be a poll too, under that network's rules, with the reply `text` as its question:
 
 ```json
 {
@@ -316,9 +347,17 @@ Any reply of an X thread can be a poll too, under the same rules, with the reply
 }
 ```
 
-On other networks a reply's `poll` is dropped. A poll can't be a [repurpose](/api-reference/repurposes/create-repurpose) destination.
+On Bluesky and LinkedIn a reply's `poll` is dropped. A poll can't be a [repurpose](/api-reference/repurposes/create-repurpose) destination.
 
-[Get post preview](/api-reference/posts/get-post-preview) returns the poll of the post and of each reply. After publishing, [Get post metrics](/api-reference/posts/get-post-metrics) returns the votes in `metrics.publication.poll`, and each reply poll in `metrics.publication.thread_polls` (`reply` is the reply's position, from 0). Votes are read with the post's other X metrics, about an hour after publishing and then 2, 3, 7, 14 and 28 days later. `voting_status` is `closed` only once a read after the poll ended has seen it closed.
+### Poll results
+
+[Get post preview](/api-reference/posts/get-post-preview) returns the poll of the post and of each reply as it is sent. After publishing, [Get post metrics](/api-reference/posts/get-post-metrics) returns the votes in `metrics.publication.poll`, and each reply poll in `metrics.publication.thread_polls` (`reply` is the reply's position, from 0). Votes are read with the post's other metrics:
+
+- **X**: about an hour after publishing and then 2, 3, 7, 14 and 28 days later.
+- **Mastodon**: about an hour after publishing and then once a day for 31 days. A multiple-choice poll also returns `multiple: true` and `voters`, the number of people who voted; a poll with hidden totals returns `totals_hidden: true` and 0 votes per choice until Mastodon reveals them. Reply polls are read on instances running Mastodon 4.3 or later.
+- **Threads**: about an hour after publishing and then once a day for 30 days, until a read after the poll's end stores it closed. `end_datetime` is the end Threads set.
+
+`voting_status` is `closed` only once a read after the poll ended has seen it closed.
 
 ## Content limits
 

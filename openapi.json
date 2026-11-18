@@ -441,6 +441,44 @@
                     }
                   }
                 },
+                "mastodon_poll": {
+                  "summary": "Mastodon poll",
+                  "value": {
+                    "content": "Which days work for the community call?",
+                    "status": "draft",
+                    "social_account_id": "5f4e3d2c-1b0a-4f9e-8d7c-6b5a4f3e2d1c",
+                    "content_type": "mastodon_poll",
+                    "meta": {
+                      "poll": {
+                        "options": [
+                          "Monday",
+                          "Wednesday",
+                          "Friday"
+                        ],
+                        "duration_minutes": 4320,
+                        "multiple": true,
+                        "hide_totals": true
+                      }
+                    }
+                  }
+                },
+                "threads_poll": {
+                  "summary": "Threads poll",
+                  "value": {
+                    "content": "Morning or evening posts?",
+                    "status": "draft",
+                    "social_account_id": "3a2b1c0d-9e8f-4a7b-8c6d-5e4f3a2b1c0d",
+                    "content_type": "threads_poll",
+                    "meta": {
+                      "poll": {
+                        "options": [
+                          "Morning",
+                          "Evening"
+                        ]
+                      }
+                    }
+                  }
+                },
                 "linkedin_with_comment": {
                   "summary": "LinkedIn post with a comment",
                   "value": {
@@ -2320,7 +2358,7 @@
         ],
         "summary": "Upload media",
         "operationId": "uploadPostMedia",
-        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
+        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2463,7 +2501,7 @@
         ],
         "summary": "Attach media from upload",
         "operationId": "attachMediaFromUpload",
-        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
+        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2629,7 +2667,7 @@
         ],
         "summary": "Attach media from URL",
         "operationId": "attachMediaFromUrl",
-        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `urls` with `This post type can't include media. Change the post type to add media.`, before anything is downloaded.",
+        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media: `422` on `urls` with `This post type can't include media. Change the post type to add media.`, before anything is downloaded.",
         "requestBody": {
           "required": true,
           "content": {
@@ -9913,16 +9951,18 @@
           "x_poll",
           "threads_post",
           "threads_ghost_post",
+          "threads_poll",
           "pinterest_pin",
           "pinterest_video_pin",
           "pinterest_carousel",
           "bluesky_post",
           "mastodon_post",
+          "mastodon_poll",
           "telegram_post",
           "discord_message",
           "google_business_post"
         ],
-        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text. An X poll (`x_poll`) takes no media; its choices and length are in `meta.poll`."
+        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media; its choices, and on X and Mastodon its length, are in `meta.poll`."
       },
       "Platform": {
         "type": "string",
@@ -10238,7 +10278,7 @@
       },
       "ThreadReply": {
         "type": "object",
-        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon), or the comment of a LinkedIn post. A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped. On LinkedIn a post takes one reply, published as a comment from the same profile or page: text only, up to 3000 characters.",
+        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon), or the comment of a LinkedIn post. A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X and Mastodon a reply can instead be a poll (`poll`), under that network's poll rules, with its text as the question (at most 280 characters on X) and no media; on Bluesky and LinkedIn `poll` is dropped. On LinkedIn a post takes one reply, published as a comment from the same profile or page: text only, up to 3000 characters.",
         "properties": {
           "text": {
             "type": [
@@ -10261,10 +10301,13 @@
                 "$ref": "#/components/schemas/XPoll"
               },
               {
+                "$ref": "#/components/schemas/MastodonPoll"
+              },
+              {
                 "type": "null"
               }
             ],
-            "description": "X only: makes this reply a poll."
+            "description": "X and Mastodon only: makes this reply a poll, under that network's rules (`XPoll` or `MastodonPoll`)."
           }
         },
         "examples": [
@@ -10355,7 +10398,7 @@
       "PlatformMetaMastodon": {
         "type": "object",
         "title": "Mastodon",
-        "description": "Settings for `mastodon_post`.",
+        "description": "Settings for `mastodon_post` and `mastodon_poll`.",
         "properties": {
           "thread_replies": {
             "type": [
@@ -10363,7 +10406,7 @@
               "null"
             ],
             "maxItems": 24,
-            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one.",
+            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one. On Mastodon a reply can be a poll: `{text, poll}` with no media.",
             "items": {
               "oneOf": [
                 {
@@ -10384,6 +10427,17 @@
             ],
             "maxLength": 500,
             "description": "Content warning. Counts toward the 500-character post limit."
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MastodonPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`mastodon_poll` only: the poll's choices, length and switches. Dropped on any other content type. On update it is merged with the stored poll."
           }
         }
       },
@@ -10775,7 +10829,7 @@
       "PlatformMetaThreads": {
         "type": "object",
         "title": "Threads",
-        "description": "Settings for `threads_post`. Use the content type `threads_ghost_post` for a text-only post archived after 24 hours (no media, no topic).",
+        "description": "Settings for `threads_post` and `threads_poll`. Use the content type `threads_ghost_post` for a text-only post archived after 24 hours (no media, no topic).",
         "properties": {
           "topic_tag": {
             "type": [
@@ -10783,6 +10837,17 @@
               "null"
             ],
             "description": "Topic, 1 to 50 characters after a leading `#` is dropped, without `.` or `&`."
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ThreadsPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`threads_poll` only: the poll's choices. Dropped on any other content type. On update it is merged with the stored poll."
           }
         }
       },
@@ -10984,7 +11049,7 @@
         "properties": {}
       },
       "PlatformMeta": {
-        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more), `poll.duration_minutes` and a question (the post `content`) on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
+        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), on a poll (`x_poll`, `mastodon_poll`, `threads_poll`) `poll.options` (2 or more) and a question (the post `content`), plus `poll.duration_minutes` on X and Mastodon. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
         "anyOf": [
           {
             "$ref": "#/components/schemas/PlatformMetaX"
@@ -11516,27 +11581,44 @@
                       "closed",
                       null
                     ],
-                    "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                    "description": "As the network last reported it. `closed` only once a read after the end has seen it closed."
                   },
                   "end_datetime": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "When voting ends (X and Mastodon from the poll's length, Threads the end it set)."
                   },
                   "duration_minutes": {
                     "type": [
                       "integer",
                       "null"
-                    ]
+                    ],
+                    "description": "X only; `null` on Mastodon and Threads."
+                  },
+                  "multiple": {
+                    "type": "boolean",
+                    "description": "Mastodon only: whether voters could pick several choices."
+                  },
+                  "voters": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Mastodon only: how many people voted on a multiple-choice poll; each choice's share is of them. `null` on a single-choice poll."
+                  },
+                  "totals_hidden": {
+                    "type": "boolean",
+                    "description": "Mastodon only: `true` while Mastodon hides the votes until the poll ends; each choice then reads 0 votes."
                   }
                 },
-                "description": "X polls: the votes per choice, read with the post's other X metrics (about an hour after publishing, then at 2, 3, 7, 14 and 28 days). A poll made on x.com also gets them when it is discovered. `null` on any other post or before the first read."
+                "description": "Polls on X, Mastodon and Threads: the votes per choice, read with the post's other metrics (X about an hour after publishing, then at 2, 3, 7, 14 and 28 days; Mastodon daily for 31 days; Threads daily for 30 days until a read after its end stores it closed). A poll made on the network also gets them when it is discovered. `null` on any other post or before the first read."
               },
               "thread_polls": {
                 "type": "array",
-                "description": "X threads published by TryPost: the votes of each reply that is a poll. Empty otherwise.",
+                "description": "X and Mastodon threads published by TryPost: the votes of each reply that is a poll (on Mastodon, from instances running 4.3 or later). Empty otherwise.",
                 "items": {
                   "type": "object",
                   "properties": {
@@ -11568,7 +11650,7 @@
                         "closed",
                         null
                       ],
-                      "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                      "description": "As the network last reported it. `closed` only once a read after the end has seen it closed."
                     },
                     "end_datetime": {
                       "type": [
@@ -11582,6 +11664,21 @@
                         "integer",
                         "null"
                       ]
+                    },
+                    "multiple": {
+                      "type": "boolean",
+                      "description": "Mastodon only: whether voters could pick several choices."
+                    },
+                    "voters": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "description": "Mastodon only: how many people voted on a multiple-choice poll; each choice's share is of them. `null` on a single-choice poll."
+                    },
+                    "totals_hidden": {
+                      "type": "boolean",
+                      "description": "Mastodon only: `true` while Mastodon hides the votes until the poll ends; each choice then reads 0 votes."
                     }
                   }
                 }
@@ -11894,10 +11991,19 @@
                 }
               },
               "duration_minutes": {
-                "type": "integer"
+                "type": "integer",
+                "description": "X and Mastodon only."
+              },
+              "multiple": {
+                "type": "boolean",
+                "description": "Mastodon only."
+              },
+              "hide_totals": {
+                "type": "boolean",
+                "description": "Mastodon only."
               }
             },
-            "description": "X `x_poll` only: the poll as it is sent (choices without blanks; a draft without a length shows 1440)."
+            "description": "On a poll (`x_poll`, `mastodon_poll`, `threads_poll`) only: the poll as it is sent, with only the keys its network takes (choices without blanks; on X and Mastodon a draft without a length shows 1440, and on Mastodon a missing switch shows `false`)."
           },
           "thread_replies": {
             "type": "array",
@@ -11925,9 +12031,17 @@
                     },
                     "duration_minutes": {
                       "type": "integer"
+                    },
+                    "multiple": {
+                      "type": "boolean",
+                      "description": "Mastodon only."
+                    },
+                    "hide_totals": {
+                      "type": "boolean",
+                      "description": "Mastodon only."
                     }
                   },
-                  "description": "X only, when the reply is a poll."
+                  "description": "X and Mastodon only, when the reply is a poll."
                 }
               }
             }
@@ -13930,7 +14044,7 @@
             "items": {
               "type": "string"
             },
-            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on the content type (a Google Business event, the `poll` of an X poll) or that the text can stand in for (a YouTube title) are not listed."
+            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on the content type (a Google Business event, the `poll` of a poll) or that the text can stand in for (a YouTube title) are not listed."
           },
           "recommended_content_length": {
             "type": [
@@ -14049,6 +14163,81 @@
               "Dark mode"
             ],
             "duration_minutes": 1440
+          }
+        ]
+      },
+      "MastodonPoll": {
+        "type": "object",
+        "description": "A Mastodon poll: the post `content` (or the reply `text`) is the question, within the 500-character limit of the post, content warning included. A poll carries no media, drafts included. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question. On update, `meta.poll` is merged key by key with the stored one and `options` replaces the whole list; a reply's `poll` is replaced along with `thread_replies`. These are the limits of mastodon.social, used for every instance.",
+        "properties": {
+          "options": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "2 to 4 choices to schedule or publish, each 1 to 50 characters, counted as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 50 characters is refused on every save, drafts included. Length is measured after trimming.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "duration_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 5,
+            "maximum": 43200,
+            "description": "How long voting stays open, from 5 minutes to 30 days. Required to schedule or publish; there is no default."
+          },
+          "multiple": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Lets each voter pick several choices. Treated as `false` when omitted."
+          },
+          "hide_totals": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Hides the vote counts until the poll ends. Treated as `false` when omitted."
+          }
+        },
+        "examples": [
+          {
+            "options": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "duration_minutes": 4320,
+            "multiple": true,
+            "hide_totals": false
+          }
+        ]
+      },
+      "ThreadsPoll": {
+        "type": "object",
+        "description": "A Threads poll, on a text post: the post `content` is the question. Threads sets how long voting stays open, so there is no length; a `duration_minutes`, `multiple` or `hide_totals` sent is dropped. A poll carries no media, drafts included, and draws no link card; it can take a `topic_tag`. A draft may lack the choices; scheduling or publishing needs at least 2 choices and a question. On update, `meta.poll` is merged key by key with the stored one and `options` replaces the whole list.",
+        "properties": {
+          "options": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "2 to 4 choices to schedule or publish, each 1 to 25 characters, counted as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 25 characters is refused on every save, drafts included. Length is measured after trimming.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "examples": [
+          {
+            "options": [
+              "Morning",
+              "Evening"
+            ]
           }
         ]
       }
