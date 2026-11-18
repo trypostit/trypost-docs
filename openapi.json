@@ -6230,7 +6230,8 @@
                         "growth": 320,
                         "net": 320,
                         "provenance": "provider",
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "series": [
@@ -6259,7 +6260,8 @@
                         "username": "trypostit",
                         "avatar_url": "https://pbs.twimg.com/profile_images/1790000000000000000/avatar_400x400.jpg",
                         "count": 18,
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "buckets": [
@@ -6293,7 +6295,8 @@
                         "preview_metadata": null,
                         "reactions": 412,
                         "comments": 38,
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "comments": [
@@ -6315,7 +6318,8 @@
                         "preview_metadata": null,
                         "reactions": 412,
                         "comments": 38,
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ]
                   },
@@ -6396,7 +6400,8 @@
                         "previous": 12.8,
                         "change": 10.94
                       },
-                      "status": "connected"
+                      "status": "connected",
+                      "verified_badge": null
                     }
                   ],
                   "coverage": [
@@ -6799,7 +6804,8 @@
                           "growth": 320,
                           "net": 320,
                           "provenance": "provider",
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ],
                       "series": [
@@ -6828,7 +6834,8 @@
                           "username": "trypostit",
                           "avatar_url": "https://pbs.twimg.com/profile_images/1790000000000000000/avatar_400x400.jpg",
                           "count": 18,
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ],
                       "buckets": [
@@ -6862,7 +6869,8 @@
                           "preview_metadata": null,
                           "reactions": 412,
                           "comments": 38,
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ],
                       "comments": [
@@ -6884,7 +6892,8 @@
                           "preview_metadata": null,
                           "reactions": 412,
                           "comments": 38,
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ]
                     },
@@ -6965,7 +6974,8 @@
                           "previous": 12.8,
                           "change": 10.94
                         },
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "coverage": [

@@ -670,6 +670,8 @@ BACKUP_NOTIFY_DISCORD_WEBHOOK_URL=
 | `BACKUP_ACCESS_KEY_ID` / `BACKUP_SECRET_ACCESS_KEY` | — | Credentials with read, write, list and delete access to the bucket |
 | `BACKUP_NOTIFY_EMAIL` | — | Receives an email after every backup, successful or not. Leave it empty to skip |
 | `BACKUP_NOTIFY_DISCORD_WEBHOOK_URL` | — | Receives a Discord message after every backup, successful or not. Leave it empty to skip |
+| `BACKUP_TIMEOUT` | `3600` | Seconds the dump may take. After that the dump is stopped and the backup fails |
+| `BACKUP_DB_CONNECTION` | The app's default connection (`DB_CONNECTION`) | The database connection to dump |
 
 Each backup dumps the database with `pg_dump` (PostgreSQL) or `mysqldump --single-transaction` (MySQL and MariaDB), gzips it and uploads it as `<BACKUP_DIRECTORY>/YYYYMMDDHHMMSS.sql.gz` (UTC). The server that runs the scheduler needs that client installed, and for PostgreSQL `pg_dump` must be the same major version as the database server or newer. The dump is written to the system temporary directory (`TMPDIR`) before the upload, so that directory needs room for it.
 

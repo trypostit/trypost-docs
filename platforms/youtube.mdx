@@ -51,7 +51,7 @@ The post text (your description when **Description** is empty) is capped at **5,
 
 ### Cover
 
-Pick the cover of a Short in **Edit Media** > **Thumbnail**: drag along the video's frames, or switch to **Image** and upload a 9:16 JPEG, PNG or WebP image. A picked frame is saved as a screenshot, because YouTube takes a cover image, not a frame time. In the API and MCP the cover is `media[].meta.cover`, with `cover_source` `frame` or `image`. See [Thumbnail](/knowledge-base/media#thumbnail).
+Pick the cover of a Short in **Edit Media** > **Thumbnail**: drag along the video's frames, or switch to **Image** and upload a 9:16 JPEG, PNG or WebP image. A picked frame is saved as a screenshot, because YouTube takes a cover image, not a frame time. In the API and MCP the cover is always an image in `media[].meta.cover`: `cover_offset_ms` is ignored on Shorts, and `cover_source` without a `cover` is dropped. To use a frame, upload a screenshot of it as `cover` (`cover_source` `frame` only records where it came from). See [Thumbnail](/knowledge-base/media#thumbnail).
 
 YouTube applies a cover only once it has processed the video, so after the Short is published TryPost checks every minute and sets the cover as soon as processing finishes. If YouTube refuses it, the post stays **Published** and its card shows **Warning**. Click it to see **Cover not applied** and the reason:
 
