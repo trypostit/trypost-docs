@@ -66,7 +66,7 @@ Each post card has buttons and a menu. What you see depends on the post's status
 | **See post insights** | Open the post's metrics. See [Channel insights](/knowledge-base/insights/channel-insights). |
 | **Post Details** | Show the full post, its channels, who created it and, once sent, its metrics. |
 
-Posts that are **Publishing**, **Published** or **Failed** cannot be edited or deleted. To try again, duplicate the post. Deleting a post never removes it from the network.
+Posts that are **Publishing**, **Published** or **Failed** cannot be edited or deleted. To try again, duplicate the post. A post that was deleted on the network can be deleted from TryPost. Deleting a post never removes it from the network.
 
 ## Statuses
 
@@ -79,6 +79,13 @@ Posts that are **Publishing**, **Published** or **Failed** cannot be edited or d
 | **Retrying** | The network had a temporary problem; TryPost tries again at the time shown. |
 | **Published** | Live on the network. |
 | **Failed** | Could not be published. |
+| **Deleted** | Published, then deleted on the network. |
+
+### Posts deleted on the network
+
+When someone deletes a published post on Facebook, Instagram, Threads, YouTube, X, Bluesky, Mastodon or Pinterest, TryPost finds out the next time it [reads the post's metrics](/knowledge-base/insights/channel-insights#how-often-data-updates). The post shows **Deleted**, with a trash mark on the calendar. Its badge opens "Deleted on Instagram" (or the channel's network): "It was removed after it was published, so its link and insights are no longer available." The post loses **Open post on Instagram**, **Share link in a post** and **Copy link**, and you can delete it from TryPost. If the network lists the post again, it goes back to **Published**.
+
+TikTok, LinkedIn, Google Business, Telegram and Discord posts are not checked, so they stay **Published**.
 
 ### Why a post failed
 

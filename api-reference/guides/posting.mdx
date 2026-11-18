@@ -211,7 +211,7 @@ curl -X PUT https://app.trypost.it/api/posts/9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e4
   -d '{ "status": "publishing" }'
 ```
 
-The response comes back with `status: "publishing"` while the network receives the post. It then becomes `published` or `failed`. The network's side is in `publish_status` (`pending`, `publishing`, `retrying`, `pending_review`, `published`, `failed` or `rejected`); `platform_url` links to the live post and `error_message` says what went wrong. Poll [Get post](/api-reference/posts/get-post), or subscribe a [webhook](/api-reference/webhooks/create-webhook) to `post.published` and `post.failed`.
+The response comes back with `status: "publishing"` while the network receives the post. It then becomes `published` or `failed`. The network's side is in `publish_status` (`pending`, `publishing`, `retrying`, `pending_review`, `published`, `failed`, `rejected` or `deleted`); `platform_url` links to the live post and `error_message` says what went wrong. A published post that is later deleted on the network keeps `status: published` and its `platform_url`, and its `publish_status` becomes `deleted`; the `post.deleted_on_network` webhook event reports it. Poll [Get post](/api-reference/posts/get-post), or subscribe a [webhook](/api-reference/webhooks/create-webhook) to `post.published` and `post.failed`.
 
 Posts created through the API publish directly: API keys belong to workspace admins, so no approval step applies (see [Approvals](/api-reference/introduction#approvals)).
 
