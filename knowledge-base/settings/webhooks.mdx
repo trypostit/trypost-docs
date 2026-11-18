@@ -40,13 +40,9 @@ A new webhook starts **Enabled**. Creating or editing a webhook does not send a 
 | `post.failed` | Post failed | A post failed to publish | Post payload |
 | `post.deleted` | Post deleted | A post is deleted | `{ "id", "workspace_id" }` only |
 
-<Note>
-  Posts used to carry their channels in a `platforms` list, and there was a `post.partially_published` event. Both were removed: a post has one channel, and its fields are at the top of `data`. Webhooks subscribed to `post.partially_published` were moved to `post.published` and `post.failed`.
-</Note>
-
 Status events fire when the status changes, not on every save. A post created already scheduled or queued sends `post.created`, with `status` set to `scheduled`. Edits that keep the status (text, media, labels, a new time on a scheduled post) send nothing.
 
-TryPost notices that a post was deleted on the network the next time it reads the post's metrics, on Facebook, Instagram, Threads, YouTube, X, Bluesky, Mastodon and Pinterest. The post keeps `status: published` and its `platform_url`. If the network lists the post again later, `post.restored` fires; `post.published` is not sent again. Neither event is sent for posts imported from the network.
+TryPost notices that a post was deleted on the network the next time it reads the post's metrics, on Facebook, Instagram, Threads, YouTube, X, Bluesky, Mastodon and Pinterest. TryPost reads a post's metrics only during its first 30 days (31 on Mastodon; on X at 2, 3, 7, 14 and 28 days), so a post deleted after that stays **Published** and sends no event. The post keeps `status: published` and its `platform_url`. If the network lists the post again later, `post.restored` fires; `post.published` is not sent again. Neither event is sent for posts imported from the network.
 
 There is no event while a post is publishing, and none for notes, approvals, channel changes or member changes. Posts deleted because their [channel was disconnected](/knowledge-base/channels/disconnecting) or their [workspace was deleted](/knowledge-base/settings/workspaces#delete-a-workspace) do not send `post.deleted`.
 
