@@ -320,7 +320,8 @@ MAIL_FROM_NAME="${APP_NAME}"
 | **Posts at risk** | Scheduled posts are on channels that must be reconnected before they can publish |
 | **Approval requested** | A member who needs approval saved a post; sent to the approvers |
 | **Post approved** / **Post rejected** | An approver decided; sent to the member who asked |
-| **Note added** | Someone added a note to a post |
+| **Note added** | Someone added a note to a post; sent to the post's author, the member who asked for approval and everyone who already wrote a note on it |
+| **Mention in a note** | Someone mentioned a member in a note, or everyone with `@all`; sent to each mentioned member |
 | **Account disconnected** | A channel lost its authorization and needs reconnection |
 | **Connections check** | The daily check found disconnected channels in a workspace |
 | **Webhook paused** | A webhook was paused after 5 failed deliveries in a row |

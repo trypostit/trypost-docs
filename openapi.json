@@ -1489,6 +1489,72 @@
         }
       }
     },
+    "/posts/{post}/notes/mentionables": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PostId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "List post note mentionables",
+        "operationId": "listPostNoteMentionables",
+        "description": "Lists the members who see the post, the API key's user included: the people a note on it can mention. Sorted by name and not paginated. On a post pending approval, only the approvers and the member who asked are listed. Mention one of them in a note body as `@[user:<id>]`, or all of them as `@[everyone]`.",
+        "responses": {
+          "200": {
+            "description": "The members a note can mention.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PostNoteMentionable"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                      "name": "Ana Souza",
+                      "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg",
+                      "timezone": "America/Sao_Paulo"
+                    },
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins",
+                      "photo_url": null,
+                      "timezone": "Europe/Lisbon"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
     "/posts/{post}/notes": {
       "parameters": [
         {
@@ -1541,7 +1607,29 @@
                     {
                       "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
                       "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
-                      "body": "Can we swap the image for the dark version?",
+                      "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                      "mentions": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        }
+                      ],
+                      "reactions": [
+                        {
+                          "emoji": "👍",
+                          "count": 2,
+                          "users": [
+                            {
+                              "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                              "name": "Leo Martins"
+                            },
+                            {
+                              "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                              "name": "Ana Souza"
+                            }
+                          ]
+                        }
+                      ],
                       "author": {
                         "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
                         "name": "Ana Souza",
@@ -1613,7 +1701,7 @@
         ],
         "summary": "Create post note",
         "operationId": "createPostNote",
-        "description": "Adds an internal note to a post as the API key's user. Notes are never published. Every other workspace member is emailed about it (unless they turned that email off in their notification preferences); on a post pending approval, only the approvers and the member who asked are.",
+        "description": "Adds an internal note to a post as the API key's user. Notes are never published.\n\nTo mention a member, write `@[user:<id>]` in `body` with an `id` from [List post note mentionables](/api-reference/post-notes/list-post-note-mentionables); `@[everyone]` mentions everyone who sees the post. A mention of someone who cannot see the post is removed from the body.\n\nEach mentioned member gets a mention email. The post's other participants (its author, the member who asked for approval and everyone who already wrote a note on it) get a new-note email. Nobody else is emailed, the note's author never is, and each member's notification preferences apply. On a post pending approval, only the approvers and the member who asked see its notes.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1626,12 +1714,13 @@
                 "properties": {
                   "body": {
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "description": "The note text. Mention a member with `@[user:<id>]`, or everyone who sees the post with `@[everyone]`."
                   }
                 }
               },
               "example": {
-                "body": "Can we swap the image for the dark version?"
+                "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?"
               }
             }
           }
@@ -1647,7 +1736,14 @@
                 "example": {
                   "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
                   "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
-                  "body": "Can we swap the image for the dark version?",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [],
                   "author": {
                     "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
                     "name": "Ana Souza",
@@ -1689,13 +1785,82 @@
           "$ref": "#/components/parameters/NoteId"
         }
       ],
+      "get": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "Get post note",
+        "operationId": "getPostNote",
+        "description": "Returns one note of the post. A note of another post returns `404`.",
+        "responses": {
+          "200": {
+            "description": "The note.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostNote"
+                },
+                "example": {
+                  "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
+                  "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 2,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        },
+                        {
+                          "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                          "name": "Ana Souza"
+                        }
+                      ]
+                    }
+                  ],
+                  "author": {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg"
+                  },
+                  "created_at": "2026-10-08 14:02:45",
+                  "updated_at": "2026-10-08 14:02:45"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
       "put": {
         "tags": [
           "Post notes"
         ],
         "summary": "Update post note",
         "operationId": "updatePostNote",
-        "description": "Changes a note's text. Only the note's author can edit it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`.",
+        "description": "Changes a note's text. Only the note's author can edit it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`. Mentions work as in [Create post note](/api-reference/post-notes/create-post-note). Only the members this edit adds as mentions are emailed, not those the note already mentioned.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1708,12 +1873,13 @@
                 "properties": {
                   "body": {
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "description": "The new note text. Mention a member with `@[user:<id>]`, or everyone who sees the post with `@[everyone]`."
                   }
                 }
               },
               "example": {
-                "body": "Can we swap the image for the dark version?"
+                "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?"
               }
             }
           }
@@ -1729,7 +1895,29 @@
                 "example": {
                   "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
                   "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
-                  "body": "Can we swap the image for the dark version?",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 2,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        },
+                        {
+                          "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                          "name": "Ana Souza"
+                        }
+                      ]
+                    }
+                  ],
                   "author": {
                     "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
                     "name": "Ana Souza",
@@ -1767,7 +1955,7 @@
         ],
         "summary": "Delete post note",
         "operationId": "deletePostNote",
-        "description": "Deletes a note. Only the note's author can delete it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`.",
+        "description": "Deletes a note and its reactions. Only the note's author can delete it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`. Nobody is emailed.",
         "responses": {
           "204": {
             "description": "Deleted."
@@ -1783,6 +1971,230 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/posts/{post}/notes/{note}/reactions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PostId"
+        },
+        {
+          "$ref": "#/components/parameters/NoteId"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "Add post note reaction",
+        "operationId": "addPostNoteReaction",
+        "description": "Reacts to a note with one emoji as the API key's user. Any single emoji works, including a flag, a keycap or one with a skin tone. Reacting again with the same emoji changes nothing. Nobody is emailed. A note of another post returns `404`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "emoji"
+                ],
+                "properties": {
+                  "emoji": {
+                    "type": "string",
+                    "description": "Exactly one emoji, for example `👍`, `👀` or `🇧🇷`."
+                  }
+                }
+              },
+              "example": {
+                "emoji": "👍"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The note with its reactions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostNote"
+                },
+                "example": {
+                  "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
+                  "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 2,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        },
+                        {
+                          "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                          "name": "Ana Souza"
+                        }
+                      ]
+                    }
+                  ],
+                  "author": {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg"
+                  },
+                  "created_at": "2026-10-08 14:02:45",
+                  "updated_at": "2026-10-08 14:02:45"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "description": "Validation failed. `emoji` must be exactly one emoji: `Pick a single emoji.`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                },
+                "example": {
+                  "message": "Pick a single emoji.",
+                  "errors": {
+                    "emoji": [
+                      "Pick a single emoji."
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "Remove post note reaction",
+        "operationId": "removePostNoteReaction",
+        "description": "Takes back the API key's user's reaction with that emoji. Only your own reaction is removed; when you had not reacted with that emoji, nothing changes. A note of another post returns `404`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "emoji"
+                ],
+                "properties": {
+                  "emoji": {
+                    "type": "string",
+                    "description": "The emoji of your reaction to remove."
+                  }
+                }
+              },
+              "example": {
+                "emoji": "👍"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The note with its reactions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostNote"
+                },
+                "example": {
+                  "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
+                  "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 1,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        }
+                      ]
+                    }
+                  ],
+                  "author": {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg"
+                  },
+                  "created_at": "2026-10-08 14:02:45",
+                  "updated_at": "2026-10-08 14:02:45"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "description": "Validation failed. `emoji` must be exactly one emoji: `Pick a single emoji.`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                },
+                "example": {
+                  "message": "Pick a single emoji.",
+                  "errors": {
+                    "emoji": [
+                      "Pick a single emoji."
+                    ]
+                  }
+                }
+              }
+            }
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -11436,7 +11848,31 @@
             "format": "uuid"
           },
           "body": {
-            "type": "string"
+            "type": "string",
+            "description": "The note text. `@[user:<id>]` mentions a member (their name is in `mentions`) and `@[everyone]` mentions everyone who sees the post. An id that is not in `mentions` belongs to a user who no longer exists."
+          },
+          "mentions": {
+            "type": "array",
+            "description": "The members the note mentions with `@[user:<id>]`, in no particular order. `@[everyone]` is not listed here.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "reactions": {
+            "type": "array",
+            "description": "The note's reactions grouped by emoji, in the order each emoji was first used.",
+            "items": {
+              "$ref": "#/components/schemas/PostNoteReaction"
+            }
           },
           "author": {
             "type": [
@@ -11469,6 +11905,58 @@
           "updated_at": {
             "type": "string",
             "description": "UTC, format `Y-m-d H:i:s`."
+          }
+        }
+      },
+      "PostNoteReaction": {
+        "type": "object",
+        "description": "One emoji on a note, with everyone who reacted with it.",
+        "properties": {
+          "emoji": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many members reacted with this emoji."
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PostNoteMentionable": {
+        "type": "object",
+        "description": "A member who sees the post, so a note on it can mention them.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Write it in a note body as `@[user:<id>]`."
+          },
+          "name": {
+            "type": "string"
+          },
+          "photo_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA time zone, for example `America/Sao_Paulo`."
           }
         }
       },

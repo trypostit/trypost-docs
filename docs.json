@@ -90,8 +90,12 @@
             "pages": [
               "GET /posts/{post}/notes",
               "POST /posts/{post}/notes",
+              "GET /posts/{post}/notes/{note}",
               "PUT /posts/{post}/notes/{note}",
-              "DELETE /posts/{post}/notes/{note}"
+              "DELETE /posts/{post}/notes/{note}",
+              "GET /posts/{post}/notes/mentionables",
+              "PUT /posts/{post}/notes/{note}/reactions",
+              "DELETE /posts/{post}/notes/{note}/reactions"
             ]
           },
           {
