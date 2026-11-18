@@ -80,7 +80,7 @@ A feed image outside 3:4 to 1.91:1 blocks scheduling and publishing; use the cro
 - **Trial reel** — show a Reel to non-followers first. See [Trial reels](#trial-reels).
 - **Music**, **Trial reel** and **Share to feed** apply to the **Reel** type only. A **Feed Post** with a single video still publishes as a Reel, but without them.
 - **Tag people** — tag up to 20 accounts on each feed image in **Edit Media** > **Tag People** (`media[].meta.user_tags`).
-- **Video cover** — pick the frame shown as the cover of a feed or reel video in **Edit Media** > **Thumbnail**.
+- **Video cover** — pick the frame shown as the cover of a feed or reel video in **Edit Media** > **Thumbnail**. On a **Reel** you can switch to **Image** and upload a cover of your own (9:16, JPEG, PNG or WebP); the uploaded image is used instead of the frame. In the API and MCP it is `media[].meta.cover` with `cover_source: "image"`. See [Thumbnail](/knowledge-base/media#thumbnail).
 - **Alt text** — up to 1,000 characters per image.
 
 ### Music

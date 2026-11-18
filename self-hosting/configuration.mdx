@@ -273,6 +273,10 @@ AWS_USE_PATH_STYLE_ENDPOINT=true
   Media must be reachable at a public URL, because the networks download it from there. Use `public` or object storage — the private `local` disk has no URL.
 </Note>
 
+<Note>
+  When your media is served from another domain than `APP_URL` (an S3 bucket, R2 custom domain or CDN), its CORS rules must allow cross-origin `GET` requests from your `APP_URL`. The media editor reads the video in the browser to save the picked frame of a YouTube Short as its cover; without CORS that capture fails with "Couldn't capture this frame. Upload an image as the cover instead." The `public` disk is served from `APP_URL`, so it needs no CORS rule.
+</Note>
+
 ## Mail
 
 TryPost sends transactional emails for post notifications, team invites, account alerts, and authentication (email verification, password reset). A working mail configuration is required.
