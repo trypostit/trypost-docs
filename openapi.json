@@ -1501,39 +1501,32 @@
         ],
         "summary": "List post note mentionables",
         "operationId": "listPostNoteMentionables",
-        "description": "Lists the members who see the post, the API key's user included: the people a note on it can mention. Sorted by name and not paginated. On a post pending approval, only the approvers and the member who asked are listed. Mention one of them in a note body as `@[user:<id>]`, or all of them as `@[everyone]`.",
+        "description": "Lists the members who see the post, the API key's user included: the people a note on it can mention. Sorted by name. Not paginated: the body is a plain array. On a post pending approval, only the approvers and the member who asked are listed. Mention one of them in a note body as `@[user:<id>]`, or all of them as `@[everyone]`.",
         "responses": {
           "200": {
             "description": "The members a note can mention.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/PostNoteMentionable"
-                      }
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostNoteMentionable"
                   }
                 },
-                "example": {
-                  "data": [
-                    {
-                      "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
-                      "name": "Ana Souza",
-                      "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg",
-                      "timezone": "America/Sao_Paulo"
-                    },
-                    {
-                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
-                      "name": "Leo Martins",
-                      "photo_url": null,
-                      "timezone": "Europe/Lisbon"
-                    }
-                  ]
-                }
+                "example": [
+                  {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg",
+                    "timezone": "America/Sao_Paulo"
+                  },
+                  {
+                    "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                    "name": "Leo Martins",
+                    "photo_url": null,
+                    "timezone": "Europe/Lisbon"
+                  }
+                ]
               }
             }
           },
@@ -6032,7 +6025,7 @@
         ],
         "summary": "Get workspace analytics",
         "operationId": "getWorkspaceAnalytics",
-        "description": "Returns the analytics report of the workspace for a date range, compared with the previous range of the same length: summary, followers, posts per bucket, top posts, per-channel performance and collection coverage. Days are calendar days in the API key user's time zone (Settings \u2192 Preferences) and weekly buckets start on that user's start of week. With `custom` (or `start`/`end` without `range`), the dates are clamped to the days with data in scope (`bounds`; for a channel, that channel's). When there is no data yet, the dates are ignored and the last 30 days are returned. A missing `end` defaults to the last day with data, and a missing `start` to 29 days before `end`. Read `range` (or `filters.start`/`filters.end`) in the response for the days actually used. The report reads analytics TryPost has already collected from the networks, not live data. LinkedIn, LinkedIn pages, Telegram, Discord and Google Business are not included.",
+        "description": "Returns the analytics report of the workspace for a date range, compared with the previous range of the same length: summary, followers, posts per bucket, top posts, per-channel performance and collection coverage. Days are calendar days in the API key user's time zone (Settings \u2192 Preferences) and weekly buckets start on that user's start of week. With `custom` (or `start`/`end` without `range`), the dates are clamped to the days with data in scope (`bounds`; for a channel, that channel's). When there is no data yet, the dates are ignored and the last 30 days are returned. A missing `end` defaults to the last day with data, and a missing `start` to 29 days before `end`. Read `range` in the response for the days actually used. The report reads analytics TryPost has already collected from the networks, not live data. LinkedIn, LinkedIn pages, Telegram, Discord and Google Business are not included.",
         "parameters": [
           {
             "name": "range",
@@ -6257,6 +6250,7 @@
                   },
                   "posts": {
                     "resolution": "daily",
+                    "total": 3,
                     "accounts": [
                       {
                         "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
@@ -6283,6 +6277,7 @@
                     "reactions": [
                       {
                         "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                        "rank": 1,
                         "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                         "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                         "platform": "x",
@@ -6304,6 +6299,7 @@
                     "comments": [
                       {
                         "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                        "rank": 1,
                         "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                         "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                         "platform": "x",
@@ -6823,6 +6819,7 @@
                     },
                     "posts": {
                       "resolution": "weekly",
+                      "total": 3,
                       "accounts": [
                         {
                           "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
@@ -6849,6 +6846,7 @@
                       "reactions": [
                         {
                           "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                          "rank": 1,
                           "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                           "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                           "platform": "x",
@@ -6870,6 +6868,7 @@
                       "comments": [
                         {
                           "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                          "rank": 1,
                           "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                           "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                           "platform": "x",
@@ -12063,10 +12062,28 @@
                 "$ref": "#/components/schemas/Platform"
               },
               "origin": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "trypost",
+                  "external"
+                ],
+                "description": "Where the post was published from: `trypost` or `external` (outside TryPost)."
               },
               "content_type": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "text",
+                  "image",
+                  "carousel",
+                  "video",
+                  "reel",
+                  "story",
+                  "short",
+                  "link",
+                  "poll",
+                  "unknown"
+                ],
+                "description": "Analytics publication type."
               },
               "availability": {
                 "type": "string",
@@ -12337,6 +12354,12 @@
                 "type": [
                   "string",
                   "null"
+                ],
+                "enum": [
+                  "reach",
+                  "impressions",
+                  "views",
+                  null
                 ]
               },
               "watch_time_milliseconds": {
@@ -12369,16 +12392,40 @@
                   ]
                 },
                 "unit": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "count",
+                    "milliseconds",
+                    "percent"
+                  ]
                 },
                 "time_basis": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "lifetime",
+                    "range",
+                    "rolling_90_days",
+                    "snapshot"
+                  ]
                 },
                 "precision": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "exact",
+                    "approximate",
+                    "estimated",
+                    "experimental"
+                  ]
                 },
                 "availability": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "available",
+                    "unsupported",
+                    "unavailable",
+                    "delayed",
+                    "privacy_limited"
+                  ]
                 },
                 "provider_metric": {
                   "type": [
@@ -13024,6 +13071,10 @@
                 "format": "uuid",
                 "description": "Analytics publication id. Read its detail with `GET /analytics/publications/{publication}`."
               },
+              "rank": {
+                "type": "integer",
+                "description": "Position in this list (by reactions or by comments), starting at 1."
+              },
               "post_id": {
                 "type": [
                   "string",
@@ -13312,6 +13363,10 @@
                   "monthly"
                 ],
                 "description": "Daily up to 14 days, weekly up to 90 days, monthly beyond. Weeks start on the API key user's start of week."
+              },
+              "total": {
+                "type": "integer",
+                "description": "Posts published in the range across the channels in scope."
               },
               "accounts": {
                 "type": "array",
@@ -13807,7 +13862,20 @@
               "string",
               "null"
             ],
-            "description": "Analytics publication type (`text`, `image`, `video`, ...)."
+            "description": "Analytics publication type (`text`, `image`, `video`, ...).",
+            "enum": [
+              "text",
+              "image",
+              "carousel",
+              "video",
+              "reel",
+              "story",
+              "short",
+              "link",
+              "poll",
+              "unknown",
+              null
+            ]
           },
           "metrics": {
             "type": "object",
