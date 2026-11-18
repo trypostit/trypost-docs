@@ -160,7 +160,7 @@ The full table (17 entries, including analytics, retention and Google Business r
 
 ## Supported Languages
 
-16 locales (`App\Enums\User\Locale`): `en`, `uk`, `pt-BR`, `es`, `fr`, `de`, `it`, `nl`, `pl`, `el`, `ja`, `ko`, `zh`, `ru`, `tr`, `ar`. Docs are written in English only.
+17 locales (`App\Enums\User\Locale`): `en`, `uk`, `pt-BR`, `es`, `fr`, `de`, `it`, `nl`, `pl`, `el`, `ja`, `ko`, `zh`, `ru`, `tr`, `ar`, `id`. Docs are written in English only.
 
 ## Running Docs Locally
 
