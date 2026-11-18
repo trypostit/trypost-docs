@@ -10,38 +10,35 @@ Every member of the workspace can connect their own assistant. It acts as you, w
 
 ## Connect an assistant
 
-<Steps>
-  <Step title="Copy your TryPost server URL">
-    Click **Copy URL**. On TryPost Cloud the URL is:
+**Settings → MCP** has two tabs: **Connected apps** and **Connect an app**. On **Connect an app**, click **Connect Claude**, **Connect ChatGPT**, or **Connect** under **Other apps** (any app that supports MCP). A dialog, **Connect TryPost to** *app*, lists the steps for that app:
 
-    ```
-    https://app.trypost.it/mcp/trypost
-    ```
-  </Step>
-  <Step title="Open your AI assistant">
-    - **Claude** — open Settings → Connectors, add a custom connector, then paste the URL.
-    - **ChatGPT** — open Settings → Apps & Connectors, create a custom connector, then paste the URL.
+- **Claude** — the dialog shows the **Name** (`TryPost`) and **Server URL**, each with **Copy**. Click **Open Claude** to go straight to Claude's custom connector form, paste the URL into the connector's URL field, then click **Add** and **Connect**. See [Claude](/ai/claude).
+- **ChatGPT** — there is nothing to paste. Click **Open ChatGPT** to open the TryPost app in ChatGPT and click **Connect** there. See [ChatGPT](/ai/chatgpt).
+- **Other apps** — the dialog, **Connect TryPost to another app**, shows the **Name**, **Server URL** and a **Config** snippet to paste into **Cursor**, **VS Code**, **Claude Code** or any other client that reads an `mcpServers` config. Add a custom MCP server in your app and paste the name and URL, or the config. The snippet names the server `TryPost`; the setup guides use `trypost`. If you paste the snippet, use `TryPost` in commands such as `codex mcp login TryPost`.
 
-    **Connect Claude** and **Connect ChatGPT** open those settings for you. Under **Other apps**, TryPost shows the name, URL or config to paste into **Cursor**, **VS Code**, **Claude Code** or any other client that reads an `mcpServers` config. That snippet names the server `TryPost`; the setup guides use `trypost`. If you paste the snippet, use `TryPost` in commands such as `codex mcp login TryPost`.
-  </Step>
-  <Step title="Authorize">
-    The first time the assistant connects, your browser opens **Authorize** *assistant name*. Pick the **Workspace** and click **Authorize**. This connection will only access the selected workspace.
-  </Step>
-</Steps>
+On TryPost Cloud the server URL is:
+
+```
+https://app.trypost.it/mcp/trypost
+```
+
+Then log in to TryPost and pick your workspace: the first time the assistant connects, your browser opens **Authorize** *assistant name*. Pick the **Workspace** and click **Authorize**. This connection will only access the selected workspace.
+
+While you do this, the dialog shows "Waiting for your AI to connect…". As soon as the assistant is connected, it closes and the app appears under **Connected apps**.
 
 To use the assistant with another workspace, connect it again and pick that workspace.
 
 Step-by-step guides for each assistant, and the list of every tool, are in [Build with AI](/ai/introduction).
 
 <Note>
-  Self-hosting TryPost? Use `{APP_URL}/mcp/trypost` as the server URL.
+  Self-hosting TryPost? Use `{APP_URL}/mcp/trypost` as the server URL. To connect ChatGPT to your own instance, see [ChatGPT](/ai/chatgpt).
 </Note>
 
 ## Connected apps
 
-**Connected apps** lists the assistants you've signed in with for this workspace, with when each was **Last used**. Each person sees only their own.
+**Connected apps** lists the assistants you've signed in with for this workspace, with when each was **Last used**. Each person sees only their own. With none yet, it shows **No connected apps**.
 
-To remove one, click **Disconnect** and type the app's name to confirm. This signs the app out of TryPost: it will need to reconnect before it can use MCP again.
+To remove one, click **Disconnect** and type `disconnect` to confirm. This signs the app out of TryPost: it will need to reconnect before it can use MCP again.
 
 Removing a member from the workspace also disconnects their apps.
 

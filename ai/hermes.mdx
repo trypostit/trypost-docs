@@ -102,7 +102,7 @@ Pick **one** way to add the server. Do not run `login` after a successful `add` 
 
 TryPost MCP accepts **OAuth only** — a browser sign-in with the `mcp:use` scope. In Hermes that is `auth: oauth`. Hermes handles [discovery, Dynamic Client Registration, PKCE, token exchange, and refresh](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp).
 
-Personal Access Tokens from **Settings → API Keys** work on the [REST API](/api-reference/introduction), not on `/mcp/trypost`.
+Personal Access Tokens from **Settings → API** work on the [REST API](/api-reference/introduction), not on `/mcp/trypost`.
 
 <Warning>
   Do not pass `--auth header` and do not put `Authorization: Bearer …` under `headers`. A pasted API key returns `403 MCP OAuth authorization required`.

@@ -49,7 +49,7 @@ Same paths, user configures `APP_URL` in `.env`:
 | **Documentation** | `book-open` | Home (`index`), quickstart, one page per network under `platforms/`, community pages |
 | **API Reference** | `code` | REST API. Operation pages are generated from **`openapi.json`** at the repo root (hand-written from the app's `routes/api.php`, `app/Http/Requests/Api/**`, `app/Http/Resources/**`). Prose that does not fit one operation lives in `api-reference/introduction.mdx` and `api-reference/guides/*.mdx`. There are no per-endpoint `.mdx` files any more; old `api-reference/endpoint/*` slugs redirect |
 | **Build with AI** | `microchip-ai` | MCP server intro, tools reference, setup guides per client |
-| **Knowledge Base** | `book` | How the app works. Groups mirror the app sidebar, then the settings sidebar: Getting started, Create, Publish, Insights, Repurpose, Channels, Settings (Personal, Workspace, Features, Developers, Account). Page titles use the on-screen labels from `lang/en/*.php` |
+| **Knowledge Base** | `book` | How the app works. Groups mirror the app sidebar, then the settings sidebar: Getting started, Create, Publish, Insights, Repurpose, Channels, Settings (Personal, Workspace, Content, Integrations). Page titles use the on-screen labels from `lang/en/*.php` |
 | **Self-Hosting** | `server` | Overview, requirements, installation, configuration, AI providers, Docker, production, upgrading — isolated from the rest |
 
 Every removed or moved slug gets an entry in `docs.json` `redirects`.
@@ -109,7 +109,7 @@ The same applies to anything a self-hoster can switch off or raise: platform ava
 ### Authentication
 - **REST API**: Bearer token in the `Authorization` header (Personal Access Tokens issued by Laravel Passport, JWT format — do not assume any prefix or fixed length). In examples use `YOUR_API_KEY` as the placeholder.
 - **MCP server**: OAuth 2.1 with Dynamic Client Registration (PKCE S256, scope `mcp:use`). Clients discover endpoints via `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`, register at `/oauth/register`, then walk the user through `/oauth/authorize` → `/oauth/token` in a browser. Personal Access Tokens are **not** accepted on `/mcp/trypost` — use the REST API for scripts/CI that cannot complete OAuth.
-- Issued via `POST /api/api-keys` or **Settings > API Keys** in the dashboard.
+- Issued via `POST /api/api-keys` or **Settings → API** in the dashboard (page **API Keys**).
 
 ### Endpoints, shapes and pagination
 
