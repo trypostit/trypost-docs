@@ -13,7 +13,7 @@ The composer is where you write posts. Open it with:
 
 <Steps>
   <Step title="Pick the channels">
-    Select one or more connected channels. Saving creates one post per channel. **Last used** selects the channels of the last post you saved in this browser. The channel search matches every word you type and ignores accents.
+    Select one or more connected channels. Saving creates one post per channel. **Last used** selects the channels of the last post you saved in this workspace, in this browser. The channel search matches every word you type and ignores accents.
   </Step>
   <Step title="Write and add media">
     Write the text in the shared editor and add images, videos or a PDF. See [Media](/knowledge-base/media).
@@ -62,8 +62,8 @@ Each network offers its own post types, such as **Feed Post**, **Reel** and **St
 | Discord | **Channel** (required), **Mentions**, **Embeds** |
 | YouTube | **Title**, **Description**, **Category**, **Visibility**, **License**, **Notify subscribers**, **Allow embedding**, **Made for kids** |
 | Google Business | **Post type** (What's New, Event, Offer), **Button** |
-| Mastodon | **Content warning** |
-| Threads | **Topic**, and the **Ghost post** type (text only, archived after 24 hours) |
+| Mastodon | **Content warning**, and the **Poll** type: 2 to 4 choices, how long voting stays open, **Allow multiple choices** and **Hide votes until it ends**, no media. See [Polls](/platforms/mastodon#polls) |
+| Threads | **Topic**, the **Ghost post** type (text only, archived after 24 hours) and the **Poll** type: 2 to 4 choices, no media; Threads sets how long voting stays open. See [Polls](/platforms/threads#polls) |
 | X | The **Poll** type: 2 to 4 choices and how long voting stays open, no media. See [Polls](/platforms/x-twitter#polls) |
 | LinkedIn | **Document title** for PDF posts, and the **Add comment** button for one comment under the post. See [Comment](/platforms/linkedin#comment) |
 | Instagram | **Collaborators** (feed posts and Reels); on Reels also **Music** (accounts connected through Facebook), **Trial reel** and **Share to feed** |
@@ -86,7 +86,7 @@ The composer counts characters for each channel and warns before you save.
 - Instagram allows up to 5 hashtags. The counter shows how many hashtags you have left.
 - Instagram and Facebook Stories send no caption, so their text is not measured.
 
-The network limits are checked when you schedule or publish, not when you save a draft. X poll choices are the exception: more than 4, a repeated one or one over 25 characters is refused even on a draft. Each network's limit is on its page in the **Platforms** section of the docs, for example [X (Twitter)](/platforms/x-twitter) or [Instagram](/platforms/instagram).
+The network limits are checked when you schedule or publish, not when you save a draft. Poll choices are the exception, on X, Mastodon and Threads alike: more than 4, a repeated one or one over the network's limit (25 characters on X and Threads, 50 on Mastodon) is refused even on a draft, and so is a poll length out of range. Each network's limit is on its page in the **Platforms** section of the docs, for example [X (Twitter)](/platforms/x-twitter) or [Instagram](/platforms/instagram).
 
 <Note>
   On TryPost Cloud, links in the X version of a post may be shown without being clickable. See [X (Twitter)](/platforms/x-twitter).
@@ -100,7 +100,7 @@ On X, Bluesky and Mastodon you can publish a thread:
 - A thread has up to 24 replies.
 - Each reply has its own text and media, and needs one of the two (a poll reply needs text and has no media). Its media appears under that reply only.
 - Each reply is measured against the account's character limit.
-- On X, a reply can be a poll: click the poll button (**Add a poll**) in the toolbar. See [Polls in a thread](/platforms/x-twitter#polls-in-a-thread).
+- On X and Mastodon, a reply can be a poll: click the poll button (**Add a poll**) in the toolbar. See Polls in a thread on [X](/platforms/x-twitter#polls-in-a-thread) and [Mastodon](/platforms/mastodon#polls-in-a-thread).
 - Press <kbd>Shift</kbd> <kbd>Enter</kbd> to start the next post of the thread, and <kbd>Backspace</kbd> in an empty one to remove it. In a reply, once the thread has 24 replies, <kbd>Shift</kbd> <kbd>Enter</kbd> breaks the line instead.
 
 On LinkedIn, **Add comment** in the card's toolbar adds one text-only comment, published under the post from the same profile or page. See [Comment](/platforms/linkedin#comment).
@@ -113,6 +113,7 @@ When your text has a link, the composer shows a link preview card.
 
 - The × (**Remove link preview**) publishes the post without the card. Facebook posts, Bluesky and LinkedIn honour it.
 - Threads always shows a card for the first link, so it has no ×.
+- The composer shows no card on a poll, on any network.
 - **Replace link preview with media** adds the card's image to the post as media.
 
 ## When it publishes
@@ -163,11 +164,11 @@ The assistant is part of the web app only; it is not available through the API o
 - Add [labels](/knowledge-base/settings/labels) to the post.
 - Add emoji from the emoji picker in the toolbar.
 - **Expand dialog** opens the composer full screen; **Exit full screen** brings it back.
-- With no channel picked, **Last used** selects the channels you used last time; **Select all** picks every channel (**Deselect all** clears them).
+- With no channel picked, **Last used** selects the channels you used last time in this workspace; **Select all** picks every channel (**Deselect all** clears them).
 - A file you remove stays under **Suggested media** until you close the composer, so you can add it back with one click.
 - An empty editor says "Start writing or get inspired with **Templates**"; the link opens your templates.
 - **Post previews** show each network's version. "Previews are an approximation. Each network decides the final look of your post."
-- If you close the composer without saving, the next time you open it TryPost asks **Resume unfinished post?** Choose **Resume post** or **Discard**.
+- If you close the composer without saving, the next time you open it TryPost asks **Resume unfinished post?** Choose **Resume post** or **Discard**. Until then, a dot on **New** and on its **Post** item reminds you: "You have a post you didn't finish".
 
 ## API and MCP
 

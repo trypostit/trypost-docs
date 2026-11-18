@@ -49,7 +49,7 @@ Same paths, user configures `APP_URL` in `.env`:
 | **Documentation** | `book-open` | Home (`index`), quickstart, one page per network under `platforms/`, community pages |
 | **API Reference** | `code` | REST API. Operation pages are generated from **`openapi.json`** at the repo root (hand-written from the app's `routes/api.php`, `app/Http/Requests/Api/**`, `app/Http/Resources/**`). Prose that does not fit one operation lives in `api-reference/introduction.mdx` and `api-reference/guides/*.mdx`. There are no per-endpoint `.mdx` files any more; old `api-reference/endpoint/*` slugs redirect |
 | **Build with AI** | `microchip-ai` | MCP server intro, tools reference, setup guides per client |
-| **Knowledge Base** | `book` | How the app works. Groups mirror the app sidebar, then the settings sidebar: Getting started, Create, Publish, Insights, Repurpose, Channels, Settings (Personal, Workspace, Features, Developers, Account). Page titles use the on-screen labels from `lang/en/*.php` |
+| **Knowledge Base** | `book` | How the app works. Groups mirror the app sidebar, then the settings sidebar: Getting started, Create, Publish, Insights, Repurpose, Channels, Settings (Personal, Workspace, Content, Integrations). Page titles use the on-screen labels from `lang/en/*.php` |
 | **Self-Hosting** | `server` | Overview, requirements, installation, configuration, AI providers, Docker, production, upgrading — isolated from the rest |
 
 Every removed or moved slug gets an entry in `docs.json` `redirects`.
@@ -109,11 +109,11 @@ The same applies to anything a self-hoster can switch off or raise: platform ava
 ### Authentication
 - **REST API**: Bearer token in the `Authorization` header (Personal Access Tokens issued by Laravel Passport, JWT format — do not assume any prefix or fixed length). In examples use `YOUR_API_KEY` as the placeholder.
 - **MCP server**: OAuth 2.1 with Dynamic Client Registration (PKCE S256, scope `mcp:use`). Clients discover endpoints via `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`, register at `/oauth/register`, then walk the user through `/oauth/authorize` → `/oauth/token` in a browser. Personal Access Tokens are **not** accepted on `/mcp/trypost` — use the REST API for scripts/CI that cannot complete OAuth.
-- Issued via `POST /api/api-keys` or **Settings > API Keys** in the dashboard.
+- Issued via `POST /api/api-keys` or **Settings → API** in the dashboard (page **API Keys**).
 
 ### Endpoints, shapes and pagination
 
-`openapi.json` is the source of truth for every operation, request field, response shape and error (hand-written from the app's `routes/api.php`, `app/Http/Requests/Api/**`, `app/Http/Resources/**`, `app/Http/Controllers/Api/**`). Public API = routes whose URI starts with `api/` (85 today: `php artisan route:list --path=api`). Edit the spec, not generated pages. `api-reference/introduction.mdx` covers auth, errors, pagination, rate limits and timestamps; `api-reference/guides/posting.mdx` covers `meta` per network, scheduling modes and thread replies; `api-reference/guides/media-uploads.mdx` covers media. Update those, not this file. Facts to keep in mind:
+`openapi.json` is the source of truth for every operation, request field, response shape and error (hand-written from the app's `routes/api.php`, `app/Http/Requests/Api/**`, `app/Http/Resources/**`, `app/Http/Controllers/Api/**`). Public API = routes whose URI starts with `api/` (89 today: `php artisan route:list --path=api`). Edit the spec, not generated pages. `api-reference/introduction.mdx` covers auth, errors, pagination, rate limits and timestamps; `api-reference/guides/posting.mdx` covers `meta` per network, scheduling modes and thread replies; `api-reference/guides/media-uploads.mdx` covers media. Update those, not this file. Facts to keep in mind:
 
 - Resources are unwrapped (`JsonResource::withoutWrapping()`); lists use the Laravel envelope `{ data, links, meta }` with the page size from `config('app.pagination.default')` (25 today). Always tell readers to read `meta.per_page`.
 - `PUT /posts/{post}` with `status: publishing` publishes now; there is no separate publish endpoint.
@@ -123,10 +123,10 @@ The same applies to anything a self-hoster can switch off or raise: platform ava
 
 ## MCP Server
 
-- The tool list is exactly `TryPostServer::$tools` (`app/Mcp/Servers/TryPostServer.php`), 83 tools today; `ai/tools-reference.mdx` documents every one and `check_coverage.py mcp` enforces it. Names are the class basename in kebab-case plus `-tool`, except `get-tiktok-creator-info-tool` (`#[Name]`).
+- The tool list is exactly `TryPostServer::$tools` (`app/Mcp/Servers/TryPostServer.php`), 86 tools today; `ai/tools-reference.mdx` documents every one and `check_coverage.py mcp` enforces it. Names are the class basename in kebab-case plus `-tool`, except `get-tiktok-creator-info-tool` (`#[Name]`).
 - `create-post-tool` / `create-posts-tool` / `update-post-tool` accept inline `media[]` (`url`, `upload_token` or `id`); `update-post-tool` cannot change the channel. `create-api-key-tool` returns `{token, plain_token}` like REST.
 - Gates mirror the web: any member (`createPost`) for posts, notes, ideas, labels, signatures, analytics and channel reads; `publishDirectly` for approve/reject, set recurrence, reorder queue, move to slot and every repurpose tool; admins (`manageAccounts`, `manageWebhooks`, `manageTeam`) for posting-schedule writes, webhooks and API keys.
-- Server route: `Mcp::web('/mcp/trypost', TryPostServer::class)->middleware(['auth:api', 'workspace.token:mcp'])`. `LoadWorkspaceFromToken` requires an active OAuth grant with `mcp:use` (`403 MCP OAuth authorization required.` otherwise), binds the token's workspace (`401 No workspace selected.`, `403 Workspace access denied.`), and returns `402 Active subscription required.` on Cloud without app access.
+- Server route: `Mcp::web('/mcp/trypost', TryPostServer::class)->middleware([ChallengeChatGptToolCalls::class, AuthenticateMcp::class.':api', LoadMcpWorkspace::class])` (`routes/ai.php`). `LoadMcpWorkspace` wraps `LoadWorkspaceFromToken`, except that ChatGPT can connect and list tools without signing in from the IP ranges in `MCP_CHATGPT_IP_RANGES_URL`. Every other request goes through `LoadWorkspaceFromToken`, which requires an active OAuth grant with `mcp:use` (`403 MCP OAuth authorization required.` otherwise), binds the token's workspace (`401 No workspace selected.`, `403 Workspace access denied.`), and returns `402 Active subscription required.` on Cloud without app access.
 - There is no REST endpoint or MCP tool for generating or rewriting content with AI. Repurpose can shorten captions with AI in the background, including for repurposes created through REST or MCP (`app/Services/Repurpose/CaptionAdapter.php`).
 
 ## Notifications and permissions
@@ -147,11 +147,11 @@ Every email the app sends is a Maizzle template in `maizzle/templates/` with a M
 
 ## Scheduled Commands
 
-The full table (17 entries, including analytics, retention and Google Business review checks) lives in `self-hosting/production.mdx` → **Scheduled Tasks (Cron)**; the source is `routes/console.php` / `php artisan schedule:list`.
+The full table (17 rows, including analytics, retention, Google Business review checks, PostHog sync and database backups) lives in `self-hosting/production.mdx` → **Scheduled Tasks (Cron)**. `php artisan schedule:list` shows 20 entries: the two publication-discovery entries (X and the rest) share a row, and the two analytics finalize jobs are covered in prose. The sources are `routes/console.php` and the `paulocastellano/laravel-database-backup` service provider (`backup:database`).
 
 ## Self-Hosted Requirements
 
-- PHP 8.4.1+ (the Docker image ships 8.4), Node.js 22.12+, PostgreSQL or MySQL, Redis
+- PHP 8.4.1+ (the Docker image ships 8.5), Node.js 22.12+, PostgreSQL or MySQL, Redis
 - Horizon (queues), Reverb (WebSockets) and the scheduler running continuously
 - Imagick with HEIC for iPhone photo conversion (in the Docker image)
 - Upload limits: `upload_max_filesize=1G`, `post_max_size=1G` (matches the Docker image)
@@ -160,7 +160,7 @@ The full table (17 entries, including analytics, retention and Google Business r
 
 ## Supported Languages
 
-16 locales (`App\Enums\User\Locale`): `en`, `uk`, `pt-BR`, `es`, `fr`, `de`, `it`, `nl`, `pl`, `el`, `ja`, `ko`, `zh`, `ru`, `tr`, `ar`. Docs are written in English only.
+17 locales (`App\Enums\User\Locale`): `en`, `uk`, `pt-BR`, `es`, `fr`, `de`, `it`, `nl`, `pl`, `el`, `ja`, `ko`, `zh`, `ru`, `tr`, `ar`, `id`. Docs are written in English only.
 
 ## Running Docs Locally
 

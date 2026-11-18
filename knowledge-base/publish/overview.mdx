@@ -1,10 +1,12 @@
 ---
 title: "Publish"
-description: "See and manage every post: the queue, approvals, drafts and what was sent, as a list or a calendar."
+description: "See and manage every post: the queue, approvals, drafts and what was sent, as a list, a calendar or a board."
 icon: "pen-to-square"
 ---
 
 **Publish** is where your posts live. Open it from the sidebar for **All channels**, or open one channel in the **Channels** section and pick **Publish** to see only that channel.
+
+**Publish** opens the view you used last in this browser: **List**, **Calendar** or **Board**. The first time, it opens the list.
 
 Each post belongs to one channel. When you save a post for several channels in the [composer](/knowledge-base/publish/composer), TryPost creates one post per channel, so each can be edited, moved or deleted on its own.
 
@@ -27,23 +29,60 @@ Published posts are kept for 2 years, then deleted from TryPost with their media
 
 Sent posts show their latest metrics right on the card, with when they were last refreshed ("Refreshed 2 hours ago"). Use the arrows to page through the metrics, and **See post insights** for everything the network reports. Until the first collection a post shows "Metrics have not been collected yet." Networks without analytics (LinkedIn, Telegram, Discord, Google Business) show none; see [Insights](/knowledge-base/insights/overview).
 
-An X poll also shows its votes per choice; see [Poll results](/platforms/x-twitter#poll-results).
+A poll on X, Mastodon or Threads also shows its votes per choice; see Poll results on [X](/platforms/x-twitter#poll-results), [Mastodon](/platforms/mastodon#poll-results) and [Threads](/platforms/threads#poll-results).
 
 **Sent** also shows posts you published directly on the network, outside TryPost. They are marked "This was published directly from Instagram" (or the channel's network).
 
-## List and Calendar
+## List, Calendar and Board
 
-Switch between **List** and **Calendar**.
+Switch between **List**, **Calendar** and **Board**. The tabs above belong to the list.
 
 - The calendar has **3 days**, **Week** and **Month** views, and a **Status** filter: **All posts**, **Drafts**, **Scheduled** or **Sent**.
-- **Undated drafts** lists drafts without a date.
+- **No Date** opens **Undated drafts**, the drafts without a date. On a phone, pick **Undated drafts** in the filter menu.
 - Clicking a time on the calendar opens the composer at that time.
-- Instagram channels have a third view, **Grid**: an approximation of your profile grid.
+- Instagram channels have one more view, **Grid**: an approximation of your profile grid.
+
+### Reschedule by dragging
+
+Drag a post on the calendar to give it a new time:
+
+- **Week** and **3 days**: drop it on an hour and it takes the start of that hour. In the current hour, it takes 5 minutes from now.
+- **Month**: drop it on a day and it keeps its time. A draft without a date gets 09:00.
+- Drop a scheduled post on a free posting time of its own channel and it joins the queue there.
+
+TryPost confirms with "Rescheduled your post for …". On a touchscreen, press and hold a post before you drag it. Press <kbd>Esc</kbd> to cancel a drag.
+
+Moving a queued post off its posting time asks first: "Moving post to a custom time". Click **Move to custom time** to go ahead, or **Cancel**. Tick **Don't show this again** to skip the question in this browser. The post's old time in the queue is free again.
+
+**Undated drafts** works both ways. Drag a draft out of it onto the calendar to give it a date. Drop a post on it to take its date away: the post becomes a draft without a date ("Moved your post to No Date as a draft."), and a queued post frees its posting time.
+
+- You can drag drafts and scheduled posts. Posts that are **Publishing**, **Published**, **Failed** or waiting for approval stay put, and so does a scheduled post due within a minute.
+- You cannot drop a post on a time that has passed.
+- A draft stays a draft; it only changes its date.
+- If you move a recurring post, its series follows it.
+- If you need approval, moving a scheduled post sends the change for approval (see [Approvals](/knowledge-base/publish/approvals)), and you cannot drop a post on a posting time.
+
+Each post on the calendar shows an icon for its state; hover over it to read **Draft**, **Pending approval**, **In the queue**, **Custom time**, **Recurring**, **Publishing**, **Published**, **Deleted** or **Failed**.
+
+### Board
+
+**Board** shows your posts as columns of cards. Pick how to split them with **Group by**:
+
+| Group by | Columns |
+| --- | --- |
+| **Status** | **Draft**, **Approvals**, **Scheduled**, **Published** and **Failed**. |
+| **Label** | One column per label, then **Untagged**. A post with two labels shows in both columns. |
+| **Channel** | One column per channel, in the sidebar's order. Only on **All channels**. |
+
+Each column shows how many posts it holds and loads more cards as you scroll. An empty column says "Nothing here". If your filters leave no column, the board says "Nothing matches these filters".
+
+Click a card to open its **Post Details**. The card's menu has the same actions as on the list, except reordering the queue. Approvers can **Approve**, **Schedule**, **Add to queue** or **Reject** a pending post right on its card; see [Approvals](/knowledge-base/publish/approvals).
 
 ## Filters and time zone
 
-- **Labels** and **Channels** filter the list and the calendar. **Untagged** shows posts without labels. See [Labels](/knowledge-base/settings/labels).
+- **Labels** and **Channels** filter the list, the calendar and the board. **Untagged** shows posts without labels. See [Labels](/knowledge-base/settings/labels).
 - **Time zone** sets the zone the page shows times in. It starts as your own time zone from [Preferences](/knowledge-base/settings/preferences). Changing it only changes what you see; each channel still publishes on its own schedule.
+- The filters and the time zone stay set when you switch between **List**, **Calendar** and **Board**.
 
 ## Post actions
 
@@ -66,19 +105,30 @@ Each post card has buttons and a menu. What you see depends on the post's status
 | **See post insights** | Open the post's metrics. See [Channel insights](/knowledge-base/insights/channel-insights). |
 | **Post Details** | Show the full post, its channels, who created it and, once sent, its metrics. |
 
-Posts that are **Publishing**, **Published** or **Failed** cannot be edited or deleted. To try again, duplicate the post. Deleting a post never removes it from the network.
+Posts that are **Publishing**, **Published** or **Failed** cannot be edited or deleted. To try again, duplicate the post. A post that was deleted on the network can be deleted from TryPost. Deleting a post never removes it from the network.
 
 ## Statuses
 
 | Status | Meaning |
 | --- | --- |
 | **Draft** | Saved, not scheduled. |
-| **Pending approval** | Waiting for an approver. |
+| **Pending** | Waiting for an approver. On the calendar, its tooltip reads "Pending approval". |
 | **Scheduled** | Will publish at its time. |
 | **Publishing** | Being sent to the network now. |
 | **Retrying** | The network had a temporary problem; TryPost tries again at the time shown. |
 | **Published** | Live on the network. |
 | **Failed** | Could not be published. |
+| **Deleted** | Published, then deleted on the network. |
+
+### Posts deleted on the network
+
+When someone deletes a published post on Facebook, Instagram, Threads, YouTube, X, Bluesky, Mastodon or Pinterest, TryPost finds out the next time it [reads the post's metrics](/knowledge-base/insights/channel-insights#how-often-data-updates). TryPost reads a post's metrics only during its first 30 days (31 on Mastodon; on X at 2, 3, 7, 14 and 28 days), so a post deleted after that stays **Published** and sends no webhook. The post shows **Deleted**, with a trash mark on the calendar. Its badge opens "Deleted on Instagram" (or the channel's network): "It was removed after it was published, so its link and insights are no longer available." The card in **Publish** no longer shows metrics, while the numbers TryPost already read stay in [Insights](/knowledge-base/insights/channel-insights#performance-per-post). The post loses **Open post on Instagram**, **Share link in a post** and **Copy link**, and you can delete it from TryPost. If the network lists the post again, it goes back to **Published**.
+
+TikTok, LinkedIn, Google Business, Telegram and Discord posts are not checked, so they stay **Published**.
+
+### Cover not applied
+
+A published YouTube Short with a cover image of its own can show **Warning**. YouTube refused the cover, but the video is live and the post stays **Published**. Click **Warning** to see **Cover not applied** and why. See [YouTube covers](/platforms/youtube#cover).
 
 ### Why a post failed
 
@@ -97,9 +147,15 @@ A post that is longer than the network allows fails with a message such as "This
 
 ## Notes
 
-Click **Show notes** at the bottom of a post card to talk with your team about it. The notes open inside the card, on every tab, and **Hide notes** closes them. Press <kbd>Enter</kbd> to send and <kbd>Shift</kbd> <kbd>Enter</kbd> for a new line. A link to a note in an email opens that post's notes and highlights the note. You can **Edit** or **Delete** your own notes; edited notes are marked "edited", and **Load older notes** shows earlier ones. A new note emails every workspace member except its author. On a post pending approval, only the approvers and the member who asked get the email. Each person can turn these emails off with **New note on a post** in [Notifications](/knowledge-base/settings/notifications).
+Click **Show notes** at the bottom of a post card to talk with your team about it. The notes open inside the card, on every tab, and **Hide notes** closes them. Press <kbd>Enter</kbd> to send and <kbd>Shift</kbd> <kbd>Enter</kbd> for a new line. A link to a note in an email opens that post's notes and highlights the note. You can **Edit** or **Delete** your own notes; edited notes are marked "edited". Scroll up to load older notes.
+
+Type `@` to mention someone: the list starts with **@all** ("Everyone on this post"), then your teammates. Hover over a mention to see that person's local time. To react, click the smiley (**Add reaction**) and pick an emoji, or click an existing reaction to add or take back yours. New notes and reactions show up for everyone who has the post open.
+
+Each person you mention gets an email. A new note also emails the post's other participants: its author, the member who asked for approval and everyone who already wrote a note on it. Nobody else is emailed, the note's author never is, and editing a note only emails the people the edit adds as mentions. Reactions send no email. On a post pending approval, only the approvers and the member who asked see its notes, so only they can be mentioned. Each person can turn these emails off with **New note on a post** in [Notifications](/knowledge-base/settings/notifications).
 
 ## Channel page extras
+
+Admins see a gear in the header: **Manage channels** on **All channels** opens [Settings → Channels](/knowledge-base/channels/settings), and **Channel settings** on a channel opens that channel's settings.
 
 When you open **Publish** for a single channel, the header also shows:
 
@@ -117,6 +173,8 @@ A workspace without channels shows "Welcome to TryPost 👋" with a button to co
 | List posts | [List posts](/api-reference/posts/list-posts) | `list-posts-tool` |
 | Read a post | [Get post](/api-reference/posts/get-post) | `get-post-tool` |
 | Delete a post | [Delete post](/api-reference/posts/delete-post) | `delete-post-tool` |
-| Notes | [List post notes](/api-reference/post-notes/list-post-notes), [Create post note](/api-reference/post-notes/create-post-note), [Update post note](/api-reference/post-notes/update-post-note), [Delete post note](/api-reference/post-notes/delete-post-note) | `list-post-notes-tool`, `create-post-note-tool`, `update-post-note-tool`, `delete-post-note-tool` |
+| Notes | [List post notes](/api-reference/post-notes/list-post-notes), [Get post note](/api-reference/post-notes/get-post-note), [Create post note](/api-reference/post-notes/create-post-note), [Update post note](/api-reference/post-notes/update-post-note), [Delete post note](/api-reference/post-notes/delete-post-note) | `list-post-notes-tool`, `create-post-note-tool`, `update-post-note-tool`, `delete-post-note-tool` |
+| Mentions | [List post note mentionables](/api-reference/post-notes/list-post-note-mentionables) | `list-post-note-mentionables-tool` |
+| Reactions | [Add post note reaction](/api-reference/post-notes/add-post-note-reaction), [Remove post note reaction](/api-reference/post-notes/remove-post-note-reaction) | `add-post-note-reaction-tool`, `remove-post-note-reaction-tool` |
 
 See the [MCP tools reference](/ai/tools-reference).

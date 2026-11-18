@@ -18,6 +18,10 @@ TryPost publishes posts and threads to Bluesky.
 TryPost opens the new channel's **Publish** page and asks how many times a week you want to post. See [Connecting channels](/knowledge-base/channels/connecting) for the full flow.
 
 <Note>
+  The email on your Bluesky account must be confirmed to connect or reconnect it. If it isn't, TryPost asks you to confirm it in Bluesky settings and connect again ("TryPost requires a confirmed email to publish videos."). A connected account whose email becomes unconfirmed fails video posts with "Confirm your email in Bluesky settings, then try publishing again."
+</Note>
+
+<Note>
   Bluesky doesn't use OAuth. Create an [App Password](https://bsky.app/settings/app-passwords) in your Bluesky settings — do not use your main password.
 </Note>
 
@@ -40,11 +44,11 @@ The video size is the lexicon's decimal value (300 000 000 bytes). Bluesky's ima
 - **300 characters** per post. TryPost counts code points, so an emoji counts as one.
 - **Threads** — click **Start thread** to add replies under the post, up to **24**. Each reply has its own text and up to 4 media items, following the same rules as a post.
 - **Link preview** — the first link gets a preview card. Remove it with the **×** on the card (`meta.link_preview: false` on the API).
-- **Alt text** — up to 2,000 characters per image.
+- **Alt text** — up to 2,000 characters per image or video.
 
 ## Insights
 
-Bluesky posts and followers appear in [Insights](/knowledge-base/insights/overview).
+Bluesky posts and followers appear in [Insights](/knowledge-base/insights/overview). When you delete a published post on Bluesky, TryPost marks it [deleted](/knowledge-base/publish/overview#posts-deleted-on-the-network) at its next metrics read.
 
 ## Self-hosting setup
 

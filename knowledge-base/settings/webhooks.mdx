@@ -1,6 +1,6 @@
 ---
 title: "Webhooks"
-description: "Receive signed HTTP notifications when posts are created, scheduled, published, fail or are deleted."
+description: "Receive signed HTTP notifications when posts are created, scheduled, published, fail, are deleted, or disappear from the network."
 icon: "webhook"
 ---
 
@@ -35,14 +35,14 @@ A new webhook starts **Enabled**. Creating or editing a webhook does not send a 
 | `post.scheduled` | Post scheduled | An existing post changes to scheduled | Post payload |
 | `post.unscheduled` | Post unscheduled | A scheduled post goes back to drafts, or back to pending approval | Post payload |
 | `post.published` | Post published | A post was published on its channel | Post payload |
+| `post.deleted_on_network` | Post deleted on network | A published post was deleted on its network | Post payload, with `publish_status: deleted` |
+| `post.restored` | Post back on network | A post marked deleted is back on its network | Post payload, with `publish_status: published` |
 | `post.failed` | Post failed | A post failed to publish | Post payload |
 | `post.deleted` | Post deleted | A post is deleted | `{ "id", "workspace_id" }` only |
 
-<Note>
-  Posts used to carry their channels in a `platforms` list, and there was a `post.partially_published` event. Both were removed: a post has one channel, and its fields are at the top of `data`. Webhooks subscribed to `post.partially_published` were moved to `post.published` and `post.failed`.
-</Note>
-
 Status events fire when the status changes, not on every save. A post created already scheduled or queued sends `post.created`, with `status` set to `scheduled`. Edits that keep the status (text, media, labels, a new time on a scheduled post) send nothing.
+
+TryPost notices that a post was deleted on the network the next time it reads the post's metrics, on Facebook, Instagram, Threads, YouTube, X, Bluesky, Mastodon and Pinterest. TryPost reads a post's metrics only during its first 30 days (31 on Mastodon; on X at 2, 3, 7, 14 and 28 days), so a post deleted after that stays **Published** and sends no event. The post keeps `status: published` and its `platform_url`. If the network lists the post again later, `post.restored` fires; `post.published` is not sent again. Neither event is sent for posts imported from the network.
 
 There is no event while a post is publishing, and none for notes, approvals, channel changes or member changes. Posts deleted because their [channel was disconnected](/knowledge-base/channels/disconnecting) or their [workspace was deleted](/knowledge-base/settings/workspaces#delete-a-workspace) do not send `post.deleted`.
 
@@ -134,12 +134,12 @@ For every event except `post.deleted`, `data` is the post at the moment of the e
 | `workspace` | `{ id, name }` |
 | `labels` | `{ id, name, color }[]` |
 | `media` | See [Media](#media) |
-| `publish_status` | Publishing state on the network: `pending`, `publishing`, `retrying`, `pending_review`, `published`, `failed` or `rejected` |
+| `publish_status` | Publishing state on the network: `pending`, `publishing`, `retrying`, `pending_review`, `published`, `failed`, `rejected` or `deleted` (deleted on the network after it was published) |
 | `social_account_id` | Channel id |
 | `platform` | For example `linkedin`, `x`, `instagram-facebook` |
 | `content_type` | For example `linkedin_post`, `instagram_reel` |
 | `platform_post_id` | Id on the network, or `null` |
-| `platform_url` | Link to the live post, or `null` |
+| `platform_url` | Link to the live post, or `null`. Kept when the post is deleted on the network |
 | `error_message` | Why publishing failed, or `null` |
 | `display_name`, `display_username`, `display_avatar` | The channel as it looked when the post was saved |
 | `meta` | Per-network settings of the post (see [Posting](/api-reference/guides/posting)) |

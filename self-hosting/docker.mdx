@@ -51,7 +51,7 @@ See [Database](/self-hosting/configuration#database) for the trade-offs between 
 
 ## Production self-hosting
 
-No local PHP/Node install required. The published image (`ghcr.io/trypostit/trypost`, amd64 and arm64) is built on Alpine with PHP 8.4, includes the built frontend, and ships GD and Imagick with HEIC support. The image also contains an Inertia SSR bundle, but TryPost does not run SSR — leave `INERTIA_SSR_ENABLED` unset.
+No local PHP/Node install required. The published image (`ghcr.io/trypostit/trypost`, amd64 and arm64) is built on Alpine with PHP 8.5, includes the built frontend, and ships GD and Imagick with HEIC support. The image also contains an Inertia SSR bundle, but TryPost does not run SSR — leave `INERTIA_SSR_ENABLED` unset.
 
 ### What you do vs what the container does
 
@@ -124,7 +124,7 @@ On first boot the entrypoint:
 - waits for the database (PostgreSQL only — see above if you run MySQL)
 - runs migrations
 - syncs the **What's New** entries (`changelog:sync`)
-- creates `storage:link` if missing (unused if you later switch to S3 / R2 / Spaces)
+- creates `storage:link` if missing (unused if you later switch to S3 or R2)
 - loads Passport keys from `PASSPORT_PRIVATE_KEY` / `PASSPORT_PUBLIC_KEY` (exits if unset in production)
 - ensures the Passport Personal Access Client (`PassportSeeder`)
 - caches config / routes / views / events
@@ -170,7 +170,7 @@ docker compose -f compose.prod.yaml logs -f app
 ```
 
 1. Open `APP_URL` and sign in as admin
-2. Create an API key (Settings → API Keys) — proves Passport keys + Personal Access Client exist
+2. Create an API key (Settings → API) — proves Passport keys + Personal Access Client exist
 3. Connect an MCP client via OAuth (Settings → MCP), if you use assistants
 4. Schedule a post — Horizon must show as running
 
@@ -242,7 +242,7 @@ docker compose up -d
 
 On first boot the entrypoint can seed `.env` from `docker/.env.docker.example`, install Composer/npm deps if missing, generate `APP_KEY`, migrate, `storage:link`, `passport:keys` and the Passport personal access client (so `db:seed` below is only needed for plans and the admin user). Horizon, Reverb, the scheduler, and Vite start via Supervisor.
 
-For local media URLs, set `FILESYSTEM_DISK=public` in `.env` and ensure `storage:link` ran. The Docker example ships with `local`, which is a private disk with no public URL, so uploaded media cannot be served until you change it.
+The Docker example's default `FILESYSTEM_DISK` has no public URL, so uploaded media cannot be served until you change it. Set `FILESYSTEM_DISK=public` in `.env` and make sure `storage:link` ran, or use `s3` or `r2` (see [File Storage](/self-hosting/configuration#file-storage)).
 
 ### 2. Seed admin + Passport client
 

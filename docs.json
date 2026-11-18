@@ -90,8 +90,12 @@
             "pages": [
               "GET /posts/{post}/notes",
               "POST /posts/{post}/notes",
+              "GET /posts/{post}/notes/{note}",
               "PUT /posts/{post}/notes/{note}",
-              "DELETE /posts/{post}/notes/{note}"
+              "DELETE /posts/{post}/notes/{note}",
+              "GET /posts/{post}/notes/mentionables",
+              "PUT /posts/{post}/notes/{note}/reactions",
+              "DELETE /posts/{post}/notes/{note}/reactions"
             ]
           },
           {
@@ -337,8 +341,8 @@
                 "group": "Personal",
                 "pages": [
                   "knowledge-base/settings/profile",
-                  "knowledge-base/settings/preferences",
                   "knowledge-base/settings/authentication",
+                  "knowledge-base/settings/preferences",
                   "knowledge-base/settings/notifications"
                 ]
               },
@@ -346,28 +350,23 @@
                 "group": "Workspace",
                 "pages": [
                   "knowledge-base/settings/workspaces",
-                  "knowledge-base/settings/members-and-permissions"
+                  "knowledge-base/settings/members-and-permissions",
+                  "knowledge-base/settings/plans-and-billing"
                 ]
               },
               {
-                "group": "Features",
+                "group": "Content",
                 "pages": [
                   "knowledge-base/settings/signatures",
-                  "knowledge-base/settings/labels",
-                  "knowledge-base/settings/webhooks"
+                  "knowledge-base/settings/labels"
                 ]
               },
               {
-                "group": "Developers",
+                "group": "Integrations",
                 "pages": [
                   "knowledge-base/settings/api-keys",
-                  "knowledge-base/settings/mcp"
-                ]
-              },
-              {
-                "group": "Account",
-                "pages": [
-                  "knowledge-base/settings/plans-and-billing"
+                  "knowledge-base/settings/mcp",
+                  "knowledge-base/settings/webhooks"
                 ]
               }
             ]

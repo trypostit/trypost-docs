@@ -43,6 +43,7 @@ Images, a video and a PDF never mix in one post, and GIFs are not accepted. Offi
 
 - **3,000 characters** per post. Characters are counted as code points, so an emoji counts as one.
 - Bold text from the editor is converted to LinkedIn's bold characters; other formatting is sent as plain text.
+- Characters LinkedIn reserves, such as `@`, `_`, `*`, `~` and brackets, publish as you typed them. `#word` becomes a hashtag and `_` ends it, so `#machine_learning` becomes the hashtag `#machine` followed by `_learning`. `@name` stays plain text: TryPost does not create mentions.
 - **Link preview** — the first link in the text gets a preview card. Remove it with the **×** on the card (`meta.link_preview: false` on the API).
 - **Document title** — for PDF posts, set the title shown on the document (`meta.document_title`, up to 300 characters). Defaults to the file name.
 - **Alt text** — up to 4,086 characters per image.

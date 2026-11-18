@@ -53,6 +53,13 @@ TikTok allows **2,200 characters** of caption. The editor's TikTok settings (or 
 
 The choices you see come from your TikTok account: TikTok can shorten the maximum video length and switch off comments, Duet or Stitch, and TryPost shows those as **Turned off in your TikTok account settings**. The API exposes the same data at [Get TikTok creator info](/api-reference/social-accounts/get-tiktok-creator-info) (`GET /social-accounts/{account}/tiktok-creator-info`).
 
+TikTok takes a moment to confirm a post. While it does, the post shows **Retrying** and TryPost checks its status again — after 5 and 30 seconds, then once a minute — without sending the post a second time:
+
+- **TikTok is still processing the post.** TryPost keeps checking for up to an hour. If TikTok has not finished by then, the post fails with "The platform stayed unavailable after several retries. Please try again later."
+- **TikTok refuses the status request.** TryPost keeps checking for about 5 minutes, then the post fails with "TikTok did not confirm this post. Check your TikTok profile before publishing it again." Check your profile first: TikTok sometimes publishes such posts anyway.
+
+If TikTok rejects the post, it fails straight away with TikTok's reason.
+
 <Note>
   TikTok has no API to delete a post. Deleting a post in TryPost never removes it from TikTok (or any other network) — remove it in the TikTok app.
 </Note>

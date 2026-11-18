@@ -38,25 +38,28 @@ There are no AI credits or usage limits.
 
 ## Start your subscription
 
-After you sign up, the welcome steps end with **Choose your plan**. Pick Socials or Workspaces; the button reads **Start for $1** — $1 for the first month, then the plan's monthly price. You finish at Stripe Checkout, which asks for a card.
+After you sign up, the welcome steps end with **Plan**: **Activate your account**, on the **Socials** plan at $19/month. Click **Activate my account** to finish at Stripe Checkout, which asks for a card. Checkout has a field for a promotion code.
 
-The $1 first month is for a first subscription only, on the plan's monthly price. When it is not offered, a first subscription starts with an 8-day free trial instead, still with a card, and the Billing page shows **Trial until** *date*. The two never combine: the $1 first month replaces the trial.
-
-If the account had a subscription before, there is no $1 first month and no trial: you pay the plan's monthly price from the start.
-
-The welcome step is monthly only. Once subscribed, you can switch to yearly from the Billing page.
+The welcome step is Socials, monthly only. Once subscribed, you can switch to yearly or to **Workspaces** with **Change plan**.
 
 Until the owner finishes checkout, members of the account see **Waiting for the account owner**.
 
+### Offers
+
+An offer link (an address with `?offer=` from a TryPost campaign) changes the plan step: it shows the offer's price, such as a discount for your first months or **Free** for a free trial, and can change the button too: free-trial offers show **Start free trial**, and a trial that needs no card adds "No credit card required". A trial that needs no card starts right away, without Stripe Checkout; one that needs a card goes through Stripe Checkout like a normal subscription. Each offer works once per account, and only while the account has no active subscription. Offers apply to the Socials monthly price. With an offer, Checkout has a promotion code field only when the offer allows promotion codes and does not already give a discount.
+
 ## The Billing page
 
-Only the account owner can manage billing. Open it from **Settings → Billing**, or **Plans and billing** in the workspace menu.
+Only the account owner can manage billing. Open it from **Settings → Billing**, or **Plans and billing** in the workspace menu. It has two tabs.
 
-- **Current plan** — your plan and price, with **Renews automatically**, **Trial until** *date* or **Cancelled, ends on** *date*, and how many workspaces you use (**Workspaces: 1 of 1**).
-- **Payment method** — your card. **Manage on Stripe** opens Stripe to update your card or billing details, or to cancel.
-- **Invoices** — download past invoices.
+**Plan**:
 
-If a payment fails, the page shows **Payment past due** with **Update payment**, and the same notice appears at the bottom of the sidebar.
+- **Current plan** — your plan and price with its status: **Active**, **Free trial**, **Cancelled** or **Past due**. Below it, **Trial until** *date* during a trial, or **Cancelled, ends on** *date* after you cancel. A discount from an offer or promotion code shows how much it takes off: on your next payment, until a date, or on every payment.
+- **Payment methods** — your cards, with **Default** on the one Stripe charges. **Manage on Stripe** opens Stripe to update your card or billing details, or to cancel.
+
+**Invoices** lists your past invoices by **Date**, **Amount** and **Status**. Click **Download invoice** for the PDF.
+
+If a payment fails, the status reads **Past due**. A **Payment past due** notice also appears at the bottom of the sidebar, with **Update payment** to fix your card on Stripe.
 
 ## Change plan
 

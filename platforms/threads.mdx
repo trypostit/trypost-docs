@@ -6,7 +6,7 @@ icon: "threads"
 
 # Threads
 
-TryPost publishes posts and ghost posts to Threads.
+TryPost publishes posts, ghost posts and polls to Threads.
 
 ## Connect your account
 
@@ -23,12 +23,14 @@ TryPost opens the new channel's **Publish** page and asks how many times a week 
 |------|----------------|-------------|
 | **Thread** | `threads_post` | Text with up to 10 optional images and videos (several make a carousel) |
 | **Ghost post** | `threads_ghost_post` | Text only, archived after 24 hours. No media and no topic |
+| **Poll** | `threads_poll` | Question with 2 to 4 choices. No media |
 
 ## Media limits
 
 | `content_type` | Image | Video | Duration | Format |
 |----------------|-------|-------|----------|--------|
 | `threads_post` | 8 MB | 1 GB | 5 minutes | JPEG/PNG, aspect ratio up to 10:1 either way; video MOV or MP4 |
+| `threads_poll` | — | — | — | No media |
 
 **Edit Media** offers the crop presets 1:1, 4:5 and 1.91:1. Official specs: [Overview](https://developers.facebook.com/docs/threads/overview/), [Posts](https://developers.facebook.com/docs/threads/posts/). Full catalog: [Media](/knowledge-base/media#threads).
 
@@ -36,12 +38,32 @@ TryPost opens the new channel's **Publish** page and asks how many times a week 
 
 - **500 characters** per post.
 - **Topic** — tag the post with a topic (`meta.topic_tag`): 1 to 50 characters after a leading `#` is dropped, without `.` or `&`.
-- **Link preview** — Threads always shows a preview card for the first link; it cannot be removed.
-- **Alt text** — up to 1,000 characters per image.
+- **Link preview** — Threads always shows a preview card for the first link; it cannot be removed. A ghost post or a poll shows no card.
+- **Alt text** — up to 1,000 characters per image or video.
+
+## Polls
+
+Pick **Poll** at the top of the Threads card to publish a poll. The post text is the question, and the poll editor below it holds the choices.
+
+- The question is the post text, up to **500 characters**. A poll can't be scheduled without one.
+- **Choices**: **2 to 4**, each up to **25 characters** (some emoji, such as 🐧, count as two). Each choice shows a counter and stops at 25 characters. Click **Add a choice** for a third or fourth choice. Each choice must be different, ignoring upper and lower case; empty ones are dropped.
+- There is no length to pick: Threads decides how long voting stays open.
+- A poll is a text post: it can't carry images or video, not even in a draft. While the card has media or a file is uploading, **Poll** is disabled; on a poll, the media button is disabled.
+- A poll can have a **Topic**, like any post.
+
+**Remove poll** turns the card back into a **Thread**. The Threads preview shows the choices.
+
+Adding another network while the Threads card is a poll takes you back to the shared editor and turns the card back into a **Thread**; pick **Poll** again when you customize the Threads card.
+
+### Poll results
+
+Every post card in **Publish** and the post details show the poll's choices, each with its votes and percentage, and the total. Once TryPost has read the poll, the total is followed by where voting stands: "Ends in …" with the end Threads set, then "Voting ended" once the end has passed, and "Final results" once a read after the end has stored the final count.
+
+TryPost reads the votes together with the post's other metrics, about an hour after publishing and then once a day for 30 days; once a read after the end has stored the final count, the poll is not read again. The numbers are not live. Until the first read, the poll shows its choices with 0 votes.
 
 ## Insights
 
-Threads posts and followers appear in [Insights](/knowledge-base/insights/overview).
+Threads posts and followers appear in [Insights](/knowledge-base/insights/overview). When you delete a published post on Threads, TryPost marks it [deleted](/knowledge-base/publish/overview#posts-deleted-on-the-network) at its next metrics read. A poll made directly on Threads is imported as a **Poll**, with its choices.
 
 ## OAuth scopes
 

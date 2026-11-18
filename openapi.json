@@ -441,6 +441,44 @@
                     }
                   }
                 },
+                "mastodon_poll": {
+                  "summary": "Mastodon poll",
+                  "value": {
+                    "content": "Which days work for the community call?",
+                    "status": "draft",
+                    "social_account_id": "5f4e3d2c-1b0a-4f9e-8d7c-6b5a4f3e2d1c",
+                    "content_type": "mastodon_poll",
+                    "meta": {
+                      "poll": {
+                        "options": [
+                          "Monday",
+                          "Wednesday",
+                          "Friday"
+                        ],
+                        "duration_minutes": 4320,
+                        "multiple": true,
+                        "hide_totals": true
+                      }
+                    }
+                  }
+                },
+                "threads_poll": {
+                  "summary": "Threads poll",
+                  "value": {
+                    "content": "Morning or evening posts?",
+                    "status": "draft",
+                    "social_account_id": "3a2b1c0d-9e8f-4a7b-8c6d-5e4f3a2b1c0d",
+                    "content_type": "threads_poll",
+                    "meta": {
+                      "poll": {
+                        "options": [
+                          "Morning",
+                          "Evening"
+                        ]
+                      }
+                    }
+                  }
+                },
                 "linkedin_with_comment": {
                   "summary": "LinkedIn post with a comment",
                   "value": {
@@ -1266,7 +1304,7 @@
         ],
         "summary": "Delete post",
         "operationId": "deletePost",
-        "description": "Deletes a post that has not been sent, with its media. Nothing is removed from the network. Posts that are publishing, published or failed cannot be deleted: the request returns `422` with `Sent posts cannot be deleted.` on `post`.",
+        "description": "Deletes a post that has not been sent, with its media. Nothing is removed from the network. Posts that are publishing, published or failed cannot be deleted: the request returns `422` with `Sent posts cannot be deleted.` on `post`. A published post that was deleted on the network (`publish_status: deleted`) can be deleted.",
         "responses": {
           "204": {
             "description": "Deleted."
@@ -1451,6 +1489,65 @@
         }
       }
     },
+    "/posts/{post}/notes/mentionables": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PostId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "List post note mentionables",
+        "operationId": "listPostNoteMentionables",
+        "description": "Lists the members who see the post, the API key's user included: the people a note on it can mention. Sorted by name. Not paginated: the body is a plain array. On a post pending approval, only the approvers and the member who asked are listed. Mention one of them in a note body as `@[user:<id>]`, or all of them as `@[everyone]`.",
+        "responses": {
+          "200": {
+            "description": "The members a note can mention.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostNoteMentionable"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg",
+                    "timezone": "America/Sao_Paulo"
+                  },
+                  {
+                    "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                    "name": "Leo Martins",
+                    "photo_url": null,
+                    "timezone": "Europe/Lisbon"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
     "/posts/{post}/notes": {
       "parameters": [
         {
@@ -1503,7 +1600,29 @@
                     {
                       "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
                       "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
-                      "body": "Can we swap the image for the dark version?",
+                      "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                      "mentions": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        }
+                      ],
+                      "reactions": [
+                        {
+                          "emoji": "👍",
+                          "count": 2,
+                          "users": [
+                            {
+                              "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                              "name": "Leo Martins"
+                            },
+                            {
+                              "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                              "name": "Ana Souza"
+                            }
+                          ]
+                        }
+                      ],
                       "author": {
                         "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
                         "name": "Ana Souza",
@@ -1575,7 +1694,7 @@
         ],
         "summary": "Create post note",
         "operationId": "createPostNote",
-        "description": "Adds an internal note to a post as the API key's user. Notes are never published. Every other workspace member is emailed about it (unless they turned that email off in their notification preferences); on a post pending approval, only the approvers and the member who asked are.",
+        "description": "Adds an internal note to a post as the API key's user. Notes are never published.\n\nTo mention a member, write `@[user:<id>]` in `body` with an `id` from [List post note mentionables](/api-reference/post-notes/list-post-note-mentionables); `@[everyone]` mentions everyone who sees the post. A mention of someone who cannot see the post is removed from the body.\n\nEach mentioned member gets a mention email. The post's other participants (its author, the member who asked for approval and everyone who already wrote a note on it) get a new-note email. Nobody else is emailed, the note's author never is, and each member's notification preferences apply. On a post pending approval, only the approvers and the member who asked see its notes.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1588,12 +1707,13 @@
                 "properties": {
                   "body": {
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "description": "The note text. Mention a member with `@[user:<id>]`, or everyone who sees the post with `@[everyone]`."
                   }
                 }
               },
               "example": {
-                "body": "Can we swap the image for the dark version?"
+                "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?"
               }
             }
           }
@@ -1609,7 +1729,14 @@
                 "example": {
                   "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
                   "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
-                  "body": "Can we swap the image for the dark version?",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [],
                   "author": {
                     "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
                     "name": "Ana Souza",
@@ -1651,13 +1778,82 @@
           "$ref": "#/components/parameters/NoteId"
         }
       ],
+      "get": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "Get post note",
+        "operationId": "getPostNote",
+        "description": "Returns one note of the post. A note of another post returns `404`.",
+        "responses": {
+          "200": {
+            "description": "The note.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostNote"
+                },
+                "example": {
+                  "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
+                  "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 2,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        },
+                        {
+                          "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                          "name": "Ana Souza"
+                        }
+                      ]
+                    }
+                  ],
+                  "author": {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg"
+                  },
+                  "created_at": "2026-10-08 14:02:45",
+                  "updated_at": "2026-10-08 14:02:45"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
       "put": {
         "tags": [
           "Post notes"
         ],
         "summary": "Update post note",
         "operationId": "updatePostNote",
-        "description": "Changes a note's text. Only the note's author can edit it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`.",
+        "description": "Changes a note's text. Only the note's author can edit it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`. Mentions work as in [Create post note](/api-reference/post-notes/create-post-note). Only the members this edit adds as mentions are emailed, not those the note already mentioned.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1670,12 +1866,13 @@
                 "properties": {
                   "body": {
                     "type": "string",
-                    "maxLength": 2000
+                    "maxLength": 2000,
+                    "description": "The new note text. Mention a member with `@[user:<id>]`, or everyone who sees the post with `@[everyone]`."
                   }
                 }
               },
               "example": {
-                "body": "Can we swap the image for the dark version?"
+                "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?"
               }
             }
           }
@@ -1691,7 +1888,29 @@
                 "example": {
                   "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
                   "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
-                  "body": "Can we swap the image for the dark version?",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 2,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        },
+                        {
+                          "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                          "name": "Ana Souza"
+                        }
+                      ]
+                    }
+                  ],
                   "author": {
                     "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
                     "name": "Ana Souza",
@@ -1729,7 +1948,7 @@
         ],
         "summary": "Delete post note",
         "operationId": "deletePostNote",
-        "description": "Deletes a note. Only the note's author can delete it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`.",
+        "description": "Deletes a note and its reactions. Only the note's author can delete it (`403` with `This action is unauthorized.` otherwise). A note of another post returns `404`. Nobody is emailed.",
         "responses": {
           "204": {
             "description": "Deleted."
@@ -1745,6 +1964,230 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/posts/{post}/notes/{note}/reactions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PostId"
+        },
+        {
+          "$ref": "#/components/parameters/NoteId"
+        }
+      ],
+      "put": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "Add post note reaction",
+        "operationId": "addPostNoteReaction",
+        "description": "Reacts to a note with one emoji as the API key's user. Any single emoji works, including a flag, a keycap or one with a skin tone. Reacting again with the same emoji changes nothing. Nobody is emailed. A note of another post returns `404`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "emoji"
+                ],
+                "properties": {
+                  "emoji": {
+                    "type": "string",
+                    "description": "Exactly one emoji, for example `👍`, `👀` or `🇧🇷`."
+                  }
+                }
+              },
+              "example": {
+                "emoji": "👍"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The note with its reactions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostNote"
+                },
+                "example": {
+                  "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
+                  "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 2,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        },
+                        {
+                          "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                          "name": "Ana Souza"
+                        }
+                      ]
+                    }
+                  ],
+                  "author": {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg"
+                  },
+                  "created_at": "2026-10-08 14:02:45",
+                  "updated_at": "2026-10-08 14:02:45"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "description": "Validation failed. `emoji` must be exactly one emoji: `Pick a single emoji.`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                },
+                "example": {
+                  "message": "Pick a single emoji.",
+                  "errors": {
+                    "emoji": [
+                      "Pick a single emoji."
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Post notes"
+        ],
+        "summary": "Remove post note reaction",
+        "operationId": "removePostNoteReaction",
+        "description": "Takes back the API key's user's reaction with that emoji. Only your own reaction is removed; when you had not reacted with that emoji, nothing changes. A note of another post returns `404`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "emoji"
+                ],
+                "properties": {
+                  "emoji": {
+                    "type": "string",
+                    "description": "The emoji of your reaction to remove."
+                  }
+                }
+              },
+              "example": {
+                "emoji": "👍"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The note with its reactions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostNote"
+                },
+                "example": {
+                  "id": "9d3c2a10-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
+                  "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
+                  "body": "@[user:9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b] can we swap the image for the dark version?",
+                  "mentions": [
+                    {
+                      "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                      "name": "Leo Martins"
+                    }
+                  ],
+                  "reactions": [
+                    {
+                      "emoji": "👍",
+                      "count": 1,
+                      "users": [
+                        {
+                          "id": "9b2f4e6a-1c3d-4e5f-8a9b-0c1d2e3f4a5b",
+                          "name": "Leo Martins"
+                        }
+                      ]
+                    }
+                  ],
+                  "author": {
+                    "id": "9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e",
+                    "name": "Ana Souza",
+                    "photo_url": "https://media.trypost.it/medias/9b1e2d3c-4f5a-4b6c-8d7e-9f0a1b2c3d4e.jpg"
+                  },
+                  "created_at": "2026-10-08 14:02:45",
+                  "updated_at": "2026-10-08 14:02:45"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "description": "Validation failed. `emoji` must be exactly one emoji: `Pick a single emoji.`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                },
+                "example": {
+                  "message": "Pick a single emoji.",
+                  "errors": {
+                    "emoji": [
+                      "Pick a single emoji."
+                    ]
+                  }
+                }
+              }
+            }
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -2320,7 +2763,7 @@
         ],
         "summary": "Upload media",
         "operationId": "uploadPostMedia",
-        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
+        "description": "Uploads one file as `multipart/form-data` and appends it to the post's media. Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). A type the post's channel does not accept fails with `422`: `This file type is not supported by the post's channel.` Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2463,7 +2906,7 @@
         ],
         "summary": "Attach media from upload",
         "operationId": "attachMediaFromUpload",
-        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
+        "description": "Appends a file uploaded earlier (`POST /uploads` or a signed upload URL) to the post's media. The token is spent by this post. An unknown or expired token fails with `422` on `upload_token`: `This upload expired. Add the file again.` A type the post's channel does not accept fails with `422`. Posts that are publishing, published or failed cannot take media: `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` On Pinterest and TikTok the content type is chosen again from the post's media, as on create. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media: `422` on `media` with `This post type can't include media. Change the post type to add media.`",
         "requestBody": {
           "required": true,
           "content": {
@@ -2484,7 +2927,7 @@
                       "null"
                     ],
                     "maxLength": 2000,
-                    "description": "Alt text. Applies to images only. `meta.alt_text` wins when both are sent."
+                    "description": "Alt text. Applies to images, and to videos where the content type has `supports_video_alt_text`; ignored for a PDF. `meta.alt_text` wins when both are sent."
                   },
                   "meta": {
                     "$ref": "#/components/schemas/MediaItemMeta"
@@ -2629,7 +3072,7 @@
         ],
         "summary": "Attach media from URL",
         "operationId": "attachMediaFromUrl",
-        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create. An X poll (`x_poll`) takes no media: `422` on `urls` with `This post type can't include media. Change the post type to add media.`, before anything is downloaded.",
+        "description": "Downloads up to 10 public files and appends them to the post's media. Each URL must serve the file itself: redirects are not followed, and web pages, private-network hosts and files over the type's size cap are refused. Each download must finish within 20 seconds. Only the types the post's channel accepts are kept. URLs that could not be attached are listed in `failed_urls`, and `failures` gives the reason of each. Posts that are publishing, published or failed cannot take media: when a file was downloaded, the request fails with `422` on `post` with `This post has already been processed and cannot be re-published. Duplicate it to try again.` Accepted files: JPEG, PNG, GIF and WebP images (HEIC and HEIF too when the server can convert them, stored as JPEG), MP4 and MOV videos, and PDF documents. Size caps: 10 MB per image (and at most about 67 megapixels, 8192 \u00d7 8192 pixels in total), 1 GB per video, 100 MB per PDF. Each network enforces its own, usually smaller, caps when the post is scheduled or published (`GET /content-types`). On Pinterest and TikTok the content type is chosen again from the post's media, as on create. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media: `422` on `urls` with `This post type can't include media. Change the post type to add media.`, before anything is downloaded.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2661,7 +3104,7 @@
                             "null"
                           ],
                           "maxLength": 2000,
-                          "description": "Alt text. Applies to images only. `meta.alt_text` wins when both are sent."
+                          "description": "Alt text. Applies to images, and to videos where the content type has `supports_video_alt_text`; ignored for a PDF. `meta.alt_text` wins when both are sent."
                         },
                         "meta": {
                           "$ref": "#/components/schemas/MediaItemMeta"
@@ -3758,7 +4201,7 @@
                 "properties": {
                   "timezone": {
                     "type": "string",
-                    "description": "IANA time zone, for example `America/Sao_Paulo`."
+                    "description": "IANA time zone, for example `America/Sao_Paulo`. Use the canonical name (`Asia/Kolkata`, not `Asia/Calcutta`); a legacy alias is rejected with `422`."
                   },
                   "posting_goal": {
                     "type": [
@@ -5582,7 +6025,7 @@
         ],
         "summary": "Get workspace analytics",
         "operationId": "getWorkspaceAnalytics",
-        "description": "Returns the analytics report of the workspace for a date range, compared with the previous range of the same length: summary, followers, posts per bucket, top posts, per-channel performance and collection coverage. Days are calendar days in the API key user's time zone (Settings \u2192 Preferences) and weekly buckets start on that user's start of week. With `custom` (or `start`/`end` without `range`), the dates are clamped to the days with data in scope (`bounds`; for a channel, that channel's). When there is no data yet, the dates are ignored and the last 30 days are returned. A missing `end` defaults to the last day with data, and a missing `start` to 29 days before `end`. Read `range` (or `filters.start`/`filters.end`) in the response for the days actually used. The report reads analytics TryPost has already collected from the networks, not live data. LinkedIn, LinkedIn pages, Telegram, Discord and Google Business are not included.",
+        "description": "Returns the analytics report of the workspace for a date range, compared with the previous range of the same length: summary, followers, posts per bucket, top posts, per-channel performance and collection coverage. Days are calendar days in the API key user's time zone (Settings \u2192 Preferences) and weekly buckets start on that user's start of week. With `custom` (or `start`/`end` without `range`), the dates are clamped to the days with data in scope (`bounds`; for a channel, that channel's). When there is no data yet, the dates are ignored and the last 30 days are returned. A missing `end` defaults to the last day with data, and a missing `start` to 29 days before `end`. Read `range` in the response for the days actually used. The report reads analytics TryPost has already collected from the networks, not live data. LinkedIn, LinkedIn pages, Telegram, Discord and Google Business are not included.",
         "parameters": [
           {
             "name": "range",
@@ -5633,6 +6076,34 @@
                 "type": "string",
                 "format": "uuid"
               }
+            }
+          },
+          {
+            "name": "labels[]",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "description": "Only posts with any of these labels (labels of this workspace). They narrow the post metrics only; follower numbers stay account-wide. A deleted or unknown label matches nothing; it is not an error.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "untagged",
+            "in": "query",
+            "required": false,
+            "description": "Also (or only) posts without labels. Posts made outside TryPost have no labels. Narrows the post metrics only; follower numbers stay account-wide. Send `1` or `0`; `true` and `false` are rejected with `422`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1",
+                "0"
+              ]
             }
           }
         ],
@@ -5759,7 +6230,8 @@
                         "growth": 320,
                         "net": 320,
                         "provenance": "provider",
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "series": [
@@ -5779,6 +6251,7 @@
                   },
                   "posts": {
                     "resolution": "daily",
+                    "total": 3,
                     "accounts": [
                       {
                         "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
@@ -5787,7 +6260,8 @@
                         "username": "trypostit",
                         "avatar_url": "https://pbs.twimg.com/profile_images/1790000000000000000/avatar_400x400.jpg",
                         "count": 18,
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "buckets": [
@@ -5805,6 +6279,7 @@
                     "reactions": [
                       {
                         "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                        "rank": 1,
                         "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                         "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                         "platform": "x",
@@ -5820,12 +6295,14 @@
                         "preview_metadata": null,
                         "reactions": 412,
                         "comments": 38,
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "comments": [
                       {
                         "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                        "rank": 1,
                         "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                         "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                         "platform": "x",
@@ -5841,7 +6318,8 @@
                         "preview_metadata": null,
                         "reactions": 412,
                         "comments": 38,
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ]
                   },
@@ -5922,7 +6400,8 @@
                         "previous": 12.8,
                         "change": 10.94
                       },
-                      "status": "connected"
+                      "status": "connected",
+                      "verified_badge": null
                     }
                   ],
                   "coverage": [
@@ -5971,7 +6450,7 @@
         ],
         "summary": "Get publication analytics",
         "operationId": "getPublicationAnalytics",
-        "description": "Returns the latest saved analytics of one publication: a post published through TryPost or found on a connected channel. Take the id from `top_posts` in `GET /analytics` or from `GET /channels/{account}/insights/publications`. A publication deleted on the network or no longer available, of another workspace or of a network without analytics returns `404`.",
+        "description": "Returns the latest saved analytics of one publication: a post published through TryPost or found on a connected channel. Take the id from `top_posts` in `GET /analytics` or from `GET /channels/{account}/insights/publications`. A publication no longer available, of another workspace or of a network without analytics returns `404`. A publication deleted on the network is still returned, with `availability: deleted` and `permalink: null`.",
         "responses": {
           "200": {
             "description": "The publication's analytics.",
@@ -6108,7 +6587,7 @@
             "required": false,
             "style": "form",
             "explode": true,
-            "description": "Only posts with any of these labels (labels of this workspace). Unknown or deleted labels return `422`.",
+            "description": "Only posts with any of these labels (labels of this workspace). A deleted or unknown label matches nothing; it is not an error.",
             "schema": {
               "type": "array",
               "items": {
@@ -6325,7 +6804,8 @@
                           "growth": 320,
                           "net": 320,
                           "provenance": "provider",
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ],
                       "series": [
@@ -6345,6 +6825,7 @@
                     },
                     "posts": {
                       "resolution": "weekly",
+                      "total": 3,
                       "accounts": [
                         {
                           "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
@@ -6353,7 +6834,8 @@
                           "username": "trypostit",
                           "avatar_url": "https://pbs.twimg.com/profile_images/1790000000000000000/avatar_400x400.jpg",
                           "count": 18,
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ],
                       "buckets": [
@@ -6371,6 +6853,7 @@
                       "reactions": [
                         {
                           "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                          "rank": 1,
                           "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                           "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                           "platform": "x",
@@ -6386,12 +6869,14 @@
                           "preview_metadata": null,
                           "reactions": 412,
                           "comments": 38,
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ],
                       "comments": [
                         {
                           "id": "9d4a0b1c-2d3e-4f5a-8b6c-7d8e9f0a1b2c",
+                          "rank": 1,
                           "post_id": "9d3c1f2a-6b4e-4c8a-9f1e-2a7b5c8d0e41",
                           "social_account_key": "9c8b7a65-4d3e-4f2a-8b1c-0d9e8f7a6b54",
                           "platform": "x",
@@ -6407,7 +6892,8 @@
                           "preview_metadata": null,
                           "reactions": 412,
                           "comments": 38,
-                          "status": "connected"
+                          "status": "connected",
+                          "verified_badge": null
                         }
                       ]
                     },
@@ -6488,7 +6974,8 @@
                           "previous": 12.8,
                           "change": 10.94
                         },
-                        "status": "connected"
+                        "status": "connected",
+                        "verified_badge": null
                       }
                     ],
                     "coverage": [
@@ -6662,7 +7149,7 @@
             "required": false,
             "style": "form",
             "explode": true,
-            "description": "Only posts with any of these labels (labels of this workspace). Unknown or deleted labels return `422`.",
+            "description": "Only posts with any of these labels (labels of this workspace). A deleted or unknown label matches nothing; it is not an error.",
             "schema": {
               "type": "array",
               "items": {
@@ -9437,8 +9924,10 @@
                           "video_aspect_ratio_max": null,
                           "auto_fits_image": false,
                           "supports_alt_text": true,
+                          "supports_video_alt_text": false,
                           "supports_user_tags": false,
                           "supports_video_cover": false,
+                          "supports_custom_video_cover": false,
                           "image_min_width": null,
                           "image_min_height": null,
                           "image_max_width": null,
@@ -9471,8 +9960,10 @@
                           "video_aspect_ratio_max": null,
                           "auto_fits_image": false,
                           "supports_alt_text": false,
+                          "supports_video_alt_text": false,
                           "supports_user_tags": false,
                           "supports_video_cover": false,
+                          "supports_custom_video_cover": false,
                           "image_min_width": null,
                           "image_min_height": null,
                           "image_max_width": null,
@@ -9913,16 +10404,18 @@
           "x_poll",
           "threads_post",
           "threads_ghost_post",
+          "threads_poll",
           "pinterest_pin",
           "pinterest_video_pin",
           "pinterest_carousel",
           "bluesky_post",
           "mastodon_post",
+          "mastodon_poll",
           "telegram_post",
           "discord_message",
           "google_business_post"
         ],
-        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text. An X poll (`x_poll`) takes no media; its choices and length are in `meta.poll`."
+        "description": "Post format on one network. It must belong to the destination's network. `GET /content-types` lists the formats of each network with their media rules. Instagram and Facebook stories publish no text. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media; its choices, and on X and Mastodon its length, are in `meta.poll`."
       },
       "Platform": {
         "type": "string",
@@ -10066,7 +10559,7 @@
           "alt_text": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Accessibility description. Applies to images; each network truncates it to its own cap."
+            "description": "Accessibility description. Applies to images, and to videos where the content type has `supports_video_alt_text`; each network truncates it to its own cap."
           },
           "user_tags": {
             "type": "array",
@@ -10104,6 +10597,36 @@
             "type": "integer",
             "minimum": 0,
             "description": "Video frame used as the cover, in milliseconds from the start. Cannot pass the end of the video."
+          },
+          "cover": {
+            "type": "object",
+            "description": "An image used as the video's cover instead of a frame. Only in `media[]` of `POST /posts`, `POST /posts/batch` and `PUT /posts/{post}`: the attach endpoints (`POST /posts/{post}/media/from-upload`, `POST /posts/{post}/media/from-url`) accept it but discard it. Only on content types with `supports_custom_video_cover` (`instagram_reel`, `youtube_short`); dropped on every other content type. In a request, give exactly one of `upload_token`, `url` or `id`, like a media item; anything else fails with `Choose an image for the video cover.` It must be a still image: a GIF, video or PDF fails with `The video cover must be a JPEG, PNG or WebP image.` The network crops it to the middle 9:16, so upload it at 9:16. In responses it is the stored image, a media item (`id`, `path`, `url`, `type`, `mime_type`, `size`, ...). On a YouTube Short it is set as the thumbnail once YouTube has processed the video; a channel that is not verified cannot take one.",
+            "properties": {
+              "upload_token": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Token from `POST /uploads`."
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048,
+                "description": "Public `http` or `https` URL of the image itself."
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Id of a media item already in this workspace."
+              }
+            }
+          },
+          "cover_source": {
+            "type": "string",
+            "enum": [
+              "frame",
+              "image"
+            ],
+            "description": "Where the cover comes from. `image`: the uploaded `cover` (the default when `cover` is sent without a source). `frame`: the frame at `cover_offset_ms`; on a YouTube Short, which takes no frame time, `cover` is then that frame's screenshot. A network that only takes a frame keeps `cover_offset_ms` and drops `cover`. Dropped when there is no `cover`, so it is also dropped by the attach endpoints, which discard `cover`."
           }
         }
       },
@@ -10130,7 +10653,7 @@
           "alt": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Alt text shorthand. Applies to images only; `meta.alt_text` wins when both are sent."
+            "description": "Alt text shorthand. Applies to images, and to videos where the content type has `supports_video_alt_text`; ignored for a PDF. `meta.alt_text` wins when both are sent."
           },
           "meta": {
             "$ref": "#/components/schemas/MediaItemMeta"
@@ -10238,7 +10761,7 @@
       },
       "ThreadReply": {
         "type": "object",
-        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon), or the comment of a LinkedIn post. A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X a reply can instead be a poll (`poll`), with its text as the question (at most 280 characters) and no media; off X `poll` is dropped. On LinkedIn a post takes one reply, published as a comment from the same profile or page: text only, up to 3000 characters.",
+        "description": "One reply published under the post as a thread (X, Bluesky and Mastodon), or the comment of a LinkedIn post. A reply needs text or media, except a poll reply, which needs its text (the question) and takes no media, drafts included. Its text must fit the account limit (Bluesky 300, Mastodon 500 including the content warning, which every reply repeats, X 280 or 25000 for accounts with long posts). Its media belongs to this reply only and follows the media rules of a post on that network. On X and Mastodon a reply can instead be a poll (`poll`), under that network's poll rules, with its text as the question (at most 280 characters on X) and no media; on Bluesky and LinkedIn `poll` is dropped. On LinkedIn a post takes one reply, published as a comment from the same profile or page: text only, up to 3000 characters.",
         "properties": {
           "text": {
             "type": [
@@ -10256,15 +10779,18 @@
             }
           },
           "poll": {
-            "oneOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/XPoll"
+              },
+              {
+                "$ref": "#/components/schemas/MastodonPoll"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "X only: makes this reply a poll."
+            "description": "X and Mastodon only: makes this reply a poll, under that network's rules (`XPoll` or `MastodonPoll`)."
           }
         },
         "examples": [
@@ -10355,7 +10881,7 @@
       "PlatformMetaMastodon": {
         "type": "object",
         "title": "Mastodon",
-        "description": "Settings for `mastodon_post`.",
+        "description": "Settings for `mastodon_post` and `mastodon_poll`.",
         "properties": {
           "thread_replies": {
             "type": [
@@ -10363,7 +10889,7 @@
               "null"
             ],
             "maxItems": 24,
-            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one.",
+            "description": "Up to 24 replies published under the post as a thread. Each item is a `ThreadReply`, or a plain string for a text-only reply. On update this list replaces the stored one. On Mastodon a reply can be a poll: `{text, poll}` with no media.",
             "items": {
               "oneOf": [
                 {
@@ -10384,6 +10910,17 @@
             ],
             "maxLength": 500,
             "description": "Content warning. Counts toward the 500-character post limit."
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MastodonPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`mastodon_poll` only: the poll's choices, length and switches. Dropped on any other content type. On update it is merged with the stored poll."
           }
         }
       },
@@ -10567,7 +11104,7 @@
       "PlatformMetaYouTube": {
         "type": "object",
         "title": "YouTube",
-        "description": "Settings for `youtube_short`. A post needs `title` or text to be scheduled or published.",
+        "description": "Settings for `youtube_short`. A post needs `title` or text to be scheduled or published. A cover image is the media item's `meta.cover`, set as the thumbnail once YouTube has processed the video.",
         "properties": {
           "title": {
             "type": [
@@ -10656,7 +11193,7 @@
       "PlatformMetaInstagram": {
         "type": "object",
         "title": "Instagram",
-        "description": "Settings for `instagram_feed`, `instagram_reel` and `instagram_story` (both `instagram` and `instagram-facebook` accounts). An `instagram_feed` post with a single video publishes as a Reel, without the Reel-only settings (`share_to_feed`, `trial_graduation`, `audio`). People tags are the media item's `meta.user_tags`; a video cover is `meta.cover_offset_ms`. A post may carry at most 5 hashtags.",
+        "description": "Settings for `instagram_feed`, `instagram_reel` and `instagram_story` (both `instagram` and `instagram-facebook` accounts). An `instagram_feed` post with a single video publishes as a Reel, without the Reel-only settings (`share_to_feed`, `trial_graduation`, `audio`). People tags are the media item's `meta.user_tags`; a video cover frame is `meta.cover_offset_ms`, and an `instagram_reel` may take an uploaded image as its cover in `meta.cover` with `cover_source` `image` (it then wins over the frame). A post may carry at most 5 hashtags.",
         "properties": {
           "is_ai_generated": {
             "type": "boolean",
@@ -10775,7 +11312,7 @@
       "PlatformMetaThreads": {
         "type": "object",
         "title": "Threads",
-        "description": "Settings for `threads_post`. Use the content type `threads_ghost_post` for a text-only post archived after 24 hours (no media, no topic).",
+        "description": "Settings for `threads_post` and `threads_poll`. Use the content type `threads_ghost_post` for a text-only post archived after 24 hours (no media, no topic).",
         "properties": {
           "topic_tag": {
             "type": [
@@ -10783,6 +11320,17 @@
               "null"
             ],
             "description": "Topic, 1 to 50 characters after a leading `#` is dropped, without `.` or `&`."
+          },
+          "poll": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ThreadsPoll"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`threads_poll` only: the poll's choices. Dropped on any other content type. On update it is merged with the stored poll."
           }
         }
       },
@@ -10984,7 +11532,7 @@
         "properties": {}
       },
       "PlatformMeta": {
-        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), X `poll.options` (2 or more), `poll.duration_minutes` and a question (the post `content`) on `x_poll`. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
+        "description": "Per-network settings of one destination. Pick the shape of the destination's network. Keys without a rule are dropped. Every known key is validated whatever the network, but only the keys of the destination's network are used when publishing. On update, `meta` is merged with the stored settings: send `null` for a key to clear it (string, list and object settings; boolean settings cannot be cleared, so send `true` or `false`); `thread_replies` replaces the whole list; `poll` is merged key by key, its `options` replaced as a list. Required to schedule or publish: TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`, Google Business `event` on `EVENT`/`OFFER`, YouTube a title (`title` or the first line of the text), on a poll (`x_poll`, `mastodon_poll`, `threads_poll`) `poll.options` (2 or more) and a question (the post `content`), plus `poll.duration_minutes` on X and Mastodon. `GET /content-types` lists the unconditional ones (TikTok, Pinterest, Discord) per network as `required_meta`.",
         "anyOf": [
           {
             "$ref": "#/components/schemas/PlatformMetaX"
@@ -11058,7 +11606,7 @@
               "string",
               "null"
             ],
-            "description": "Post text, stored as sent (posts written in the app hold the editor's HTML)."
+            "description": "Post text, stored as sent."
           },
           "media": {
             "type": [
@@ -11187,9 +11735,10 @@
               "pending_review",
               "published",
               "failed",
-              "rejected"
+              "rejected",
+              "deleted"
             ],
-            "description": "Publishing state on the network. `pending` until the post is sent; `retrying` waits for a retry after a network limit or a temporary network problem (such as a LinkedIn post not yet ready for its comment); `pending_review` and `rejected` come from networks that review posts (Google Business)."
+            "description": "Publishing state on the network. `pending` until the post is sent; `retrying` waits for a retry after a network limit or a temporary network problem (such as a LinkedIn post not yet ready for its comment); `pending_review` and `rejected` come from networks that review posts (Google Business); `deleted` means the post was published and then deleted on the network (`status` stays `published` and `platform_url` is kept)."
           },
           "platform": {
             "oneOf": [
@@ -11371,7 +11920,31 @@
             "format": "uuid"
           },
           "body": {
-            "type": "string"
+            "type": "string",
+            "description": "The note text. `@[user:<id>]` mentions a member (their name is in `mentions`) and `@[everyone]` mentions everyone who sees the post. An id that is not in `mentions` belongs to a user who no longer exists."
+          },
+          "mentions": {
+            "type": "array",
+            "description": "The members the note mentions with `@[user:<id>]`, in no particular order. `@[everyone]` is not listed here.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "reactions": {
+            "type": "array",
+            "description": "The note's reactions grouped by emoji, in the order each emoji was first used.",
+            "items": {
+              "$ref": "#/components/schemas/PostNoteReaction"
+            }
           },
           "author": {
             "type": [
@@ -11404,6 +11977,58 @@
           "updated_at": {
             "type": "string",
             "description": "UTC, format `Y-m-d H:i:s`."
+          }
+        }
+      },
+      "PostNoteReaction": {
+        "type": "object",
+        "description": "One emoji on a note, with everyone who reacted with it.",
+        "properties": {
+          "emoji": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many members reacted with this emoji."
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PostNoteMentionable": {
+        "type": "object",
+        "description": "A member who sees the post, so a note on it can mention them.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Write it in a note body as `@[user:<id>]`."
+          },
+          "name": {
+            "type": "string"
+          },
+          "photo_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA time zone, for example `America/Sao_Paulo`."
           }
         }
       },
@@ -11447,10 +12072,28 @@
                 "$ref": "#/components/schemas/Platform"
               },
               "origin": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "trypost",
+                  "external"
+                ],
+                "description": "Where the post was published from: `trypost` or `external` (outside TryPost)."
               },
               "content_type": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "text",
+                  "image",
+                  "carousel",
+                  "video",
+                  "reel",
+                  "story",
+                  "short",
+                  "link",
+                  "poll",
+                  "unknown"
+                ],
+                "description": "Analytics publication type."
               },
               "availability": {
                 "type": "string",
@@ -11459,7 +12102,7 @@
                   "deleted",
                   "unavailable"
                 ],
-                "description": "Always `available` on `GET /analytics/publications/{publication}`."
+                "description": "`available`, or `deleted` when the post was deleted on the network. `unavailable` publications are not returned by `GET /analytics/publications/{publication}`."
               },
               "provider_published_at": {
                 "type": [
@@ -11472,7 +12115,8 @@
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "`null` when the post was deleted on the network."
               },
               "excerpt": {
                 "type": [
@@ -11516,27 +12160,44 @@
                       "closed",
                       null
                     ],
-                    "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                    "description": "As the network last reported it. `closed` only once a read after the end has seen it closed."
                   },
                   "end_datetime": {
                     "type": [
                       "string",
                       "null"
                     ],
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "When voting ends (X and Mastodon from the poll's length, Threads the end it set)."
                   },
                   "duration_minutes": {
                     "type": [
                       "integer",
                       "null"
-                    ]
+                    ],
+                    "description": "X only; `null` on Mastodon and Threads."
+                  },
+                  "multiple": {
+                    "type": "boolean",
+                    "description": "Mastodon only: whether voters could pick several choices."
+                  },
+                  "voters": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Mastodon only: how many people voted on a multiple-choice poll; each choice's share is of them. `null` on a single-choice poll."
+                  },
+                  "totals_hidden": {
+                    "type": "boolean",
+                    "description": "Mastodon only: `true` while Mastodon hides the votes until the poll ends; each choice then reads 0 votes."
                   }
                 },
-                "description": "X polls: the votes per choice, read with the post's other X metrics (about an hour after publishing, then at 2, 3, 7, 14 and 28 days). A poll made on x.com also gets them when it is discovered. `null` on any other post or before the first read."
+                "description": "Polls on X, Mastodon and Threads: the votes per choice, read with the post's other metrics (X about an hour after publishing, then at 2, 3, 7, 14 and 28 days; Mastodon daily for 31 days; Threads daily for 30 days until a read after its end stores it closed). A poll made on the network also gets them when it is discovered. `null` on any other post or before the first read."
               },
               "thread_polls": {
                 "type": "array",
-                "description": "X threads published by TryPost: the votes of each reply that is a poll. Empty otherwise.",
+                "description": "X and Mastodon threads published by TryPost: the votes of each reply that is a poll (on Mastodon, from instances running 4.3 or later). Empty otherwise.",
                 "items": {
                   "type": "object",
                   "properties": {
@@ -11568,7 +12229,7 @@
                         "closed",
                         null
                       ],
-                      "description": "As X last reported it. `closed` only once a read after the end has seen it closed."
+                      "description": "As the network last reported it. `closed` only once a read after the end has seen it closed."
                     },
                     "end_datetime": {
                       "type": [
@@ -11582,6 +12243,21 @@
                         "integer",
                         "null"
                       ]
+                    },
+                    "multiple": {
+                      "type": "boolean",
+                      "description": "Mastodon only: whether voters could pick several choices."
+                    },
+                    "voters": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "description": "Mastodon only: how many people voted on a multiple-choice poll; each choice's share is of them. `null` on a single-choice poll."
+                    },
+                    "totals_hidden": {
+                      "type": "boolean",
+                      "description": "Mastodon only: `true` while Mastodon hides the votes until the poll ends; each choice then reads 0 votes."
                     }
                   }
                 }
@@ -11688,6 +12364,12 @@
                 "type": [
                   "string",
                   "null"
+                ],
+                "enum": [
+                  "reach",
+                  "impressions",
+                  "views",
+                  null
                 ]
               },
               "watch_time_milliseconds": {
@@ -11720,16 +12402,40 @@
                   ]
                 },
                 "unit": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "count",
+                    "milliseconds",
+                    "percent"
+                  ]
                 },
                 "time_basis": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "lifetime",
+                    "range",
+                    "rolling_90_days",
+                    "snapshot"
+                  ]
                 },
                 "precision": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "exact",
+                    "approximate",
+                    "estimated",
+                    "experimental"
+                  ]
                 },
                 "availability": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "available",
+                    "unsupported",
+                    "unavailable",
+                    "delayed",
+                    "privacy_limited"
+                  ]
                 },
                 "provider_metric": {
                   "type": [
@@ -11783,7 +12489,8 @@
               "pending_review",
               "published",
               "failed",
-              "rejected"
+              "rejected",
+              "deleted"
             ],
             "description": "Publishing state on the network (see `Post.publish_status`)."
           },
@@ -11801,7 +12508,7 @@
             ]
           },
           "metrics": {
-            "description": "The saved analytics, or `{unsupported: true, reason}` when there are none: `not_published`, `platform_not_supported` (LinkedIn, LinkedIn Page, Telegram, Discord and Google Business are not in analytics) or `not_collected` (not collected yet).",
+            "description": "The saved analytics, or `{unsupported: true, reason}` when there are none: `not_published`, `deleted_on_network` (the post was deleted on the network after it was published), `platform_not_supported` (LinkedIn, LinkedIn Page, Telegram, Discord and Google Business are not in analytics) or `not_collected` (not collected yet).",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/PublicationAnalytics"
@@ -11818,6 +12525,7 @@
                     "type": "string",
                     "enum": [
                       "not_published",
+                      "deleted_on_network",
                       "platform_not_supported",
                       "not_collected"
                     ]
@@ -11894,10 +12602,19 @@
                 }
               },
               "duration_minutes": {
-                "type": "integer"
+                "type": "integer",
+                "description": "X and Mastodon only."
+              },
+              "multiple": {
+                "type": "boolean",
+                "description": "Mastodon only."
+              },
+              "hide_totals": {
+                "type": "boolean",
+                "description": "Mastodon only."
               }
             },
-            "description": "X `x_poll` only: the poll as it is sent (choices without blanks; a draft without a length shows 1440)."
+            "description": "On a poll (`x_poll`, `mastodon_poll`, `threads_poll`) only: the poll as it is sent, with only the keys its network takes (choices without blanks; on X and Mastodon a draft without a length shows 1440, and on Mastodon a missing switch shows `false`)."
           },
           "thread_replies": {
             "type": "array",
@@ -11925,9 +12642,17 @@
                     },
                     "duration_minutes": {
                       "type": "integer"
+                    },
+                    "multiple": {
+                      "type": "boolean",
+                      "description": "Mastodon only."
+                    },
+                    "hide_totals": {
+                      "type": "boolean",
+                      "description": "Mastodon only."
                     }
                   },
-                  "description": "X only, when the reply is a poll."
+                  "description": "X and Mastodon only, when the reply is a poll."
                 }
               }
             }
@@ -12327,6 +13052,19 @@
               null
             ],
             "description": "Current connection status. `null` when the channel is no longer in the workspace."
+          },
+          "verified_badge": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "blue",
+              "business",
+              "government",
+              null
+            ],
+            "description": "X checkmark; `null` on other networks, unverified accounts, and channels no longer in the workspace."
           }
         }
       },
@@ -12342,6 +13080,10 @@
                 "type": "string",
                 "format": "uuid",
                 "description": "Analytics publication id. Read its detail with `GET /analytics/publications/{publication}`."
+              },
+              "rank": {
+                "type": "integer",
+                "description": "Position in this list (by reactions or by comments), starting at 1."
               },
               "post_id": {
                 "type": [
@@ -12363,7 +13105,13 @@
                 "description": "Analytics publication type (`text`, `image`, `video`, ...)."
               },
               "availability": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "available",
+                  "deleted",
+                  "unavailable"
+                ],
+                "description": "`deleted` when the post was deleted on the network; `unavailable` when its metrics could not be read several times in a row."
               },
               "published_at": {
                 "type": [
@@ -12376,7 +13124,8 @@
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "`null` when the post was deleted on the network."
               },
               "excerpt": {
                 "type": [
@@ -12624,6 +13373,10 @@
                   "monthly"
                 ],
                 "description": "Daily up to 14 days, weekly up to 90 days, monthly beyond. Weeks start on the API key user's start of week."
+              },
+              "total": {
+                "type": "integer",
+                "description": "Posts published in the range across the channels in scope."
               },
               "accounts": {
                 "type": "array",
@@ -13106,7 +13859,8 @@
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "`null` when the post was deleted on the network."
           },
           "published_at": {
             "type": "string",
@@ -13118,7 +13872,20 @@
               "string",
               "null"
             ],
-            "description": "Analytics publication type (`text`, `image`, `video`, ...)."
+            "description": "Analytics publication type (`text`, `image`, `video`, ...).",
+            "enum": [
+              "text",
+              "image",
+              "carousel",
+              "video",
+              "reel",
+              "story",
+              "short",
+              "link",
+              "poll",
+              "unknown",
+              null
+            ]
           },
           "metrics": {
             "type": "object",
@@ -13336,10 +14103,12 @@
           "post.scheduled",
           "post.unscheduled",
           "post.published",
+          "post.deleted_on_network",
+          "post.restored",
           "post.failed",
           "post.deleted"
         ],
-        "description": "- `post.created`: a post was created. Its `data.status` is the status it was created with (`draft`, `scheduled`, `publishing` or `pending_approval`).\n- `post.scheduled`: an existing post was scheduled (for example a draft scheduled, or a request approved). A post created already scheduled sends only `post.created`.\n- `post.unscheduled`: a scheduled post went back to draft or to pending approval.\n- `post.published`: the post was published.\n- `post.failed`: publishing failed.\n- `post.deleted`: a post was deleted. Not sent for posts imported from the network or removed by disconnecting their channel. Its `data` is only `{id, workspace_id}`."
+        "description": "- `post.created`: a post was created. Its `data.status` is the status it was created with (`draft`, `scheduled`, `publishing` or `pending_approval`).\n- `post.scheduled`: an existing post was scheduled (for example a draft scheduled, or a request approved). A post created already scheduled sends only `post.created`.\n- `post.unscheduled`: a scheduled post went back to draft or to pending approval.\n- `post.published`: the post was published.\n- `post.deleted_on_network`: a published post was deleted on its network, found the next time TryPost reads its metrics (Facebook, Instagram, Threads, YouTube, X, Bluesky, Mastodon and Pinterest). Its `data.publish_status` is `deleted`; `status` stays `published`. Only within the post's metrics window (30 days; 31 on Mastodon; X up to 28 days).\n- `post.restored`: a post marked deleted is back on its network. Its `data.publish_status` is `published` again; `post.published` is not sent again. Neither network event is sent for posts imported from the network.\n- `post.failed`: publishing failed.\n- `post.deleted`: a post was deleted. Not sent for posts imported from the network or removed by disconnecting their channel. Its `data` is only `{id, workspace_id}`."
       },
       "Webhook": {
         "type": "object",
@@ -13726,7 +14495,8 @@
                     "pending_review",
                     "published",
                     "failed",
-                    "rejected"
+                    "rejected",
+                    "deleted"
                   ]
                 }
               }
@@ -13847,6 +14617,10 @@
           "supports_alt_text": {
             "type": "boolean"
           },
+          "supports_video_alt_text": {
+            "type": "boolean",
+            "description": "Alt text on a video (`media[].meta.alt_text`). `true` on `bluesky_post`, `mastodon_post`, `threads_post` and `discord_message`."
+          },
           "supports_user_tags": {
             "type": "boolean",
             "description": "Instagram user tags (`media[].meta.user_tags`)."
@@ -13854,6 +14628,10 @@
           "supports_video_cover": {
             "type": "boolean",
             "description": "A video cover frame (`media[].meta.cover_offset_ms`)."
+          },
+          "supports_custom_video_cover": {
+            "type": "boolean",
+            "description": "An image as the video cover (`media[].meta.cover`). `true` on `instagram_reel` and `youtube_short`."
           },
           "image_min_width": {
             "type": [
@@ -13930,7 +14708,7 @@
             "items": {
               "type": "string"
             },
-            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on the content type (a Google Business event, the `poll` of an X poll) or that the text can stand in for (a YouTube title) are not listed."
+            "description": "`meta` keys needed to schedule or publish (TikTok `privacy_level`, Pinterest `board_id`, Discord `channel_id`). Settings that depend on the content type (a Google Business event, the `poll` of a poll) or that the text can stand in for (a YouTube title) are not listed."
           },
           "recommended_content_length": {
             "type": [
@@ -14049,6 +14827,81 @@
               "Dark mode"
             ],
             "duration_minutes": 1440
+          }
+        ]
+      },
+      "MastodonPoll": {
+        "type": "object",
+        "description": "A Mastodon poll: the post `content` (or the reply `text`) is the question, within the 500-character limit of the post, content warning included. A poll carries no media, drafts included. A draft may lack the choices or the length; scheduling or publishing needs at least 2 choices, `duration_minutes` and a question. On update, `meta.poll` is merged key by key with the stored one and `options` replaces the whole list; a reply's `poll` is replaced along with `thread_replies`. These are the limits of mastodon.social, used for every instance.",
+        "properties": {
+          "options": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "2 to 4 choices to schedule or publish, each 1 to 50 characters, counted as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 50 characters is refused on every save, drafts included. Length is measured after trimming.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "duration_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 5,
+            "maximum": 43200,
+            "description": "How long voting stays open, from 5 minutes to 30 days. Required to schedule or publish; there is no default."
+          },
+          "multiple": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Lets each voter pick several choices. Treated as `false` when omitted."
+          },
+          "hide_totals": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Hides the vote counts until the poll ends. Treated as `false` when omitted."
+          }
+        },
+        "examples": [
+          {
+            "options": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "duration_minutes": 4320,
+            "multiple": true,
+            "hide_totals": false
+          }
+        ]
+      },
+      "ThreadsPoll": {
+        "type": "object",
+        "description": "A Threads poll, on a text post: the post `content` is the question. Threads sets how long voting stays open, so there is no length; a `duration_minutes`, `multiple` or `hide_totals` sent is dropped. A poll carries no media, drafts included, and draws no link card; it can take a `topic_tag`. A draft may lack the choices; scheduling or publishing needs at least 2 choices and a question. On update, `meta.poll` is merged key by key with the stored one and `options` replaces the whole list.",
+        "properties": {
+          "options": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "2 to 4 choices to schedule or publish, each 1 to 25 characters, counted as X counts them (an emoji outside the basic plane, such as \ud83d\udc27, counts two). No two the same, compared without case. Blank choices are dropped. More than 4, a repeated choice or one over 25 characters is refused on every save, drafts included. Length is measured after trimming.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "examples": [
+          {
+            "options": [
+              "Morning",
+              "Evening"
+            ]
           }
         ]
       }

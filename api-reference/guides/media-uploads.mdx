@@ -23,7 +23,7 @@ A post's media is a list of files of three types: **image**, **video** and **doc
 
 HEIC and HEIF photos are accepted too when the server can convert them, and are stored as JPEG.
 
-These are the caps for any upload. Each network has its own, usually smaller, limits on count, size, duration and aspect ratio, checked when the post is scheduled or published. [List content types](/api-reference/platform/list-content-types) returns them per content type (`max_media_count`, `max_image_bytes`, `max_video_bytes`, `max_video_duration_sec`, …), and each network page lists them, for example [Instagram](/platforms/instagram), [TikTok](/platforms/tiktok) or [LinkedIn](/platforms/linkedin). A file whose type the channel does not accept is refused with `422`. An X poll (`x_poll`) takes no media at all: adding any is refused with `422` ("This post type can't include media. Change the post type to add media.") on every save, drafts included.
+These are the caps for any upload. Each network has its own, usually smaller, limits on count, size, duration and aspect ratio, checked when the post is scheduled or published. [List content types](/api-reference/platform/list-content-types) returns them per content type (`max_media_count`, `max_image_bytes`, `max_video_bytes`, `max_video_duration_sec`, …), and each network page lists them, for example [Instagram](/platforms/instagram), [TikTok](/platforms/tiktok) or [LinkedIn](/platforms/linkedin). A file whose type the channel does not accept is refused with `422`. A poll (`x_poll`, `mastodon_poll` or `threads_poll`) takes no media at all: adding any is refused with `422` ("This post type can't include media. Change the post type to add media.") on every save, drafts included.
 
 ## Media on create and update
 
@@ -164,10 +164,12 @@ Each media item takes optional settings:
 
 | Key | Use |
 |---|---|
-| `alt` | Alt text shorthand, up to 2000 characters. Images only |
+| `alt` | Alt text shorthand, up to 2000 characters. On an image, and on a video where the content type has `supports_video_alt_text` (Bluesky, Mastodon, Threads and Discord). Ignored for a PDF |
 | `meta.alt_text` | Alt text, up to 2000 characters. Wins over `alt` when both are sent. Each network cuts it to its own cap |
 | `meta.user_tags` | Up to 20 people tagged on an Instagram image: `{ "username", "x", "y" }`, with `x` and `y` from 0 to 1 |
-| `meta.cover_offset_ms` | The video frame used as the cover, in milliseconds from the start |
+| `meta.cover_offset_ms` | The video frame used as the cover, in milliseconds from the start. Used only by content types with `supports_video_cover`; a `youtube_short` ignores it, because its cover is always the `cover` image |
+| `meta.cover` | An image used as the video cover instead of a frame. Only in `media[]` of [Create post](/api-reference/posts/create-post), [Create posts](/api-reference/posts/create-posts-in-batch) and [Update post](/api-reference/posts/update-post); the attach endpoints discard it. Only on content types with `supports_custom_video_cover` (`instagram_reel`, `youtube_short`; dropped elsewhere). Give `upload_token`, `url` or `id`, like a media item. A JPEG, PNG or WebP image; the network crops it to the middle 9:16. Responses return it as a media item |
+| `meta.cover_source` | `frame` or `image`: where the cover comes from. `image` when `cover` is sent without it. With `frame`, `cover_offset_ms` is the cover; on `youtube_short`, which takes no frame time, `cover` is that frame's screenshot. Dropped when there is no `cover` |
 
 ```json
 {
@@ -182,6 +184,24 @@ Each media item takes optional settings:
   ]
 }
 ```
+
+A Reel or Short with its own cover image:
+
+```json
+{
+  "media": [
+    {
+      "upload_token": "4f6c2b1e-8d3a-4e5f-9a7b-1c2d3e4f5a6b",
+      "meta": {
+        "cover": { "url": "https://example.com/reel-cover.jpg" },
+        "cover_source": "image"
+      }
+    }
+  ]
+}
+```
+
+A cover that is not an image fails with `The video cover must be a JPEG, PNG or WebP image.`; one without exactly one of `upload_token`, `url` or `id` fails with `Choose an image for the video cover.` YouTube sets the cover once it has processed the Short; see [YouTube covers](/platforms/youtube#cover).
 
 ## Which posts take media
 

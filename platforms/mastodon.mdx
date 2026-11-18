@@ -6,7 +6,7 @@ icon: "mastodon"
 
 # Mastodon
 
-TryPost publishes posts and threads to any Mastodon instance.
+TryPost publishes posts, polls and threads to any Mastodon instance.
 
 ## Connect your account
 
@@ -23,25 +23,54 @@ TryPost opens the new channel's **Publish** page and asks how many times a week 
 | Type | `content_type` | Description |
 |------|----------------|-------------|
 | **Post** | `mastodon_post` | Text with up to 4 optional images or 1 video |
+| **Poll** | `mastodon_poll` | Question with 2 to 4 choices. No media |
 
 ## Media limits
 
 | `content_type` | Image | Video | Format |
 |----------------|-------|-------|--------|
 | `mastodon_post` | 10 MB | 40 MB | JPEG/PNG/GIF/WebP; video MP4 or MOV |
+| `mastodon_poll` | — | — | No media |
 
 Official specs: [Attachments](https://docs.joinmastodon.org/user/posting/#attachments), [`Instance.media_attachments`](https://docs.joinmastodon.org/entities/Instance/). Full catalog: [Media](/knowledge-base/media#mastodon).
 
 ## Text and per-post options
 
 - **500 characters** per post, **including the content warning**. TryPost uses the default Mastodon limit even if your instance allows more.
+- The text goes to Mastodon as plain text. Mastodon links hashtags, mentions and URLs itself.
 - **Content warning** — hide the post behind a warning (`meta.spoiler_text`, up to 500 characters). In a thread, the warning is repeated on every reply.
-- **Threads** — click **Start thread** to add replies under the post, up to **24**. Each reply has its own text and up to 4 media items.
-- **Alt text** — up to 1,500 characters per image.
+- **Threads** — click **Start thread** to add replies under the post, up to **24**. Each reply has its own text and up to 4 media items. Any reply can also be a [poll](#polls).
+- **Alt text** — up to 1,500 characters per image or video.
+
+## Polls
+
+Pick **Poll** at the top of the Mastodon card to publish a poll. The post text is the question, and the poll editor below it holds the choices, how long voting stays open and two switches.
+
+- The question is the post text, within the **500 characters** of the post, content warning included. A poll can't be scheduled without one.
+- **Choices**: **2 to 4**, each up to **50 characters** (some emoji, such as 🐧, count as two). Each choice shows a counter and stops at 50 characters. Click **Add a choice** for a third or fourth choice. Each choice must be different, ignoring upper and lower case; empty ones are dropped.
+- **Length**: from **5 minutes to 30 days** in **Days**, **Hours** and **Minutes**. It starts at 1 day; at 30 days, **Hours** and **Minutes** are off.
+- **Allow multiple choices** lets each voter pick more than one choice. Off by default.
+- **Hide votes until it ends** keeps the vote counts hidden until voting closes. Off by default.
+- A poll can't carry images or video, not even in a draft. While the card has media or a file is uploading, **Poll** is disabled; on a poll, the media button is disabled.
+- A poll can have a **Content warning**, like any post.
+
+These are the limits of mastodon.social; TryPost uses them even if your instance allows other ones. **Remove poll** turns the card back into a regular post. The Mastodon preview shows the choices and the length.
+
+Adding another network while the Mastodon card is a poll takes you back to the shared editor and turns the card back into a **Post**; pick **Poll** again when you customize the Mastodon card.
+
+### Polls in a thread
+
+Any post of a thread can be a poll, and one thread can hold several. The first post becomes a poll through its post type; a reply becomes a poll with the poll button in the editor toolbar (**Add a poll**). A reply poll follows the same rules: its text is the question (within the 500 characters, content warning included, needed to schedule), it has 2 to 4 choices and it carries no media. While a reply has media or a file is uploading to it, its poll button is disabled; **Remove poll** gives the reply its media button back. Replies that are not polls can still carry media, even under a poll.
+
+### Poll results
+
+Every post card in **Publish** and the post details show the poll's choices, each with its votes and percentage, and the total. On a poll with **Allow multiple choices**, the total counts the people who voted ("3 people") and each percentage is of them, as Mastodon shows it. On a poll with **Hide votes until it ends**, the choices show without votes and the total reads "Votes hidden until the poll ends" until Mastodon reveals them. Once the post is published, the total is followed by where voting stands: "Ends in …", then "Voting ended" once the end has passed, and "Final results" once Mastodon reports the poll closed. A reply's poll shows under it, captioned "Post 2 of the thread" (or its number).
+
+TryPost reads the votes together with the post's other metrics, about an hour after publishing and then once a day for 31 days, so a 30-day poll still gets a read after it ends. The numbers are not live. Until the first read, the poll shows its choices with 0 votes. Reply polls are read on instances running Mastodon 4.3 or later.
 
 ## Insights
 
-Mastodon posts and followers appear in [Insights](/knowledge-base/insights/overview).
+Mastodon posts and followers appear in [Insights](/knowledge-base/insights/overview). When you delete a published post on Mastodon, TryPost marks it [deleted](/knowledge-base/publish/overview#posts-deleted-on-the-network) at its next metrics read. A poll made directly on Mastodon is imported as a **Poll**, with its choices, its length and whether it allows multiple choices.
 
 ## OAuth scopes
 
