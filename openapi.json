@@ -6084,6 +6084,34 @@
                 "format": "uuid"
               }
             }
+          },
+          {
+            "name": "labels[]",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "description": "Only posts with any of these labels (labels of this workspace). They narrow the post metrics only; follower numbers stay account-wide. A deleted or unknown label matches nothing; it is not an error.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "untagged",
+            "in": "query",
+            "required": false,
+            "description": "Also (or only) posts without labels. Posts made outside TryPost have no labels. Narrows the post metrics only; follower numbers stay account-wide. Send `1` or `0`; `true` and `false` are rejected with `422`.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1",
+                "0"
+              ]
+            }
           }
         ],
         "responses": {
@@ -6558,7 +6586,7 @@
             "required": false,
             "style": "form",
             "explode": true,
-            "description": "Only posts with any of these labels (labels of this workspace). Unknown or deleted labels return `422`.",
+            "description": "Only posts with any of these labels (labels of this workspace). A deleted or unknown label matches nothing; it is not an error.",
             "schema": {
               "type": "array",
               "items": {
@@ -7112,7 +7140,7 @@
             "required": false,
             "style": "form",
             "explode": true,
-            "description": "Only posts with any of these labels (labels of this workspace). Unknown or deleted labels return `422`.",
+            "description": "Only posts with any of these labels (labels of this workspace). A deleted or unknown label matches nothing; it is not an error.",
             "schema": {
               "type": "array",
               "items": {
@@ -12967,6 +12995,19 @@
               null
             ],
             "description": "Current connection status. `null` when the channel is no longer in the workspace."
+          },
+          "verified_badge": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "blue",
+              "business",
+              "government",
+              null
+            ],
+            "description": "X checkmark; `null` on other networks, unverified accounts, and channels no longer in the workspace."
           }
         }
       },
