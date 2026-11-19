@@ -10727,6 +10727,7 @@
             "enum": [
               "ai",
               "unsplash",
+              "giphy",
               "google_drive",
               "google_photos",
               "canva",
