@@ -77,7 +77,7 @@ FILESYSTEM_DISK=public
 | `APP_KEY` | Already set by `key:generate` — encrypts sessions, cookies, encrypted data |
 | Database | Where posts, users, and Passport clients live. The block above is PostgreSQL; for MySQL use `DB_CONNECTION=mysql` on port `3306` — see [Database](/self-hosting/configuration#database) |
 | Redis + queue/cache drivers | Horizon publishes posts and processes background jobs from Redis queues |
-| `BROADCAST_CONNECTION=reverb` | Live dashboard updates |
+| `BROADCAST_CONNECTION=reverb` | Live dashboard updates, and media imported from the composer's media sources |
 | `FILESYSTEM_DISK=public` | Local media on disk (use `s3` or `r2` for object storage) |
 | `SELF_HOSTED=true` | Disables Stripe billing and public `/register` |
 
