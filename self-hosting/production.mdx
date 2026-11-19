@@ -68,7 +68,7 @@ TryPost uses queues for critical background processing:
 - **Sending email** notifications
 - **Verifying channel connections** and refreshing tokens
 - **Collecting analytics** for [Insights](/knowledge-base/insights/overview) (`analytics` queue)
-- **Importing posts** made outside TryPost and media from Google Drive, Google Photos, Canva or Unsplash (`media-imports` queue)
+- **Importing posts** made outside TryPost and media from Unsplash, GIPHY, Google Drive, Google Photos, Canva or a link preview image (`media-imports` queue)
 - **Polling RSS feeds** (`rss-feeds` queue); [repurpose](/knowledge-base/repurpose) sources are polled on their network's `social-<platform>` queue
 - **Delivering [webhooks](/knowledge-base/settings/webhooks)** and their retries (`webhooks` queue)
 - **Live updates** to the browser (`broadcasts` queue)
@@ -247,7 +247,7 @@ Add this line:
 
 ## WebSocket Server (Reverb)
 
-TryPost uses [Laravel Reverb](https://laravel.com/docs/reverb) for real-time updates in the app (posts created, deleted or changing status, post notes, Telegram connections and webhook delivery logs). Add a Supervisor config to keep it running:
+TryPost uses [Laravel Reverb](https://laravel.com/docs/reverb) for real-time updates in the app (posts created, deleted or changing status, post notes, Telegram connections, webhook delivery logs, and media imported from the composer's media sources, which stay loading until Reverb reports them done). Add a Supervisor config to keep it running:
 
 Create `/etc/supervisor/conf.d/trypost-reverb.conf`:
 

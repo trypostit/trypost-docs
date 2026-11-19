@@ -35,9 +35,9 @@ Personal profiles use `linkedin_post`; company pages use `linkedin_page_post`.
 
 | `content_type` | Image | Video | PDF | Duration | Format |
 |----------------|-------|-------|-----|----------|--------|
-| `linkedin_post` / `linkedin_page_post` | 5 MB | 1 GB | 100 MB | 10 minutes | JPG/PNG. Video MP4 or MOV. PDF alone |
+| `linkedin_post` / `linkedin_page_post` | 5 MB | 1 GB | 100 MB | 10 minutes | JPG/PNG/GIF. Video MP4 or MOV. PDF alone |
 
-Images, a video and a PDF never mix in one post, and GIFs are not accepted. Official specs: [Videos](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/videos-api), [Images](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api), [Documents](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/documents-api). Full catalog: [Media](/knowledge-base/media#linkedin).
+Images, a video and a PDF never mix in one post. GIFs count as images: they keep their animation, can sit next to other images, and stay under the 5 MB image limit. LinkedIn also refuses GIFs over 250 frames, which TryPost does not check before publishing. Official specs: [Videos](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/videos-api), [Images](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api), [Documents](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/documents-api). Full catalog: [Media](/knowledge-base/media#linkedin).
 
 ## Text and per-post options
 

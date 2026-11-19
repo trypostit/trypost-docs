@@ -575,7 +575,9 @@ OPENAI_API_KEY=sk-...
 
 ## Media sources (optional)
 
-The composer's **More media sources** menu can offer Unsplash, Google Drive, Google Photos and Canva. Each source stays hidden until it is switched on **and** its keys are set. Uploading from the computer always works.
+The composer's **More media sources** menu can offer Unsplash, GIPHY, Google Drive, Google Photos and Canva. Each source stays hidden until it is switched on **and** its keys are set. Uploading from the computer always works.
+
+A file picked from one of these sources is downloaded on the `media-imports` queue, and the composer learns it finished through Reverb, so Horizon and Reverb must be running.
 
 ### Unsplash
 
@@ -584,6 +586,20 @@ UNSPLASH_ACCESS_KEY=
 ```
 
 The access key alone turns Unsplash on.
+
+### GIPHY
+
+```env
+GIPHY_ENABLED=true
+GIPHY_API_KEY=
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GIPHY_ENABLED` | `true` | Offers GIPHY in the media menu once `GIPHY_API_KEY` is set. `false` hides it |
+| `GIPHY_API_KEY` | empty | API key of an app created on the [GIPHY developer dashboard](https://developers.giphy.com/dashboard). Without it GIPHY stays hidden |
+
+Results use GIPHY's strictest rating (`g`). Each user can load 30 pages of GIPHY results (searches and trending) per minute.
 
 ### Google Drive and Google Photos
 
@@ -807,6 +823,7 @@ LEGAL_PRIVACY_URL=https://trypost.it/privacy
 | `OPENAI_APPS_CHALLENGE` | empty | Domain verification token served at `/.well-known/openai-apps-challenge`, only needed to list your install in the ChatGPT apps directory. Empty answers `404` |
 | `MCP_CHATGPT_IP_RANGES_URL` | `https://openai.com/chatgpt-connectors.json` | The list of IP ranges ChatGPT calls MCP from. From those ranges, ChatGPT may list the tools without signing in and gets its sign-in prompt inside the conversation |
 | `MCP_CLAUDE_IP_RANGES` | `160.79.104.0/21` | The ranges Claude calls MCP from, comma-separated. Together with ChatGPT's, they are exempt from the limit on OAuth client registration |
+| `MCP_REQUESTS_PER_MINUTE` / `MCP_REQUESTS_PER_HOUR` | `240` / `2400` | Requests one MCP connection may send to `/mcp/trypost` per minute and per hour. Each connection (one assistant, for one user, in one workspace) has its own budget, separate from the REST API's. Past either limit the server answers `429` with `Retry-After`. Enforced only when `APP_ENV=production` |
 
 ## Advanced and internal settings
 
