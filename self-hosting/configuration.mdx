@@ -575,7 +575,7 @@ OPENAI_API_KEY=sk-...
 
 ## Media sources (optional)
 
-The composer's **More media sources** menu can offer Unsplash, GIPHY, Google Drive, Google Photos and Canva. Each source stays hidden until it is switched on **and** its keys are set. Uploading from the computer always works.
+The composer's **More media sources** menu can offer Unsplash, GIPHY, Google Drive, Google Photos, Canva and a WebDAV share. Each source stays hidden until it is switched on **and** its keys are set. Uploading from the computer always works.
 
 A file picked from one of these sources is downloaded on the `media-imports` queue, and the composer learns it finished through Reverb, so Horizon and Reverb must be running.
 
@@ -631,6 +631,42 @@ CANVA_CLIENT_SECRET=
 ```
 
 Create a [Canva Connect API](https://www.canva.com/developers/integrations/connect-api) integration with the redirect URL `${APP_URL}/integrations/canva/callback` and the return URL `${APP_URL}/integrations/canva/return`. Canva only lets other users connect once it approves the integration as public, so in practice this is easiest on a single-team install.
+
+### WebDAV (Nextcloud, ownCloud)
+
+A WebDAV share, such as a Nextcloud or ownCloud folder, can be browsed from the media menu, so files already kept there don't have to be downloaded and uploaded again.
+
+```env
+WEBDAV_ENABLED=true
+WEBDAV_URL=https://cloud.example.com/remote.php/dav/files/trypost
+WEBDAV_USERNAME=trypost
+WEBDAV_PASSWORD=
+WEBDAV_ROOT=Marketing/Social
+WEBDAV_LABEL="Team files"
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `WEBDAV_ENABLED` | `false` | Offers the share in the media menu once `WEBDAV_URL`, `WEBDAV_USERNAME` and `WEBDAV_PASSWORD` are set |
+| `WEBDAV_URL` | empty | The share's WebDAV endpoint. In Nextcloud and ownCloud: `https://<host>/remote.php/dav/files/<user>` |
+| `WEBDAV_USERNAME` / `WEBDAV_PASSWORD` | empty | The account TryPost signs in with |
+| `WEBDAV_ROOT` | empty | A folder inside the share. Users can't browse above it |
+| `WEBDAV_LABEL` | `WebDAV` | The name of the source in the media menu |
+| `WEBDAV_REQUESTS_PER_MINUTE` | `60` | Folder listings each user can load per minute |
+
+Users open folders, tick images and videos, and click **Add**. Other file types and names starting with a dot are not listed. Each picked file is copied into the workspace like a file from any other source, so a scheduled post keeps its media even if the file changes or goes away on the share. The usual media size limits apply.
+
+The URL and the credentials stay on the server: the browser only sees paths below `WEBDAV_ROOT`, and TryPost sends the credentials to the share's host alone, even when it follows a redirect.
+
+<Note>
+  Use a dedicated account that can only read the folder you point TryPost at. In Nextcloud, create an [app password](https://docs.nextcloud.com/server/latest/user_manual/en/session_management.html#managing-devices) for it instead of using its login password. TryPost only reads from the share.
+</Note>
+
+<Warning>
+  The credentials belong to the install, not to a workspace: everyone who can create posts browses the same share. That suits an install run by one team. If yours hosts unrelated workspaces, point `WEBDAV_ROOT` at a folder all of them may see, or leave the source off.
+</Warning>
+
+Files on a share in your own network (for example `http://nextcloud.lan`) can be listed but not imported unless `TRYPOST_ALLOW_PRIVATE_NETWORK=true`: the import downloads them like any other address TryPost fetches. When the share is also reachable under its public address, use that instead.
 
 ## Analytics (optional)
 
